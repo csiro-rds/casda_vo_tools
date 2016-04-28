@@ -1,0 +1,46 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "http://jenkins-cdc.it.csiro.au:8085/nexus/content/repositories/releases/"}
+    }
+    dependencies {
+        classpath 'au.csiro:serverStatus:1.0.3'
+    }
+}
+
+assert project.hasProperty('remoteHost'), 'The remote host for the deployment must be specified.'
+
+ext.status=0    // used in statusTest
+
+// Select the server to do the status check on
+ext {
+    port = ""
+    // The remote port the application will be available on.
+    if (project.hasProperty('remotePort')) {
+        port = ":${remotePort}"
+    }
+    endpoint = "http://${remoteHost}${port}/casda_vo_tools/health"
+}
+
+task status(type: au.csiro.serverStatus.ServerStatus) {
+    description 'This task checks the status of the CASDA VO Tools web application and if not OK then an exception will be thrown that will stop execution of all following tasks.'
+    group 'Continuous Delivery'
+
+    uri=endpoint
+    timeout=5000
+    attempts=18
+    contentType = groovyx.net.http.ContentType.JSON
+    requestContentType = groovyx.net.http.ContentType.JSON
+
+    doLast {
+        if (response != null) {
+            status=response.getStatus()
+            // Generally if the status != 200 then an exception is thrown that will bypass this
+            if (status != 200) {
+                throw new ResourceException("CASDA VO Tools Health check is not OK - the Server says: ${response.getData()}");
+            }
+        } else {
+            throw new ResourceException("CASDA VO Tools Health check is not OK - there is no response at all");
+        }
+    }
+}

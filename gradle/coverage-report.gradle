@@ -1,0 +1,7 @@
+apply plugin: 'jacoco'
+
+jacocoTestReport {
+    reports {
+        html.destination "${buildDir}/reports/jacocoHtml"
+    }
+}

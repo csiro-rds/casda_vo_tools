@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0"
+           xmlns:cs="http://www.ivoa.net/xml/ConeSearch/v1.0"
+           xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1"
+           targetNamespace="http://www.ivoa.net/xml/ConeSearch/v1.0"
+           elementFormDefault="unqualified" attributeFormDefault="unqualified"
+           version="1.0">
+
+   <xs:annotation>
+      <xs:appinfo>
+        <vm:schemaName>ConeSearch</vm:schemaName>
+        <vm:schemaPrefix>xs</vm:schemaPrefix>
+        <vm:targetPrefix>cs</vm:targetPrefix>
+      </xs:appinfo>
+      <xs:documentation>
+        Implementation of an XML Schema describing a Cone Search Service.
+        Based on "Simple Cone Search: a First Guide for Data Curators",
+        http://www.us-vo.org/metadata/conesearch/.
+      </xs:documentation>
+      <xs:documentation>
+        This schema defines a Capability type that is specific to Cone
+        Search.  A service that has ConeSearch capability should be 
+        registered as a TabularSkyService.  The ConeSearch capability 
+        element must include a ParamHTTP interface.  
+      </xs:documentation>
+   </xs:annotation>
+
+   <xs:import namespace="http://www.ivoa.net/xml/VOResource/v1.0"
+              schemaLocation="VOResource.xsd"/>
+
+   <xs:complexType name="CSCapRestriction" abstract="true">
+      <xs:annotation>
+         <xs:documentation>
+            an abstract capability that fixes the standardID to the
+            IVOA ID for the ConeSearch standard.
+         </xs:documentation>
+         <xs:documentation>
+            See vr:Capability for documentation on inherited children.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexContent>
+         <xs:restriction base="vr:Capability">
+            <xs:sequence>
+               <xs:element name="validationLevel" type="vr:Validation"
+                           minOccurs="0" maxOccurs="unbounded"/>
+               <xs:element name="description" type="xs:token" 
+                           minOccurs="0"/>
+               <xs:element name="interface" type="vr:Interface" 
+                           minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="standardID" type="vr:IdentifierURI"
+                          use="required" fixed="ivo://ivoa.net/std/ConeSearch"/>
+         </xs:restriction>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:complexType name="ConeSearch">
+      <xs:annotation>
+         <xs:documentation>
+            The capabilities of a Cone Search implementation.  
+         </xs:documentation>
+      </xs:annotation>
+
+      <xs:complexContent>
+         <xs:extension base="cs:CSCapRestriction">
+            <xs:sequence>
+               <xs:element name="maxSR" type="xs:float"
+                           minOccurs="0" maxOccurs="1">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The largest search radius, in degrees, that will be
+                        accepted by the service without returning an error 
+                        condition.  Not providing this element or 
+                        specifying a value of 180 indicates that there
+                        is no restriction.
+                     </xs:documentation>
+                     <xs:documentation>
+                        Not providing a value is the prefered way to indicate
+                        that there is no restriction. 
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+
+               <xs:element name="maxRecords" type="xs:positiveInteger"
+                           minOccurs="0" maxOccurs="1">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The largest number of records that the service will 
+                        return.  Not providing this value means that
+                        there is no effective limit.  
+                     </xs:documentation>
+                     <xs:documentation>
+                        This does not refer to the total number of records in 
+                        the catalog but rather maximum number of records the 
+                        service is capable of returning.  A limit that is 
+                        greater than the number of records available in the 
+                        archive is equivalent to their being no effective 
+                        limit.  (See RM, Hanisch 2007.)
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+
+               <xs:element name="verbosity" type="xs:boolean">
+                  <xs:annotation>
+                     <xs:documentation>
+                        True if the service supports the VERB keyword; 
+                        false, otherwise.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+
+               <xs:element name="testQuery" type="cs:Query"
+                           minOccurs="0" maxOccurs="1">
+                  <xs:annotation>
+                     <xs:documentation>
+                        A query that will result in at least on
+                        matched record that can be used to test the
+                        service.  
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:complexType name="Query">
+      <xs:annotation>
+         <xs:documentation>
+            A query to be sent to the service
+         </xs:documentation>
+      </xs:annotation>
+
+      <xs:sequence>
+         <xs:element name="ra" type="xs:double">
+            <xs:annotation>
+               <xs:documentation>
+                   the right ascension of the search cone's center in
+                   decimal degrees.  
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+         <xs:element name="dec" type="xs:double">
+            <xs:annotation>
+               <xs:documentation>
+                   the declination of the search cone's center in
+                   decimal degrees.  
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+         <xs:element name="sr" type="xs:double">
+            <xs:annotation>
+               <xs:documentation>
+                   the radius of the search cone in decimal degrees.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+         <xs:element name="verb" type="xs:positiveInteger" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                   the verbosity level to use where 1 means the bare
+                   minimum set of columns and 3 means the full set of 
+                   available columns.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+         <xs:element name="catalog" type="xs:string" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                   the catalog to query.  
+               </xs:documentation>
+               <xs:documentation>
+                   When the service can access more than one catalog,
+                   this input parameter, if available, is used to
+                   indicate which service to access.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+         <xs:element name="extras" type="xs:string" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                   any extra (non-standard) parameters that must be 
+                   provided (apart from what is part of base URL given 
+                   by the accessURL element).
+               </xs:documentation>
+               <xs:documentation>
+                   this value should be in the form of name=value
+                   pairs delimited with ampersands (&amp;).  
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+
+      </xs:sequence>
+
+   </xs:complexType>
+   
+
+</xs:schema>

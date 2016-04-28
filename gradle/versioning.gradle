@@ -1,0 +1,62 @@
+/*
+ * Scripts for configuring the version of a build.  
+ * 
+ * Sets the following variables: 
+ *  project.version is set to majorVersion.minorVersion.SOURCE_BUILD_NUMBER (only if present)
+ *  buildTimestamp is set to the current time
+ */
+class ProjectVersion {
+    Integer major
+    Integer minor
+    String build
+
+    ProjectVersion(Integer major, Integer minor) {
+        this.major = major
+        this.minor = minor
+    }
+    
+    ProjectVersion(Integer major, Integer minor, String build) {
+        this.major = major
+        this.minor = minor
+        this.build = build
+    }
+
+    @Override
+    String toString() {
+        String fullVersion = "$major.$minor"
+
+        if(build) {
+            fullVersion += ".$build"
+        }
+
+        fullVersion
+    }
+}
+
+allprojects {
+    ext.buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss')
+    if (System.env.SOURCE_BUILD_NUMBER) {
+        project.version = new ProjectVersion(majorVersion, minorVersion, System.env.SOURCE_BUILD_NUMBER)
+    }
+    else if (System.env.BUILD_NUMBER) {
+        project.version = new ProjectVersion(majorVersion, minorVersion, System.env.BUILD_NUMBER)
+    }
+    else {
+        project.version = new ProjectVersion(majorVersion, minorVersion)
+    }
+    
+}
+
+task echoVer() << {
+    println "${project.name} Version: ${project.version}"
+}
+
+task makeVersionProps (type: Copy) {
+    description 'Create a version.properties file with the version info and overwrite the default one'
+
+    from("${projectDir}/gradle/version.properties.template")
+    rename('.+',"version.properties")
+    expand(version: version, date: new Date().format('dd MMM yyyy'), timestamp: buildTimestamp)
+    into "${buildDir}/resources/main/resources/"
+}
+makeVersionProps.mustRunAfter processResources

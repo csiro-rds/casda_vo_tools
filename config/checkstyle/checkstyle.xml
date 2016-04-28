@@ -1,0 +1,145 @@
+<!-- checkstyle_checks.xml -->
+<!DOCTYPE module PUBLIC
+    "-//Puppy Crawl//DTD Check Configuration 1.1//EN"
+    "file://///nexus/CSIRO IT/Service Delivery/Applications/Applications Development/checkstyle/checkstyle_config_1_1.dtd">
+
+<module name="Checker">
+
+    <module name="SuppressionFilter">
+        <property name="file" value="${projectDir}/config/checkstyle/suppressions.xml"/>
+    </module>
+
+	<module name="SuppressWarningsFilter" />
+
+	<!-- Checks each package has a corresponding package.html file -->
+	<!-- <module name="PackageHtml"/> -->
+
+	<!-- Checks for each module -->
+	<module name="TreeWalker">
+
+		<!-- Cache file location -->
+		<property name="cacheFile" value="build/reports/checkstyle/cachefile" />
+		
+		<!-- Make the @SuppressWarnings annotations available to Checkstyle -->
+        <module name="SuppressWarningsHolder" />
+        
+		<!-- Tab property for TreeWalker and sub-modules -->
+		<property name="tabWidth" value="4" />
+
+		<!-- Module checks for imports -->
+		<module name="AvoidStarImport" />
+		<module name="RedundantImport" />
+		<module name="UnusedImports" />
+
+		<!-- Check for class and interface names -->
+		<module name="TypeName" />
+
+		<!-- Module checks for valid constant names -->
+		<module name="ConstantName">
+			<property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|logger)$" />
+			<!-- Use the following commented out blocks to disable logger being a 
+				valid public, protected or default constant name in checkstyle 5.1+ -->
+			<!-- property name="applyToPublic" value="false" /> <property name="applyToPackage" 
+				value="false" /> <property name="applyToProtected" value="false" / -->
+		</module>
+
+		<!-- Only allow lower case logger for private static final -->
+		<!-- module name="ConstantName"> <property name="applyToPrivate" value="false" 
+			/> </module -->
+
+		<!-- Module check for member names -->
+		<module name="MemberName" />
+
+		<!-- Module check for method names -->
+		<module name="MethodName">
+			<!-- Allow $ in method names for ZK Autowiring in Generic Forward Composers -->
+			<property name="format" value="^[a-z][a-zA-Z0-9\$]*$" />
+		</module>
+
+		<!-- Checks visibility of class attributes - only static final can be public -->
+		<module name="VisibilityModifier" />
+
+		<!-- Module check for empty code blocks -->
+		<module name="EmptyBlock" />
+
+		<!-- Check header for files -->
+		<!-- <module name="Header"> <property name="headerFile" value="${checkstyle.header.file}"/> 
+			</module> -->
+
+		<!-- Checks JavaDocs for class or interface comments -->
+		<module name="JavadocType">
+			<!-- Scope is public -->
+			<property name="scope" value="public" />
+		</module>
+
+		<!-- Checks JavaDocs for methods -->
+		<module name="JavadocMethod">
+			<!-- Scope is everything but private -->
+			<property name="scope" value="package" />
+			<!-- Allows undeclared exceptions to be documented in throws as long as 
+				it extends RuntimeException -->
+			<property name="allowUndeclaredRTE" value="true" />
+			<!-- We don't require getters and setters to have javadoc -->
+			<property name="allowMissingPropertyJavadoc" value="true" />
+		</module>
+
+		<!-- Checks JavaDocs for attributes -->
+		<module name="JavadocVariable">
+			<property name="scope" value="package" />
+		</module>
+
+		<!-- Max length of a line -->
+		<module name="LineLength">
+			<property name="max" value="125" />
+			<!-- Lines to be ignored -->
+			<!-- 1. Javadoc with only a single word on a line -->
+			<!-- 2. ID tags in javadoc. ^ *\* *\$Id: -->
+			<property name="ignorePattern" value="(^ *\* *[^ ]+$)|(^ *\* *\$Id:)" />
+		</module>
+
+		<!-- Position of the left curly bracket { -->
+		<module name="LeftCurly">
+			<!-- Must be on a new line -->
+			<property name="option" value="nl" />
+		</module>
+
+		<!-- Position of right curly bracket } -->
+		<module name="RightCurly">
+			<!-- Must be alone on a line -->
+			<property name="option" value="alone" />
+		</module>
+
+		<!-- Check for braces around code blocks -->
+		<module name="NeedBraces" />
+
+		<!-- Enforce spacing rules.  -->
+		<module name="ParenPad"/>
+		
+		<!-- Allow FIXME and similar comment tags, not only TODO -->
+		<module name="TodoComment">
+			<property name="severity" value="ignore" />
+		</module>
+
+		<!-- Checks for Coding and Design mistakes -->
+		<module name="FinalClass" />
+		<module name="InterfaceIsType" />
+		<module name="EmptyStatement" />
+		<module name="EqualsHashCode" />
+		<module name="InnerAssignment" />
+		<module name="MagicNumber" />
+		<module name="SimplifyBooleanReturn" />
+		<module name="MissingSwitchDefault" />
+
+		<!-- Hidden field picks up every generated getter and setter, therefor 
+			it has been excluded. -->
+		<!-- module name="HiddenField"/ -->
+
+		<!-- Checks for Illegal direct instantiations -->
+		<module name="IllegalInstantiation">
+			<property name="classes"
+				value="java.lang.Boolean" />
+		</module>
+
+	</module> <!-- END TreeWalker module -->
+
+</module> <!-- END Checker module -->

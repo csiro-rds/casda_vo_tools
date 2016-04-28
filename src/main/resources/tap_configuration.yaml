@@ -1,0 +1,456 @@
+!Configuration
+endPoints: 
+   TAP: 
+      tables: 
+      - 'schema'.tap_columns
+      - 'schema'.tap_schemas
+      - 'schema'.tap_tables
+      - 'schema'.tap_keys
+      - 'schema'.tap_key_columns
+options: !Map
+   connection.url: jdbc:postgresql://localhost:5432/casda
+   connection.username: casdbusr
+   connection.password: password
+   connection.driverClassName: org.postgresql.Driver
+   default.db.schema: 'schema'
+schemas: 
+   TAP_SCHEMA: !au.csiro.casda.votools.config.SchemaConfig
+      options: !Map
+         description: The compulsory TAP metadata schema.
+   ivoa: !au.csiro.casda.votools.config.SchemaConfig
+      options: !Map
+         description: Schema of the IVOA.obscore table
+tables: 
+   'schema'.tap_columns: 
+      columns: 
+         std: !Column
+            options: !Map
+               description: A std column (1 true, 0 false)
+               size: 4
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 12
+            type: integer
+         indexed: !Column
+            options: !Map
+               description: An indexed column (1 true, 0 false)
+               size: 4
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 11
+            type: integer
+         column_name: !Column
+            notnull: true
+            options: !Map
+               primarykey: true
+               description: Column name
+               size: 64
+               principal: 1
+               indexed: 1
+               std: 0
+               column_order: 1
+            type: character varying(64)
+         utype: !Column
+            options: !Map
+               description: UTYPE if table corresponds to a data model
+               size: 255
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 7
+            type: character varying(255)
+         description: !Column
+            options: !Map
+               description: Brief description of column
+               size: 255
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 4
+            type: character varying(255)
+         table_name: !Column
+            notnull: true
+            options: !Map
+               primarykey: true
+               description: Fully qualified table name
+               size: 64
+               principal: 1
+               indexed: 1
+               std: 0
+               column_order: 2
+            type: character varying(64)
+         scs_verbosity: !Column
+            options: !Map
+               description: The lowest verbosity level (1,2,3)  at which this column should be included
+                  in a cone search result. Leave null to hide the column from SCS.
+               size: 4
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 13
+            type: integer
+         principal: !Column
+            options: !Map
+               description: A principal column (1 true, 0 false)
+               size: 4
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 10
+            type: integer
+         unit: !Column
+            options: !Map
+               description: Unit in VO std format
+               size: 64
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 5
+            type: character varying(64)
+         size: !Column
+            options: !Map
+               description: Length of variable length datatypes
+               size: 4
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 9
+            type: integer
+         datatype: !Column
+            options: !Map
+               description: ADQL datatype as in section 2.5
+               size: 32
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 8
+            type: character varying(32)
+         ucd: !Column
+            options: !Map
+               description: UCD of column if any
+               size: 128
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 6
+            type: character varying(128)
+         column_order: !Column
+            defaultvalue: 0
+            notnull: true
+            options: !Map
+               description: The default order in which the column will output in a TAP query of the containing table
+               size: 4
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 3
+            type: integer
+      constraints: 
+         tap_columns_table_name_fkey: FOREIGN KEY (table_name) REFERENCES 'schema'.tap_tables(table_name)
+      keys: 
+         tap_columns_pkey: PRIMARY KEY (table_name, column_name)
+      options: !Map
+         description: The required TAP metadata COLUMNS table
+         description_long: The required TAP metadata COLUMNS table
+         scs_enabled: 0
+         release_required: 0
+         creation.order: 3
+         tap.schema.name: TAP_SCHEMA
+         tap.table.name: columns
+   'schema'.tap_schemas: 
+      columns: 
+         utype: !Column
+            options: !Map
+               description: The UTYPE if schema corresponds to a data model.
+               size: 64
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 3
+            type: character varying(64)
+         description: !Column
+            options: !Map
+               description: The brief description of the schema
+               size: 256
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 2
+            type: character varying(256)
+         schema_name: !Column
+            notnull: true
+            options: !Map
+               primarykey: true
+               description: Fully qualified schema name
+               size: 64
+               principal: 1
+               indexed: 1
+               std: 0
+               column_order: 1
+            type: character varying(64)
+      keys: 
+         tap_schemas_pkey: PRIMARY KEY (schema_name)
+      options: !Map
+         description: The names of the TAP services schemas
+         description_long: The names of the TAP services schemas
+         scs_enabled: 0
+         release_required: 0
+         creation.order: 0
+         tap.schema.name: TAP_SCHEMA
+         tap.table.name: schemas
+   'schema'.tap_tables: 
+      columns: 
+         db_schema_name: !Column
+            options: !Map
+               description: The database schema name by which this table must be referenced in SQL.
+               size: 255
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 6
+            type: character varying(255)
+         db_table_name: !Column
+            options: !Map
+               description: The database table name by which this table must be referenced in SQL.
+               size: 255
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 7
+            type: character varying(255)
+         release_required: !Column
+            defaultvalue: false
+            options: !Map
+               description: Should unauthorised access to this table be restricted to released data, ie
+                  has a populated released_date column.
+               size: 1
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 9
+            type: boolean
+         scs_enabled: !Column
+            defaultvalue: false
+            options: !Map
+               description: Should this table be queryable using the Simple Cone Search service.
+               size: 1
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 8
+            type: boolean
+         utype: !Column
+            options: !Map
+               description: The UTYPE if table corresponds to a data model.
+               size: 64
+               principal: 0
+               indexed: 0
+               std: 1
+               column_order: 5
+            type: character varying(64)
+         description_long: !Column
+            options: !Map
+               description: The long description of the table
+               size: 2000
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 10
+            type: character varying(2000)
+         description: !Column
+            options: !Map
+               description: The brief description of the table
+               size: 256
+               principal: 0
+               indexed: 0
+               std: 1
+               column_order: 4
+            type: character varying(256)
+         schema_name: !Column
+            options: !Map
+               description: Fully qualified schema name
+               size: 64
+               principal: 1
+               indexed: 1
+               std: 0
+               column_order: 3
+            type: character varying(64)
+         params: !Column
+            options: !Map
+               description: Additional parameters of the table
+               size: 255
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 11
+            type: character varying(255)
+         table_name: !Column
+            notnull: true
+            options: !Map
+               primarykey: true
+               description: Fully qualified table name in the format schema.table
+               size: 70
+               principal: 1
+               indexed: 1
+               std: 0
+               column_order: 1
+            type: character varying(64)
+         table_type: !Column
+            options: !Map
+               description: 'One of: table or view'
+               size: 8
+               principal: 0
+               indexed: 0
+               std: 1
+               column_order: 2
+            type: character varying(255)
+      constraints: 
+         tap_tables_schema_name_fkey: FOREIGN KEY (schema_name) REFERENCES 'schema'.tap_schemas(schema_name)
+      keys: 
+         tap_tables_pkey: PRIMARY KEY (table_name)
+      options: !Map
+         description: The parameters of the TAP services tables
+         description_long: The parameters of the TAP services tables
+         scs_enabled: 0
+         release_required: 0
+         creation.order: 1
+         tap.schema.name: TAP_SCHEMA
+         tap.table.name: tables
+   'schema'.tap_keys: 
+      columns: 
+         key_id: !Column
+            notnull: true
+            options: !Map
+               primarykey: true
+               description: Unique key descriptor
+               size: 64
+               principal: 1
+               indexed: 1
+               std: 0
+               column_order: 1
+            type: character varying(64)
+         utype: !Column
+            options: !Map
+               description: Utype of this key
+               size: 64
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 5
+            type: character varying(64)
+         target_table: !Column
+            options: !Map
+               description: Fully qualified table name
+               size: 70
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 3
+            type: character varying(70)
+         description: !Column
+            options: !Map
+               description: Description of this key
+               size: 255
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 4
+            type: character varying(255)
+         from_table: !Column
+            options: !Map
+               description: Fully qualified table name
+               size: 70
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 2
+            type: character varying(70)
+      constraints: 
+         tap_keys_from_table_fkey: FOREIGN KEY (from_table) REFERENCES 'schema'.tap_tables(table_name)
+         tap_keys_target_table_fkey: FOREIGN KEY (target_table) REFERENCES 'schema'.tap_tables(table_name)
+      keys: 
+         tap_keys_pkey: PRIMARY KEY (key_id)
+      options: !Map
+         description: The required TAP keys table
+         description_long: The required TAP keys table
+         scs_enabled: 0
+         release_required: 0
+         creation.order: 2
+         tap.schema.name: TAP_SCHEMA
+         tap.table.name: keys
+   'schema'.tap_key_columns: 
+      columns: 
+         key_id: !Column
+            options: !Map
+               description: Key identifier from keys table
+               size: 64
+               principal: 1
+               indexed: 1
+               std: 0
+               column_order: 2
+            type: character varying(64)
+         from_column: !Column
+            options: !Map
+               description: Key column name in the from_table
+               size: 64
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 3
+            type: character varying(64)
+         target_table: !Column
+            options: !Map
+               description: Fully qualified target table name
+               size: 64
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 6
+            type: character varying(64)
+         id: !Column
+            notnull: true
+            options: !Map
+               primarykey: true
+               description: For internal purposes
+               size: 4
+               principal: 0
+               indexed: 1
+               std: 0
+               column_order: 1
+            type: integer
+         from_table: !Column
+            options: !Map
+               description: Fully qualified source table name
+               size: 64
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 5
+            type: character varying(64)
+         target_column: !Column
+            options: !Map
+               description: Key column name in the target_table
+               size: 64
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 4
+            type: character varying(64)
+      constraints: 
+         tap_key_columns_key_id_fkey: FOREIGN KEY (key_id) REFERENCES 'schema'.tap_keys(key_id)
+         tap_key_columns_target_column_fkey: FOREIGN KEY (target_column, target_table) REFERENCES 'schema'.tap_columns(column_name,
+            table_name)
+         tap_key_columns_from_column_fkey: FOREIGN KEY (from_column, from_table) REFERENCES 'schema'.tap_columns(column_name,
+            table_name)
+      keys: 
+         tap_key_columns_pkey: PRIMARY KEY (id)
+      options: !Map
+         description: The required TAP key_columns table
+         description_long: The required TAP key_columns table
+         scs_enabled: 0
+         release_required: 0
+         creation.order: 4
+         tap.schema.name: TAP_SCHEMA
+         tap.table.name: key_columns

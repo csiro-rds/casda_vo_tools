@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context
+  reloadable="true"
+  path="/casda_vo_tools"
+  crossContext="false"
+  allowLinking="true">
+</Context>

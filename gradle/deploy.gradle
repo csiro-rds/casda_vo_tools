@@ -1,0 +1,82 @@
+/*
+ * Scripts for deploying CASDA VO Tools to a server.
+ *
+ * NB: This script is conditionally applied. Any new tasks will need to be 
+ * included in the conditions in build.gradle. 
+ *
+ * Usage: gradle deployToServer
+ */
+ 
+
+// Make sure the required params are supplied. This is generally done by the CI job's 
+// "Properties Content" field with a prefix of ORG_GRADLE_PROJECT_  
+// e.g.  ORG_GRADLE_PROJECT_deployuser=auser
+// or they can be added locally to your gradle.properties
+assert project.hasProperty('deployuser'), 'Properties for deployment must be provided'
+assert project.hasProperty('deploypassword'), 'Properties for deployment must be provided'
+assert System.env.SOURCE_BUILD_NUMBER, 'Deploying must be done by the appropriate Jenkins job'
+assert project.hasProperty('remoteHost'), 'The remote host for the deployment must be specified.'
+assert project.hasProperty('appUser'), 'The application user for the deployment environment'
+
+// Ssh settings
+ssh {
+  knownHosts = allowAnyHosts    // Disable host key verification
+}
+
+
+// Define the remote server we are interacting with.
+remotes {
+    targetServer {
+        host = remoteHost
+        user = deployuser
+        password = deploypassword
+    }
+}
+
+def tomcatRemoteDir = '/CASDA/application/tomcat'
+def downloadFolder = "${buildDir}/download"
+def downloadedArtifact = file("${downloadFolder}/${rootProject.name}.war")
+def repoUrl = 'http://jenkins-cdc.it.csiro.au:8085/nexus/service/local/artifact/maven/redirect?r=cd'
+
+task deployToServer(type: SshTask) {
+	description 'Deploy CASDA VO Tools to the required server. Intended for use by the CI job only.'
+	group 'Continuous Delivery'
+	
+    doFirst {
+        println "Deploying casda_vo_tools build ${project.version} to server ${remotes.targetServer.host}"
+    }
+    
+    ssh {
+        // Enable PTY allocation for sudo
+        pty = true
+    }
+	// Note: Each sudo command here must be specifically allowed in the remote host suduers config. 
+	session(remotes.targetServer) {
+		execute("sudo  ${tomcatRemoteDir}/stop")
+		println "Cleaning out old app at ${tomcatRemoteDir}/webapps/${war.baseName} "
+		execute("sudo -u ${appUser} ${tomcatRemoteDir}/cleanupwarfile ${war.baseName}")
+		println "Uploading ${downloadedArtifact} to ${tomcatRemoteDir}/webapps/${war.baseName}.war"
+		put downloadedArtifact, "${tomcatRemoteDir}/webapps/${war.baseName}.war"
+		execute("sudo  ${tomcatRemoteDir}/start")
+	}
+}
+
+
+task makeDownloadFolder() {
+	mkdir file(downloadFolder)
+}
+
+task downloadBinaryArchive(dependsOn: makeDownloadFolder) {
+	description 'Download our target war file from the nexus repository'
+	group 'Continuous Delivery'
+
+	doLast {
+	    ext {
+	        binaryUrl = "${repoUrl}&g=${project.group}&a=${war.baseName}&e=war&v=${project.version}"
+	    }
+	
+		ant.get(src: binaryUrl, dest: downloadedArtifact)
+	}
+}
+
+deployToServer.dependsOn(downloadBinaryArchive)

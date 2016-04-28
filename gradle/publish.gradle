@@ -1,0 +1,55 @@
+/*
+ * Scripts for publishing the project artifacts to nexus.
+ *
+ * NB: This script is conditionally applied. Any new tasks will need to be 
+ * included in the conditions in build.gradle. 
+ *
+ * Usage: gradle publish
+ */
+ 
+
+// Make sure the required params are supplied. This is generally done by the CI job's 
+// "Properties Content" field with a prefix of ORG_GRADLE_PROJECT_  
+// e.g.  ORG_GRADLE_PROJECT_nexususer=auser
+// or they can be added locally to your gradle.properties
+// or they can be specified on the command line using -P
+// e.g. build -Pnexususer="bob"
+//
+// Create dummy values for these variables iff we're doing a publishMavenLocal
+if (gradle.startParameter.taskNames.any{it == "publishToMavenLocal"} 
+    && 
+    !gradle.startParameter.taskNames.any{it == "publish"})
+{
+    if (!project.hasProperty('nexususer')) {
+        project.ext.nexususer = 'nexususer'
+    }
+    if (!project.hasProperty('nexuspassword')) {
+        project.ext.nexuspassword = 'nexuspassword'
+    }
+}
+
+assert project.hasProperty('nexususer'), "Publishing to the maven repository requires a 'nexususer' project property (typically provided in a Jenkins job using ORG_GRADLE_PROJECT_nexususer in 'Properties Content', or via -Pnexuspassword on the command line, or via gradle.properties)"
+assert project.hasProperty('nexuspassword'), "Publishing to the maven repository requires a 'nexuspassword' project property (typically provided in a Jenkins job using ORG_GRADLE_PROJECT_nexususer in 'Properties Content', or via -Pnexuspassword on the command line, or via gradle.properties)"
+if (gradle.startParameter.taskNames.any{it == "publish"}) {
+    assert System.env.BUILD_NUMBER, "Publishing to the maven repository requires a 'BUILD_NUMBER' env property (typically provided in a Jenkins job)"
+}
+// Define how maven-publish publishes to the nexus repository
+publishing {
+    publications {
+        mavenWar(MavenPublication) {
+            artifact tasks.war
+            artifactId "${war.baseName}"
+            version project.version
+        }
+    }
+
+    repositories {
+        maven {
+            url "http://jenkins-cdc.it.csiro.au:8085/nexus/content/repositories/cd/" 
+            credentials {
+                username project.nexususer
+                password project.nexuspassword 
+            }
+        }
+    }
+}

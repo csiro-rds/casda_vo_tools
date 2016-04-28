@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+	<Appenders>
+
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS}{UTC}Z %-5p [${hostName}] [%t] [instance-id:%X{instanceid}] [%X{component}#%C:%L] %m %throwable%n" />
+		</Console>
+		<Syslog name="Syslog" host="localhost" port="514" protocol="tcp"
+			format="RFC5424" facility="LOCAL3" mdcId="mdc" newLineEscape="\t"
+			newLine="true">
+			<LoggerFields>
+				<KeyValuePair key="amessage"
+					value="%d{yyyy-MM-dd HH:mm:ss.SSS}{UTC}Z %-5p [${hostName}] [%t] [instance-id:%X{instanceid}] [%X{component}#%C:%L] %m %throwable%n" />
+			</LoggerFields>
+
+		</Syslog>
+
+		<RollingFile name="RollingFile"
+			fileName="/CASDA/application/tomcat/logs/casda_vo_tools.log"
+			filePattern="/CASDA/application/tomcat/logs/$${date:yyyy-MM}/casda_vo_tools-%d{MM-dd-yyyy}-%i.log.gz">
+			<PatternLayout
+				pattern="%d{yyyy-MM-dd HH:mm:ss.SSS}{UTC}Z %-5p [${hostName}] [%t] [instance-id:%X{instanceid}] [%X{component}#%C:%L] %m %throwable%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+		</RollingFile>
+
+	</Appenders>
+	<Loggers>
+
+		<Root level="ERROR">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="RollingFile" />
+			<AppenderRef ref="Syslog" />
+		</Root>
+
+		<Logger name="au.csiro" level="INFO" additivity="false">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="Syslog" />
+			<AppenderRef ref="RollingFile" />
+		</Logger>
+
+
+	</Loggers>
+
+</Configuration>

@@ -1,0 +1,68 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+   http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>au.csiro.casda</groupId>
+	<artifactId>project</artifactId>
+	<version>1.0</version>
+
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>Maven Repository Switchboard</name>
+			<url>http://repo1.maven.org/maven2</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<finalName>casda-1.0</finalName>
+		<plugins>
+
+			<!-- for mojohaus : license-maven-plugin -->	
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>1.8</version>
+				<configuration>
+					<licenseName>casda_license</licenseName>
+					<licenseResolver>${project.baseUri}src/licenses</licenseResolver>
+					
+					<projectName>CSIRO ASKAP Science Data Archive</projectName>
+					<inceptionYear>2015</inceptionYear>
+					<organizationName>Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230.</organizationName>
+					
+					<canUpdateCopyright>true</canUpdateCopyright>
+					<canUpdateDescription>true</canUpdateDescription>
+
+					<includes>
+						<include>**/*.java</include>
+					</includes>
+					<roots>
+						<root>src/main/java</root>
+						<root>src/test/java</root>
+					</roots>
+				</configuration>
+
+				<executions>
+					<execution>
+						<id>first</id>
+						<goals>
+							<goal>update-file-header</goal>
+						</goals>
+						<phase>process-sources</phase>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<artifactId>maven-help-plugin</artifactId>
+				<version>2.1.1</version>
+			</plugin>
+
+		</plugins>
+	</build>
+</project>

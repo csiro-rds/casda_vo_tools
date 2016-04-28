@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [${hostName}] [%t] [instance-id:%X{instanceid}] (%X{component}#%C:%L) %m %rThrowable{1}%n" />
+        </Console>
+        <File name="File" fileName="casda-vo-tools.log">
+            <PatternLayout
+                pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p [${hostName}] [%t] [instance-id:%X{instanceid}] (%X{component}#%C:%L) %m %rThrowable{1}%n" />
+        </File>
+    </Appenders>
+    <Loggers>
+    
+        <Logger name="au.csiro" level="INFO" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File" />
+        </Logger>
+        
+       <!-- Log ERROR and higher from other classes to the log file and to logstash -->
+        <Root level="ERROR">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File" />
+        </Root>
+    
+    </Loggers>
+</Configuration>

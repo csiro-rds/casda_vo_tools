@@ -1,0 +1,29 @@
+<FindBugsFilter>
+     <!-- 
+       Exclude particular bug types.
+       See http://findbugs.sourceforge.net/bugDescriptions.html#DM_CONVERT_CASE for bug codes
+       and descriptions. 
+     -->
+     <Match>
+         <!--
+         EI: May expose internal representation by returning reference to mutable object (EI_EXPOSE_REP)
+         EI2: May expose internal representation by incorporating reference to mutable object (EI_EXPOSE_REP2)
+         -->
+         <Bug code="EI,EI2" />
+     </Match>
+     <Match>
+     	 <!-- 
+     	   Dm: Consider using Locale parameterized version of invoked method (DM_CONVERT_CASE)
+     	 -->
+         <Bug code="Dm" />
+     </Match>
+     <Match>
+     	<!--
+     	   Se: Non-transient non-serializable instance field in serializable class (SE_BAD_FIELD)
+     	   Don't include classes in UI packages since these relate to unnecessary serialisation
+     	   of UI subclasses.
+     	-->
+     	<Class name="~.*(Window|Popup|Dialog|Composer)" />
+     	<Bug code="Se" />
+     </Match>
+</FindBugsFilter>

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><?xml-stylesheet href='http://localhost:8080/casda_vo_tools/votable.xsl' type='text/xsl' ?>
+
+<VOT:VOTABLE xmlns:VOT="http://www.ivoa.net/xml/VOTable/v1.3"/>

@@ -1,0 +1,138 @@
+p, td, th, tr, legend, h1, h2 {
+	font-family: sans-serif;
+}
+
+legend {
+	font-size: 150%;
+	font-weight: bold;
+}
+
+fieldset {
+	padding: 10px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+	border: solid 1px black;
+}
+
+.centered {
+	text-align: center;
+}
+
+.statusBox {
+	font-weight: bold;
+	padding: 10px;
+	margin-left: 35%;
+	margin-right: 35%;
+}
+
+.preparing {
+	background: #CCCCCC;
+}
+
+.ready {
+	background: #B6D7A8;
+}
+
+.expired {
+	background: #F9CB9C;
+}
+
+.error {
+	background: #E06666;
+}
+
+.voTable {
+	border-collapse: collapse;
+	border: solid 2px black;
+	padding: 0px;
+}
+
+.voTable col {
+	border-left: solid 2px black;
+}
+
+.tableHeader {
+	background: #CCCCCC;
+	border: solid 1px black;
+}
+
+.jobsTable {
+	border: solid 1px black;
+}
+
+.even {
+	background: #EEEEEE;
+	border-left: solid 1px black;
+}
+
+.odd {
+	background: #FFFFFF;
+	border-left: solid 1px black;
+}
+
+.floatLeft {
+	float: left;
+}
+
+.floatRight {
+	float: right;
+}
+
+.indentLeft {
+	margin-left: 12px;
+}
+
+.indentRight {
+	float: right;
+	margin-right: 12px;
+}
+
+html, body {
+	height: 100%;
+}
+
+#header {
+	padding-top: 1px;
+}
+
+#wrapper {
+	min-height: 100%;
+	position: relative;
+}
+
+#content {
+	padding-bottom: 66px; /* Height of the footer element */
+}
+
+#footer {
+	width: 100%;
+	height: 66px;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+}
+
+@media only screen and (max-width : 550px) {
+	#content {
+		padding-bottom: 86px; /* Height of the footer element */
+	}
+	#footer {
+		width: 100%;
+		height: 86px;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+	}
+}
+
+table {
+	display: table;
+	max-width: 100%;
+	margin: 0px 0px 2.625rem 0px;
+}
+
+td, th, tr {
+	border: solid 1px black;
+}

@@ -1,0 +1,14 @@
+/bin/
+/binSrc/
+/binTest/
+/build/
+.classpath
+.gradle/
+.project
+/tmp/
+.settings/
+.idea/
+temp/
+*.log
+dep.txt
+config/configuration.yaml

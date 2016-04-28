@@ -1,0 +1,34 @@
+<jaxb:bindings 
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance"
+    jaxb:extensionBindingPrefixes="inheritance"
+    jaxb:version="2.1">
+
+    <jaxb:bindings schemaLocation="VOTable-1.3.xsd" node="/xs:schema">
+
+        <!-- 
+            If you're thinking about renaming other elements than the root one
+            then it seems to be a bit of a crap-shoot.  In the end the hassle
+            didn't seem worth it to me.
+        -->
+        <jaxb:bindings node="//xs:element[@name='VOTABLE']">
+            <jaxb:class name="VoTable"/>                                     
+        </jaxb:bindings>
+
+        <!-- Rename value Info's value attribute (otherwise it conflicts) -->
+        <jaxb:bindings node="//xs:complexType[@name='Info']">
+            <jaxb:bindings node=".//xs:attribute[@name='value']">
+                <jaxb:property name="valueAttribute"/>
+            </jaxb:bindings>
+        </jaxb:bindings>
+
+    </jaxb:bindings>
+    
+
+    <jaxb:globalBindings>
+    </jaxb:globalBindings>
+
+</jaxb:bindings>
+
+

@@ -1,0 +1,76 @@
+def catalinaHomePath = System.env.CATALINA_HOME
+assert catalinaHomePath != null, "CATALINA_HOME system property is required"
+assert file(catalinaHomePath).directory
+
+def catalinaBinPath = java.nio.file.Paths.get(catalinaHomePath, "bin").toFile()
+assert catalinaBinPath.directory
+
+task localTomcatStop(type: Exec) {
+	workingDir catalinaBinPath
+	standardOutput = new ByteArrayOutputStream() // ignore output
+	errorOutput = new ByteArrayOutputStream() // ignore output
+	ignoreExitValue true
+	if (System.env.SHELL) {
+		commandLine 'sh', '-c', 'catalina.sh stop'
+	} else {
+		commandLine 'cmd', '/c', 'catalina.bat stop'
+	}
+}
+
+task localTomcatStart(type: Exec, dependsOn: localTomcatStop) {
+	workingDir catalinaBinPath
+	standardOutput = new ByteArrayOutputStream() // ignore output
+	errorOutput = new ByteArrayOutputStream() // ignore output
+	ignoreExitValue true
+	if (System.env.SHELL) {
+		commandLine 'sh', '-c', 'catalina.sh start'
+	} else {
+		commandLine 'cmd', '/c', 'catalina.bat start'
+	}
+}
+
+def webappsDir = java.nio.file.Paths.get(catalinaHomePath, "webapps").toFile()
+assert webappsDir.directory
+def deployedWarFile = new File(webappsDir, "${tasks.war.baseName}.war")
+
+task localTomcatDeleteInstalledWar(type: Delete, dependsOn: localTomcatStop) {
+	def deployedWarDirectory = new File(webappsDir, tasks.war.baseName)
+	def workDir = java.nio.file.Paths.get(catalinaHomePath, "work", "Catalina", "localhost", war.baseName).toFile()
+	if (deployedWarFile.file) {
+		delete deployedWarFile
+	}
+	if (deployedWarDirectory.directory) {
+		delete deployedWarDirectory
+	}
+	if (workDir.directory) {
+		delete workDir
+	}
+}
+
+task localTomcatInstallWar(type: Copy, dependsOn: [ localTomcatDeleteInstalledWar, localTomcatStop, tasks.war ]) {
+	into webappsDir
+	from tasks.war.archivePath
+	rename tasks.war.archiveName, "${tasks.war.baseName}.war"
+}
+
+task localTomcatInstallApplicationProperties(type: Copy, dependsOn: localTomcatStop) {
+    into java.nio.file.Paths.get(catalinaHomePath, "bin", "config").toFile()
+    from file("src/test/resources/config/application-casda_vo_tools.properties")
+}
+
+def contextDir = java.nio.file.Paths.get(catalinaHomePath, "conf", "Catalina", "localhost").toFile()
+assert contextDir.directory
+
+task localTomcatInstallContext(type: Copy, dependsOn: localTomcatStop) {
+    into contextDir
+    from file("gradle/local.context.xml")
+    rename "local.context.xml", "${tasks.war.baseName}.xml"
+}
+
+task deployToLocal(dependsOn: [
+	tasks.check,
+	tasks.localTomcatInstallWar,
+    tasks.localTomcatInstallContext,
+    tasks.localTomcatInstallApplicationProperties,
+	tasks.localTomcatStart
+])
