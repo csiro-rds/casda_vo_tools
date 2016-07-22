@@ -204,17 +204,40 @@ public class CsvTsvResultsExtractorTest
     }
 
     /**
-     * Test the output of data in CSV format when the url placeholder is substituted.
+     * Test the output of data in CSV format when the url placeholder is substituted. When a proxy url is present
+     * it should be used in the output.
      * 
      * @throws Exception
      *             Not expected.
      */
     @Test
-    public void testExtractDataWithUrlSubstitution() throws Exception
+    public void testExtractDataWithUrlSubstitutionWithProxy() throws Exception
     {
         StringWriter writer = new StringWriter();
         CsvTsvResultsExtractor extractor = new CsvTsvResultsExtractor(writer, 2, OutputType.CSV, APP_BASE_URL,
                 PROXY_BASE_URL);
+        ResultSetMetaData mockMetaData = create2ColMetadata();
+        ResultSet mockResults = create2RowResultSet(mockMetaData);
+        Mockito.when(mockResults.getString(1)).thenReturn("Foo").thenReturn("#{baseUrl}/bar.html");
+
+        extractor.extractData(mockResults);
+        assertThat(writer.toString(),
+                is(FIELD_DEFS_LINE + "Foo," + TEST_DATE_STR + "\r\n" + PROXY_BASE_URL + "/bar.html,\r\n"));
+    }
+    
+    /**
+     * Test the output of data in CSV format when the url placeholder is substituted. When a proxy url is not present
+     * the base url should be used instead.
+     * 
+     * @throws Exception
+     *             Not expected.
+     */
+    @Test
+    public void testExtractDataWithUrlSubstitutionWithoutProxy() throws Exception
+    {
+        StringWriter writer = new StringWriter();
+        CsvTsvResultsExtractor extractor = new CsvTsvResultsExtractor(writer, 2, OutputType.CSV, APP_BASE_URL,
+                null);
         ResultSetMetaData mockMetaData = create2ColMetadata();
         ResultSet mockResults = create2RowResultSet(mockMetaData);
         Mockito.when(mockResults.getString(1)).thenReturn("Foo").thenReturn("#{baseUrl}/bar.html");

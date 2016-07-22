@@ -10,7 +10,6 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,8 +135,12 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
     @Override
     public Boolean extractData(ResultSet rs) throws SQLException, DataAccessException
     {
+        logger.info("Started extracting data for result set " + rs);
+        Utils.reportMemory(logger);
+
         setCutoff(false);
         int columnCount = rs.getMetaData().getColumnCount();
+        final int memoryReportInterval = 50000;
         setProcessedCount(0);
         String error = "";
         try
@@ -150,6 +153,11 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
                 {
                     writer.append(buildRowOutput(rs, columnCount, dataTypes));
                     setProcessedCount(getProcessedCount() + 1);
+                    if (getProcessedCount() % memoryReportInterval == 0)
+                    {
+                        logger.info("Reached " + getProcessedCount() + " records. ");
+                        Utils.reportMemory(logger);
+                    }
                 }
                 setCutoff(getProcessedCount() >= maxRec && !(rs.isLast() || rs.isAfterLast()));
                 setResultSize(getProcessedCount());
@@ -193,7 +201,7 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
         for (int i = 1; i <= columnCount; i++)
         {
             String value = getFieldValue(rs, dataTypes[i], i);
-            rowOutput.append("<TD>" + StringEscapeUtils.escapeXml10(value) + "</TD>");
+            rowOutput.append("<TD>" + value + "</TD>");
         }
         rowOutput.append("</TR>\n");
         return rowOutput.toString();
@@ -447,7 +455,7 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
     private static String translateTapColumnTypeToVoTableType(String tapColumnType)
     {
         String datatype;
-        switch (tapColumnType)
+        switch (tapColumnType.toUpperCase())
         {
         case "INTEGER":
             datatype = "int";
@@ -461,11 +469,16 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
         case "REGION":
         case "CLOB":
         case "TIMESTAMP":
+        case "TEXT":
             datatype = "char";
             break;
 
         case "REAL":
             datatype = "float";
+            break;
+
+        case "DOUBLE PRECISION":
+            datatype = "double";
             break;
 
         case "BOOLEAN":

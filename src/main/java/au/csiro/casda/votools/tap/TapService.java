@@ -2,6 +2,10 @@ package au.csiro.casda.votools.tap;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -30,6 +34,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 
@@ -611,13 +616,14 @@ public class TapService extends Configurable
 
         String mode = params.get(VoKeys.SUBMITTED_MODE);
 
+        TapStatementCreator tsc = new TapStatementCreator(sqlQuery);
         if (TapService.SUBMITTED_MODE_SYNC.equals(mode))
         {
-            jdbcTemplateSync.query(sqlQuery, extractor);
+            jdbcTemplateSync.query(tsc, extractor);
         }
         else
         {
-            jdbcTemplateAsync.query(sqlQuery, extractor);
+            jdbcTemplateAsync.query(tsc, extractor);
         }
 
         ZonedDateTime submitted = ZonedDateTime.parse(params.get(VoKeys.SUBMITTED_TIME));
@@ -1117,5 +1123,35 @@ public class TapService extends Configurable
     public void setJdbcTemplateAsync(JdbcTemplate jdbcTemplateAsync)
     {
         this.jdbcTemplateAsync = jdbcTemplateAsync;
+    }
+    
+    /**
+     * A prepared statement creator configured to allow streaming of results. Each instance is responsible for creating
+     * the statement for a specific query. They should not be reused.
+     */
+    static class TapStatementCreator implements PreparedStatementCreator
+    {
+        private String query;
+
+        /**
+         * Create a new TapStatementCreator instance for a specific query.
+         * @param query The query to be run.
+         */
+        public TapStatementCreator(String query)
+        {
+            this.query = query;
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public PreparedStatement createPreparedStatement(Connection con) throws SQLException
+        {
+            con.setAutoCommit(false);
+            PreparedStatement preparedStatement = con.prepareStatement(query);
+            preparedStatement.setFetchDirection(ResultSet.FETCH_FORWARD);
+            final int resultFetchSizeRows = 1000;
+            preparedStatement.setFetchSize(resultFetchSizeRows);
+            return preparedStatement;
+        }
     }
 }

@@ -2,6 +2,7 @@ package au.csiro.casda.votools.config;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,12 +39,60 @@ import uws.UWSToolBox;
  * Copyright 2014, CSIRO Australia All rights reserved.
  */
 @Controller
-public class ConfigurationController
+public class ConfigurationController extends Configurable
 {
     private static Logger logger = LoggerFactory.getLogger(ConfigurationController.class);
 
-    @Autowired
     private ConfigurationService cfgService;
+    
+    private Configuration config;
+    
+    private String buildNumber = "Unknown";
+    
+    private String environment = "Unknown";
+    
+    private String css;
+    
+    private String logoUrl;
+    
+    /**
+     * Constructor
+     * @param configRegistry the configuration registry
+     * @param cfgService the configuration service
+     */
+    @Autowired
+    public ConfigurationController(ConfigurationRegistry configRegistry, ConfigurationService cfgService)
+    {
+        this.cfgService = cfgService;
+                
+        try
+        {
+            configRegistry.register(this);
+        }
+        catch (ConfigurationException e)
+        {
+            logger.warn("Controller could not be registered with the configuration registry", e);
+        }
+        
+        if(config != null)
+        {
+            environment = config.get(ConfigValueKeys.ENVIRONMENT);
+            css = config.get(ConfigValueKeys.CSS);
+            logoUrl =  config.get(ConfigValueKeys.LOGO_URL);
+        }
+
+        Properties prop;
+        try
+        {
+            prop = Utils.loadProperties("version.properties");
+            buildNumber = prop.getProperty(ConfigValueKeys.BUILD_NUMBER);
+        }
+        catch (IOException e)
+        {
+            logger.warn("Version properties could not be loaded", e);
+        }
+    }
+    
 
     /**
      * Home page
@@ -53,11 +102,10 @@ public class ConfigurationController
      * @param response
      *            HTTP servlet response object
      * @return the model-and-view
-     * @throws Exception
-     *             an exception
+     * @throws IOException if password file cannot be read.
      */
     @RequestMapping(value = "/configure/home", method = RequestMethod.GET, produces = "text/html")
-    public ModelAndView home(HttpServletRequest request, HttpServletResponse response) throws Exception
+    public ModelAndView home(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
 
         ModelAndView result = new ModelAndView("configure");
@@ -65,6 +113,11 @@ public class ConfigurationController
         String password = Utils.retrieveFromFile()[1];
         result.getModel().put("passwordSetup", Utils.DEFAULT_PASSWORD.equals(password));
 
+        result.addObject("serverName", environment);
+        result.addObject("buildNumber", buildNumber);
+        result.addObject("css", css);
+        result.addObject("logo", logoUrl);
+        
         logger.info("Hit the controller for the '/configure' url mapping - servicing {} request", request.getMethod());
         return result;
     }
@@ -92,6 +145,11 @@ public class ConfigurationController
         result.getModel().put("explored", false);
         result.getModel().put("passwordError", false);
         result.getModel().put("ioError", false);
+        
+        result.addObject("serverName", environment);
+        result.addObject("buildNumber", buildNumber);
+        result.addObject("css", css);
+        result.addObject("logo", logoUrl);
 
         try
         {
@@ -149,6 +207,25 @@ public class ConfigurationController
             result.getModel().put("ioError", true);
             return result;
         }
+
+    }
+    
+    @Override
+    public void setConfiguration(Configuration config)
+    {
+        this.config = config;
+    }
+
+    @Override
+    public synchronized boolean isReady() throws ConfigurationException
+    {
+        return true;
+    }
+
+
+    @Override
+    public void invalidate()
+    {
 
     }
 }

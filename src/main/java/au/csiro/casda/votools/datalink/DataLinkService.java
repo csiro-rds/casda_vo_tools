@@ -35,6 +35,7 @@ import au.csiro.casda.votools.logging.CasdaVoToolsEvents;
 import au.csiro.casda.votools.result.VotableError;
 import au.csiro.casda.votools.siap2.SiapParamProcessor;
 import au.csiro.casda.votools.utils.RequestToken;
+import au.csiro.casda.votools.utils.Utils;
 import au.csiro.casda.votools.utils.VoKeys;
 
 /*
@@ -63,8 +64,6 @@ public class DataLinkService extends Configurable
      */
     private static final String CASDA_DATALINK_RESULT_NAME = "CASDA Data Link";
 
-    private static final int ONE_KB_IN_BYTES = 1024;
-
     private static Logger logger = LoggerFactory.getLogger(DataLinkService.class);
 
     private List<String> authTrustedIp;
@@ -79,7 +78,6 @@ public class DataLinkService extends Configurable
     private String syncServiceUrl;
     private String asyncServiceName;
     private String asyncServiceUrl;
-    private String webServiceName;
     private String webServiceUrlTemplate;
     private String cutoutServiceName;
     private String cutoutServiceUrl;
@@ -114,7 +112,6 @@ public class DataLinkService extends Configurable
         syncServiceUrl = config.get(ConfigValueKeys.DATALINK_SYNC_SERVICE_URL);
         asyncServiceName = config.get(ConfigValueKeys.DATALINK_ASYNC_SERVICE_NAME);
         asyncServiceUrl = config.get(ConfigValueKeys.DATALINK_ASYNC_SERVICE_URL);
-        webServiceName = config.get(ConfigValueKeys.DATALINK_WEB_SERVICE_NAME);
         webServiceUrlTemplate = config.get(ConfigValueKeys.DATALINK_WEB_SERVICE_URL);
         dataLinkBaseUrl = config.get(ConfigValueKeys.DATALINK_BASE_URL);
         dataLinkAccessEncriptionSecretKey = config.get(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY);
@@ -257,8 +254,7 @@ public class DataLinkService extends Configurable
                             CasdaFormatter.formatDateTimeForLog(Date.from(start.toInstant())),
                             "failed to build AccessData URI's: " + e.getMessage(), userId))
                     .toString(), e);
-            this.reportDataLinkError(writer, String.format(SiapParamProcessor.USAGE_FAULT_MSG,
-                    "failed to build AccessData URI's: " + e.getMessage()));
+            this.reportDataLinkError(writer, String.format(SiapParamProcessor.TRANSIENT_FAULT_MSG));
             return false;
         }
 
@@ -323,7 +319,7 @@ public class DataLinkService extends Configurable
                         projectIds = new ArrayList<>();
                         projectIds.add(-1L);
                     }
-                    
+
                     String query = "select id from " + table + " where id = ?"
                             + " and (released_date is not null or project_id in ("
                             /*
@@ -364,23 +360,14 @@ public class DataLinkService extends Configurable
                     if (StringUtils.isNotBlank(syncServiceUrl))
                     {
                         builder.withAccessUrlResult(id, syncServiceUrl + requestToken.toEncryptedString(),
-                                syncServiceName, contentType, (long) contentLengthKb * ONE_KB_IN_BYTES);
+                                syncServiceName, contentType, (long) contentLengthKb * Utils.ONE_KB_IN_BYTES);
                     }
                     if (StringUtils.isNotBlank(asyncServiceUrl))
                     {
                         builder.withServiceDefResult(id, "async_service", asyncServiceName, contentType,
-                                (long) contentLengthKb * ONE_KB_IN_BYTES, requestToken.toEncryptedString());
-                        builder.withServiceDefinition("async_service", "ivo://ivoa.net/std/AccessData#async",
+                                (long) contentLengthKb * Utils.ONE_KB_IN_BYTES, requestToken.toEncryptedString());
+                        builder.withServiceDefinition("async_service", "ivo://ivoa.net/std/SODA#async-1.0",
                                 asyncServiceUrl);
-                    }
-
-                    // cutouts link
-                    if (StringUtils.isNotBlank(cutoutServiceUrl))
-                    {
-                        builder.withServiceDefResult(id, "cutout_service", cutoutServiceName, "#cutout", contentType,
-                                null, requestToken.toEncryptedString());
-                        builder.withServiceDefinition("cutout_service", "ivo://ivoa.net/std/AccessData#async",
-                                cutoutServiceUrl, true);
                     }
 
                     // cutouts UI link
@@ -389,24 +376,21 @@ public class DataLinkService extends Configurable
                         builder.withAccessUrlResult(id, cutoutUiServiceUrl + requestToken.toEncryptedString(),
                                 cutoutUiServiceName, contentType, null, "#cutout");
                     }
-                }
-            }
 
-            if (!StringUtils.isBlank(webServiceUrlTemplate))
-            {
-                String webUrl = webServiceUrlTemplate.replace("<ID>",
-                        id.toLowerCase().replace("cube-", "").replace("visibility-", ""));
-                if (id.toLowerCase().startsWith("cube-"))
-                {
-                    webUrl = webUrl.replace("<TYPE>", "IMAGE_CUBE");
+                    // cutouts link
+                    if (StringUtils.isNotBlank(cutoutServiceUrl))
+                    {
+                        builder.withServiceDefResult(id, "cutout_service", cutoutServiceName, "#cutout", contentType,
+                                null, requestToken.toEncryptedString());
+                        builder.withServiceDefinition("cutout_service", "ivo://ivoa.net/std/SODA#async-1.0",
+                                cutoutServiceUrl, true);
+                    }
                 }
-                else
+                else if(!VoKeys.ANONYMOUS_USER.equals(userId))
                 {
-                    webUrl = webUrl.replace("<TYPE>", "MEASUREMENT_SET");
+                    builder.withErrorResult(userId,
+                            "Sorry, but you do not have permission to access this data product");
                 }
-                webUrl = webUrl.replace("<RELEASED>", Boolean.toString(dataProductReleased));
-
-                builder.withAccessUrlResult(id, webUrl, webServiceName, "text/html", null);
             }
 
             if (VoKeys.ANONYMOUS_USER.equals(userId))

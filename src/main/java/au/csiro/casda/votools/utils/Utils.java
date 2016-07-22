@@ -5,14 +5,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 
 import javax.crypto.BadPaddingException;
@@ -27,6 +30,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.helpers.FileUtils;
+import org.slf4j.Logger;
 
 /*
  * #%L
@@ -57,6 +61,10 @@ public class Utils
     public static final String AUTH_FILE_NAME = "config/authz";
     /** Constant for the vo tools admin role */
     public static final String ADMIN_ROLE = "VO_TOOLS_ADMIN";
+    
+    /** The number of bytes in a kilobyte. */
+    public static final long ONE_KB_IN_BYTES = 1024; 
+
 
     /**
      * Prepares a string for SQL statement
@@ -316,4 +324,50 @@ public class Utils
             throw new RuntimeException(e);
         }
     }
+    
+    /**
+     * Load all properties from a properties file in resources/ on the classpath. The properties are loaded into the
+     * properties instance parameter.
+     * 
+     * @param propertiesFileName
+     *            The name of the properties file to be loaded.
+     * @return the properties object containing properties extracted from the fiven file
+     * @throws IOException if version file cannot be found/opened/read
+     */
+    public static Properties loadProperties(String propertiesFileName) throws IOException
+    {
+        Properties appProps = new Properties();
+        ClassLoader cl = Utils.class.getClassLoader();
+        URL url = cl.getResource(propertiesFileName);
+        if (url == null)
+        {
+            url = cl.getResource("resources/" + propertiesFileName);
+        }
+        if (url != null)
+        {
+            InputStream rf = url.openStream();
+            if (rf != null)
+            {
+                appProps.load(rf);
+            }
+        }
+        return appProps;
+    }
+
+
+    /**
+     * Log the current amount of used memory (total-free).
+     * @param logger The logger to be used.
+     */
+    public static void reportMemory(Logger logger)
+    {
+        final long BYTE_IN_GB = ONE_KB_IN_BYTES*ONE_KB_IN_BYTES*ONE_KB_IN_BYTES; 
+        Runtime runtime = Runtime.getRuntime();
+        // Calculate the used memory
+        long memory = runtime.totalMemory() - runtime.freeMemory();
+        float memGb = memory / (float) BYTE_IN_GB;
+        
+        logger.info("" + String.format(">>Used memory: %.3f GB", memGb));
+    }
+    
 }

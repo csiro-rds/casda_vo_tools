@@ -83,7 +83,7 @@ public class ScsController
             // set this header as a hint to the browser for the filename and extension
             response.setHeader(CONTENT_DISPOSITION, String.format(CONTENT_DISPOSITION_HEADER_FORMAT, RESULTS_FILENAME,
                     OutputFormat.VOTABLE.getFileExtension()));
-
+            response.setContentType("text/xml;content=x-votable");
             PrintWriter writer = response.getWriter();
             scsService.processQuery(writer, paramsMap);
         }

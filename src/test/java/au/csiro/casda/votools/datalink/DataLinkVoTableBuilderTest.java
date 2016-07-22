@@ -66,7 +66,7 @@ public class DataLinkVoTableBuilderTest
     public void testWithServiceDefinition() throws Exception
     {
         DataLinkVoTableBuilder builder = new DataLinkVoTableBuilder(APP_BASE_URL);
-        builder.withResultsTable().withServiceDefinition("async_service", "ivo://ivoa.net/std/AccessData#async",
+        builder.withResultsTable().withServiceDefinition("async_service", "ivo://ivoa.net/std/SODA#async-1.0",
                 "http://localhost/data");
         checkXmlAgainstTestCaseFile("builder.service_def", builder.getXml());
     }

@@ -233,6 +233,15 @@ public class ConfigurationRegistry
     @Value("${datalink.links.url}")
     private String datalinkLinksUrl;
     
+    @Value("${build.environment}")
+    private String environment;
+    
+    @Value("${stylesheet.information}")
+    private String css;
+    
+    @Value("${logo.url}")
+    private String logoUrl;
+    
     private Set<String> verifiedDbs;
 
     /**
@@ -1031,4 +1040,35 @@ public class ConfigurationRegistry
     {
         this.siapSharedSecretKey = siapSharedSecretKey;
     }
+
+    public String getEnvironment()
+    {
+        return environment;
+    }
+
+    public void setEnvironment(String environment)
+    {
+        this.environment = environment;
+    }
+
+    public String getCss()
+    {
+        return css;
+    }
+
+    public void setCss(String css)
+    {
+        this.css = css;
+    }
+
+    public String getLogoUrl()
+    {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl)
+    {
+        this.logoUrl = logoUrl;
+    }
+    
 }

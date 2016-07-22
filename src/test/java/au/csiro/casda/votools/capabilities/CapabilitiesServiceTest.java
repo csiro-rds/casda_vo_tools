@@ -182,7 +182,7 @@ public class CapabilitiesServiceTest
         assertThat(caps.get(0).getInterface().get(0).getAccessURL().get(0).getValue(),
                 is("http://my.proxy.url/vo/data/capabilities"));
         Capability cap = caps.get(2);
-        assertThat(cap.getStandardID(), is("ivo://ivoa.net/std/AccessData#sync"));
+        assertThat(cap.getStandardID(), is("ivo://ivoa.net/std/SODA#sync-1.0"));
         Interface scsInterface = cap.getInterface().get(0);
         assertThat(scsInterface.getAccessURL().get(0).getValue(), containsString("http://my.proxy.url/vo/data/"));
     }

@@ -116,7 +116,7 @@ public class DataLinkVoTableBuilder
      * @param xmlId
      *            the XML ID of the service definition
      * @param standardId
-     *            the 'standardID' of the service (eg: ivo://ivoa.net/std/AccessData#async)
+     *            the 'standardID' of the service (eg: ivo://ivoa.net/std/SODA#async-1.0)
      * @param accessUrl
      *            the URL to access the service
      * @return this builder instance
@@ -133,7 +133,7 @@ public class DataLinkVoTableBuilder
      * @param xmlId
      *            the XML ID of the service definition
      * @param standardId
-     *            the 'standardID' of the service (eg: ivo://ivoa.net/std/AccessData#async)
+     *            the 'standardID' of the service (eg: ivo://ivoa.net/std/SODA#async-1.0)
      * @param accessUrl
      *            the URL to access the service
      * @param isCutout

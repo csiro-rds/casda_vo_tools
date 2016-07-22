@@ -3,7 +3,7 @@
 <VOT:VOTABLE xmlns:VOT="http://www.ivoa.net/xml/VOTable/v1.3">
     <VOT:RESOURCE name="CASDA Datalink Result" type="results">
         <VOT:TABLE>
-            <VOT:FIELD datatype="char" name="ID" ucd="meta.id;meta.main" arraysize="*"/>
+        	<VOT:FIELD datatype="char" name="ID" ucd="meta.id;meta.main" arraysize="*"/>
             <VOT:FIELD datatype="char" name="access_url" ucd="meta.ref.url" arraysize="*"/>
             <VOT:FIELD datatype="char" name="service_def" ucd="meta.ref" arraysize="*"/>
             <VOT:FIELD datatype="char" name="error_message" ucd="meta.code.error" arraysize="*"/>
@@ -19,7 +19,7 @@
                         <VOT:TD>http://localhost:8080/casda_data_access/data/sync?id=-SDgmfVcIqFb486Xg_h4CV00AXWyQJFCby_-Cy7u6eAYg3ZLSPW2W3pZxIbQlRFo</VOT:TD>
                         <VOT:TD/>
                         <VOT:TD/>
-                        <VOT:TD>CASDA SYNC Data Access</VOT:TD>
+                        <VOT:TD>Direct file download</VOT:TD>
                         <VOT:TD>#this</VOT:TD>
                         <VOT:TD>application/fits</VOT:TD>
                         <VOT:TD>1024</VOT:TD>
@@ -30,7 +30,7 @@
                         <VOT:TD/>
                         <VOT:TD>async_service</VOT:TD>
                         <VOT:TD/>
-                        <VOT:TD>CASDA ASYNC Data Access</VOT:TD>
+                        <VOT:TD>Scripted file access</VOT:TD>
                         <VOT:TD>#this</VOT:TD>
                         <VOT:TD>application/fits</VOT:TD>
                         <VOT:TD>1024</VOT:TD>
@@ -38,50 +38,39 @@
                     </VOT:TR>
                     <VOT:TR>
                         <VOT:TD>cube-123456</VOT:TD>
+                        <VOT:TD>http://localhost:8080/casda_data_access/cutoutui?id=-SDgmfVcIqFb486Xg_h4CV00AXWyQJFCby_-Cy7u6eAYg3ZLSPW2W3pZxIbQlRFo</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD>Simple cut-out service</VOT:TD>
+                        <VOT:TD>#cutout</VOT:TD>
+                        <VOT:TD>application/fits</VOT:TD>
+                        <VOT:TD></VOT:TD>
+                        <VOT:TD/>
+                    </VOT:TR>
+                    <VOT:TR>
+                        <VOT:TD>cube-123456</VOT:TD>
                         <VOT:TD/>
                         <VOT:TD>cutout_service</VOT:TD>
                         <VOT:TD/>
-                        <VOT:TD>CASDA Image Cutout</VOT:TD>
+                        <VOT:TD>Scripted cut-out service</VOT:TD>
                         <VOT:TD>#cutout</VOT:TD>
                         <VOT:TD>application/fits</VOT:TD>
                         <VOT:TD></VOT:TD>
                         <VOT:TD>-SDgmfVcIqFb486Xg_h4CV00AXWyQJFCby_-Cy7u6eAYg3ZLSPW2W3pZxIbQlRFo</VOT:TD>
-                    </VOT:TR>
-                    <VOT:TR>
-                        <VOT:TD>cube-123456</VOT:TD>
-                        <VOT:TD>http://localhost:8080/casda_data_access/cutoutui?id=-SDgmfVcIqFb486Xg_h4CV00AXWyQJFCby_-Cy7u6eAYg3ZLSPW2W3pZxIbQlRFo</VOT:TD>
-                        <VOT:TD/>
-                        <VOT:TD/>
-                        <VOT:TD>CASDA Image Cutout</VOT:TD>
-                        <VOT:TD>#cutout</VOT:TD>
-                        <VOT:TD>application/fits</VOT:TD>
-                        <VOT:TD></VOT:TD>
-                        <VOT:TD/>
-                    </VOT:TR>
-                    <VOT:TR>
-                        <VOT:TD>cube-123456</VOT:TD>
-                        <VOT:TD>http://blah:8080/dap/public/casda/casdaResult.zul?dpId=123456&amp;dataProducts=IMAGE_CUBE&amp;released=true</VOT:TD>
-                        <VOT:TD/>
-                        <VOT:TD/>
-                        <VOT:TD>CSIRO Data Access Portal</VOT:TD>
-                        <VOT:TD>#this</VOT:TD>
-                        <VOT:TD>text/html</VOT:TD>
-                        <VOT:TD/>
-                        <VOT:TD/>
                     </VOT:TR>
                 </VOT:TABLEDATA>
             </VOT:DATA>
         </VOT:TABLE>
     </VOT:RESOURCE>
     <VOT:RESOURCE ID="async_service" utype="adhoc:service" type="meta">
-        <VOT:PARAM value="ivo://ivoa.net/std/AccessData#async" datatype="char" name="standardID" arraysize="*"/>
+        <VOT:PARAM value="ivo://ivoa.net/std/SODA#async-1.0" datatype="char" name="standardID" arraysize="*"/>
         <VOT:PARAM value="http://localhost:8080/casda_data_access/data/async" datatype="char" name="accessURL" arraysize="*"/>
         <VOT:GROUP name="inputParams">
             <VOT:PARAM value="" datatype="char" ref="authenticatedIdToken" name="ID" arraysize="*"/>
         </VOT:GROUP>
     </VOT:RESOURCE>
 	<VOT:RESOURCE ID="cutout_service" utype="adhoc:service" type="meta">
-        <VOT:PARAM value="ivo://ivoa.net/std/AccessData#async" datatype="char" name="standardID" arraysize="*"/>
+        <VOT:PARAM value="ivo://ivoa.net/std/SODA#async-1.0" datatype="char" name="standardID" arraysize="*"/>
         <VOT:PARAM value="http://localhost:8080/casda_data_access/data/async" datatype="char" name="accessURL" arraysize="*"/>
         <VOT:GROUP name="inputParams">
             <VOT:PARAM value="" datatype="char" ref="authenticatedIdToken" name="ID" arraysize="*"/>

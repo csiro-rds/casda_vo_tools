@@ -254,6 +254,9 @@ public class Configuration extends Options
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_UI_URL, registry.getDatalinkCutoutUiUrl());
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_UI_SERVICE_NAME, registry.getDatalinkCutoutUiServiceName());
         putDefault(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY, registry.getSiapSharedSecretKey());
+        putDefault(ConfigValueKeys.ENVIRONMENT, registry.getEnvironment());
+        putDefault(ConfigValueKeys.CSS, registry.getCss());
+        putDefault(ConfigValueKeys.LOGO_URL, registry.getLogoUrl());
         putDefault(DEFAULT_DB_SCHEMA, registry.getDefaultDbSchema());
 
         // TAP metadata

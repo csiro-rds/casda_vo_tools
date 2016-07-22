@@ -28,7 +28,7 @@ public class ColumnConfig extends Options
 {
     /** name of the name field */
     public static final String NAME = "name";
-    /** name of the name field */
+    /** name of the database column name field */
     public static final String DB_COLUMN_NAME = "db_column_name";
     /** name of the size field */
     public static final String SIZE = "size";

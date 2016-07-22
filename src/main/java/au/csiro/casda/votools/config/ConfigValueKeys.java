@@ -64,4 +64,16 @@ public abstract class ConfigValueKeys
 
     /** Constant for the cut-out user interface service name */
     public static final String DATALINK_CUTOUT_UI_SERVICE_NAME = "datalink.cutout.ui.service.name";
+    
+    /** Constant for the build number */
+    public static final String BUILD_NUMBER = "build.number";
+    
+    /** Constant for the server environment */
+    public static final String ENVIRONMENT = "build.environment";
+    
+    /** Constant for the server environment */
+    public static final String CSS = "stylesheet.address";
+    
+    /** Constant for the server environment */
+    public static final String LOGO_URL = "logo.url";
 }

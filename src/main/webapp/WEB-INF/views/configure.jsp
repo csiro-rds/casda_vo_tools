@@ -2,7 +2,7 @@
 <%@ page session="false" %>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="https://daptst.csiro.au/dap/resources-2.6.6/css/style.css">
+        <link rel="stylesheet" type="text/css" href="${css }">
         <title>VO Tools Configuration</title>
         <style type="text/css">
 /* Style overrides until we get a standard style. */
@@ -26,11 +26,9 @@ input.centreButton
         </style>
     </head>
     <body>
-        <div id="header">
-			<a href="/casda_vo_tools/tap" title="CASDA VO Tools Home"><img class="headerLogoImage" src="https://daptst.csiro.au/dap/resources-2.6.6/images/csiro_logo.png" alt="CSIRO Logo"></a>
-			<span class="banner">CASDA VO Tools</span>
-			<div style="position: relative;"><span class="envBanner">Local Environment</span></div>
-        </div>
+        <jsp:include page="includes/header.jsp" >
+        	<jsp:param name="addressPrefix" value="../"/>
+        </jsp:include>
         <div id="main">
             <br/>
             <div class="meta" style="float: right; font-size: 15;">
@@ -60,7 +58,7 @@ input.centreButton
            		<c:if test="${success}">
                 	<div id="successMessage" class="success">${successMessage }</div>
                 </c:if>
-                <form action="/casda_vo_tools/configure/act" method="post">
+                <form action="./act" method="post">
                     <div class="form-field" style="width:800">
 	                    <c:if test="${!passwordSetup}">
 	                      <table>
@@ -105,15 +103,6 @@ input.centreButton
             </div>
             <br/>
         </div>
-        <div id="footer">
-            <span class="copyright">Copyright (c) 2010-2015 CSIRO Australia. All Rights Reserved</span>
-            <ul class="links footerLinks">
-              <li><a href="https://daptst.csiro.au/dap/acknowledgements" target="dapLinks">Acknowledgements</a></li>
-              <li><a href="https://daptst.csiro.au/dap/legal" target="dapLinks">Legal Notice and Disclaimer</a></li>
-              <li><a href="https://daptst.csiro.au/dap/privacy" target="dapLinks">Privacy</a></li>
-              <li><a href="https://daptst.csiro.au/dap/copyright" target="dapLinks">Copyright</a></li>
-            </ul>
-    		<br>
-        </div>
+        <jsp:include page="includes/footer.jsp" />
     </body>
 </html>

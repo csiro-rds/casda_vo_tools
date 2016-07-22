@@ -1,6 +1,9 @@
 package au.csiro.casda.votools.tap;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -13,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import uws.UWSException;
-import uws.UWSToolBox;
 import au.csiro.casda.services.dto.Message.MessageCode;
 import au.csiro.casda.services.dto.MessageDTO;
 import au.csiro.casda.votools.config.ConfigurationException;
@@ -32,6 +34,8 @@ import au.csiro.casda.votools.result.OutputFormat;
 import au.csiro.casda.votools.utils.Utils;
 import au.csiro.casda.votools.utils.VoKeys;
 import au.csiro.casda.votools.uws.UWServiceInterface;
+import uws.UWSException;
+import uws.UWSToolBox;
 
 /*
  * #%L
@@ -263,8 +267,16 @@ public class TapController
         }
         else
         {
+            // If not authorised just return an empty job list
             logger.debug("UNAUTHORIZED to process async request: " + request.getHeader(VoKeys.VO_AUTH_HEADER_USER_ID));
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("text/xml");
+            OutputStream outputStream = response.getOutputStream();
+            PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8)));
+            out.write("<uws:jobList xmlns:uws=\"http://www.ivoa.net/xml/UWS/v1.0\" "
+                    + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                    + "xsi:schemaLocation=\"http://www.ivoa.net/xml/UWS/v1.0 http://www.ivoa.net/xml/UWS/v1.0\"> "
+                    + "</uws:jobList>");
+            out.flush();
         }
     }
 

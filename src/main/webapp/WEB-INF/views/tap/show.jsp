@@ -2,7 +2,7 @@
 <%@ page session="false" %>
 <html>
     <head>
-        <link rel="stylesheet" type="text/css" href="https://data.csiro.au/dap/resources-2.6.6/css/style.css">
+        <link rel="stylesheet" type="text/css" href="${css}">
         <title>TAP Basic UI</title>
         <style type="text/css">
 /* Style overrides until we get a standard style. */
@@ -12,11 +12,7 @@ form .form-field label {
         </style>
     </head>
     <body>
-        <div id="header">
-			<a href="tap" title="CASDA VO Tools Home"><img class="headerLogoImage" src="https://data.csiro.au/dap/resources-2.6.6/images/csiro_logo.png" alt="CSIRO Logo"></a>
-			<span class="banner">CASDA VO Tools</span>
-			<div style="position: relative;"><span class="envBanner">Local Environment</span></div>
-        </div>
+        <jsp:include page="../includes/header.jsp" />
         <div id="main">
             <br/>
             <h1>
@@ -57,16 +53,6 @@ form .form-field label {
             </div>
             <br/>
         </div>
-        <div id="footer">
-            <span class="copyright">Copyright (c) 2010-2014 CSIRO Australia. All Rights Reserved</span>
-            <ul class="links footerLinks">
-              <li><a href="https://data.csiro.au/dap/acknowledgements" target="dapLinks">Acknowledgements</a></li>
-              <li><a href="https://data.csiro.au/dap/legal" target="dapLinks">Legal Notice and Disclaimer</a></li>
-              <li><a href="https://data.csiro.au/dap/privacy" target="dapLinks">Privacy</a></li>
-              <li><a href="https://data.csiro.au/dap/copyright" target="dapLinks">Copyright</a></li>
-            </ul>
-    		<br>
-            <span class="serverInfo">Server Name: Localhost. Build Number: Someit... (30 Jul 2014)</span>
-        </div>
+		<jsp:include page="../includes/footer.jsp" />
     </body>
 </html>

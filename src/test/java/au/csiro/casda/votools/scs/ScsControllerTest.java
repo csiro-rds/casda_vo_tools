@@ -87,7 +87,7 @@ public class ScsControllerTest
 
         // check content type set to a default
         this.mockMvc.perform(get("/scs/obscore?" + queryString)).andExpect(status().isOk()).andDo(print())
-                .andExpect(content().contentType("application/x-votable+xml"))
+                .andExpect(content().contentType("text/xml;content=x-votable"))
                 .andExpect(header().string("content-disposition", CoreMatchers.startsWith("attachment; filename=\"")))
                 .andExpect(header().string("content-disposition", CoreMatchers.endsWith(".xml\"")));
 
@@ -110,7 +110,7 @@ public class ScsControllerTest
         String queryString = "";
 
         this.mockMvc.perform(get("/scs/obscore?" + queryString)).andExpect(status().isOk()).andDo(print())
-                .andExpect(content().contentType("application/x-votable+xml"));
+                .andExpect(content().contentType("text/xml;content=x-votable"));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -132,7 +132,7 @@ public class ScsControllerTest
                 .perform(get("/scs/obscore?" + queryString).header(VoKeys.VO_AUTH_HEADER_USER_ID, userId)
                         .header(VoKeys.VO_AUTH_HEADER_LOGIN_SYSTEM, loginSystem)
                         .header(VoKeys.VO_AUTH_HEADER_USER_PROJECTS, userProjects))
-                .andExpect(status().isOk()).andDo(print()).andExpect(content().contentType("application/x-votable+xml"))
+                .andExpect(status().isOk()).andDo(print()).andExpect(content().contentType("text/xml;content=x-votable"))
                 .andExpect(header().string("content-disposition", CoreMatchers.startsWith("attachment; filename=\"")))
                 .andExpect(header().string("content-disposition", CoreMatchers.endsWith(".xml\"")));
 
@@ -161,7 +161,7 @@ public class ScsControllerTest
                 .perform(get("/scs/obscore?" + queryString).header(VoKeys.VO_AUTH_HEADER_USER_ID, userId)
                         .header(VoKeys.VO_AUTH_HEADER_LOGIN_SYSTEM, loginSystem)
                         .header(VoKeys.VO_AUTH_HEADER_USER_PROJECTS, userProjects))
-                .andExpect(status().isOk()).andDo(print()).andExpect(content().contentType("application/x-votable+xml"))
+                .andExpect(status().isOk()).andDo(print()).andExpect(content().contentType("text/xml;content=x-votable"))
                 .andExpect(header().string("content-disposition", CoreMatchers.startsWith("attachment; filename=\"")))
                 .andExpect(header().string("content-disposition", CoreMatchers.endsWith(".xml\"")));
 

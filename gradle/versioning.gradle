@@ -59,4 +59,6 @@ task makeVersionProps (type: Copy) {
     expand(version: version, date: new Date().format('dd MMM yyyy'), timestamp: buildTimestamp)
     into "${buildDir}/resources/main/resources/"
 }
+
+war.dependsOn makeVersionProps
 makeVersionProps.mustRunAfter processResources
