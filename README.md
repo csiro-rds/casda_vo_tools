@@ -33,7 +33,7 @@ Installation
 
 CASDA Vo Tools is distributed as a read to install war file (web archive). This can be directly deployed in a Java web container such as Tomcat.
 
-The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.2 on CSIRO Data Access Portal](http://doi.org/10.4225/08/5728108951F27)
+The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.3 on CSIRO Data Access Portal](http://doi.org/10.4225/08/57985C82D5757)
 or you can build it using the instructions below.
 
 ### Deployment
@@ -51,7 +51,7 @@ Configuration
 -------------
 
 A full guide to interactive configuration is provided at 
-[Deploying_CASDA_VO_Tools.pdf](https://ws.data.csiro.au/collections/17515/support/1186) however a short intro is provided here.
+[Deploying_CASDA_VO_Tools.pdf](https://ws.data.csiro.au/collections/18710/support/1374) however a short intro is provided here.
 
 ### Application config
 Two configuration systems are available for use in the CASDA VO Tools application.
