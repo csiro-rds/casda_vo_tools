@@ -3,12 +3,12 @@
 ## v1.3 - 2016-07-28
 
 * New Features
-    *   Update documentation to be primarily aimed at deployers rather than developers
+    *   Updated documentation to be primarily aimed at deployers rather than developers
     *   Page css is now configurable
     *   Allowed for logging to be externally configured
     *   Page footer now includes build information
-    *   Identification of postgres BIT type by vo tools
-    *   Conversion of non UTF-8 data to XML character codes 
+    *   Added support for PostgreSQL BIT type
+    *   Added conversion of non UTF-8 data to XML character codes 
 
 * Bug fixes
     *   Large queries (> 300,000 results) would use up too much memory
