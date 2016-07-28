@@ -20,6 +20,14 @@ The application is designed to be reusable both within CSIRO and by other data c
 CSIRO specific code or functionality included in the application. All customisation is also accessible using 
 configuration rather than via code.  
 
+Release History
+---------------
+
+Current Release: v1.3
+
+Notes for each release are available at  [release_notes.md](./release_notes.md)
+
+
 Installation
 ------------
 
@@ -31,7 +39,7 @@ Installation
 
 ### Accessing the WAR file
 
-CASDA Vo Tools is distributed as a read to install war file (web archive). This can be directly deployed in a Java web container such as Tomcat.
+CASDA Vo Tools is distributed as a ready to install war file (web archive). This can be directly deployed in a Java web container such as Tomcat.
 
 The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.3 on CSIRO Data Access Portal](http://doi.org/10.4225/08/57985C82D5757)
 or you can build it using the instructions below.
