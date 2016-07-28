@@ -2,15 +2,14 @@ CASDA VO Tools
 ==============
 
 
-This web application provides access to CASDA data using the Virtual Observatory protocols:
+This web application provides access to astronomical data using the following Virtual Observatory protocols:
 
 | Protocol |Version |Endpoint Base |
 |---------|--------|---------|
 | [Table Access Protocol](http://www.ivoa.net/Documents/TAP/) | v1.0 | /tap |
 | [Simple Cone Search](http://www.ivoa.net/Documents/latest/ConeSearch.html) | v1.03 | /scs |
-| [Simple Image Access](http://www.ivoa.net/documents/SIA/) | v2.0 (PR 20150730)  | /sia2 |
+| [Simple Image Access](http://www.ivoa.net/documents/SIA/) | v2.0  | /sia2 |
 | [Datalink](http://www.ivoa.net/documents/DataLink/index.html) | v1.0 | /datalink |
-| [Access Data](http://wiki.ivoa.net/twiki/bin/view/IVOA/AccessData) | WD2014-03-12 | /data |
  
 Each protocol has an `/availability` and `/capabilities` endpoint (e.g. `/tap/capabilities` ) which comply 
 with the [IVOA Support Interfaces (VOSI) v1.0](http://www.ivoa.net/documents/VOSI/) specification. The `/capabilities` endpoint 
@@ -18,90 +17,52 @@ lists all other endpoints and is the means clients will use
 for auto discovery of services. The `/capabilities` will also be included in the IVOA registry entries for each VO Tools instance.
 
 The application is designed to be reusable both within CSIRO and by other data centers. As a result there should be no 
-CSIRO specific code or functionality included in the application. Any customisation should also be accessible using 
+CSIRO specific code or functionality included in the application. All customisation is also accessible using 
 configuration rather than via code.  
 
-Setting up
-----------
-
-This project assumes that Eclipse / STS is being used. Having checked out the project from Stash into the standard project location (ie: 'C:\Projects\Casda'), you can import it into Eclipse as a Gradle project. You will then need to right-click on the project and do a Gradle -> Refresh All. 
-
-Please then follow the instructions at [https://wiki.csiro.au/display/CASDA/CASDA+Application+setup+-+common](https://wiki.csiro.au/display/CASDA/CASDA+Application+setup+-+common) to ensure you're using the standard code formatting and templates.
-
-This project relies on the same Postgres instance managed by the `casda_deposit_manager` service. Please see that project for instructions on setting-up and configuring the database.
-
-Running the Tests Locally
--------------------------
-
-> `gradle clean test`
-
-Note: Some tests will only be run if there is a local database available. This means that local builds may run much longer than CI builds, because CI builds will skip these tests. 
-
-
-Running the Tests within Eclipse
---------------------------------
-
-You should just be able to run a test as a JUnit test in Eclipse (ie: there is no special configuration required).
-
-
-Building and Installing Locally
--------------------------------
-
-> `gradle clean deployToLocal`
-
-This will build and deploy the war to tomcat (along with an application context file.)
-
-
-Running Locally
+Release History
 ---------------
 
-You can access the tools by going to:
+Current Release: v1.3
 
-> `http://localhost:8080/casda_vo_tools/tap`
-
-The UI you see at this address can be used to execute some ADQL queries.  eg:
-
-> `SELECT * FROM tap_schema.tables`
-
-> `SELECT obs_id, count(*) FROM ObsCore GROUP BY obs_id`
-
-> `SELECT obs_id, dataproduct_type, calib_level, dataproduct_subtype, obs_collection FROM ObsCore WHERE obs_id = 140112`
-
-> `SELECT TOP 2 * FROM ObsCore WHERE 1=CONTAINS(POINT('ICRS', s_ra, s_dec),  CIRCLE('ICRS', 189.2, 62.21, 0.05 ))`
-
-The tomcat server can be stopped and started with the following gradle commands:
-
-> `gradle localTomcatStop`
-
-> `gradle localTomcatStart`
-
-To use the SIAP/Datalink tools locally you may need to change the `datalink.base.url` URL in the properties file. by default this is set to point to a proxy service for authentication. by changing this to point to your vo tools local URL e.g. `http://localhost:8080/casda_vo_tools/` you can work on this component without the need for authentication.
+Notes for each release are available at  [release_notes.md](./release_notes.md)
 
 
-Running Within Eclipse
-----------------------
+Installation
+------------
 
-* In Eclipse, make sure the 'Servers' view is visible somewhere (Window -> Show View -> Servers).  
-* In that view, right-click and select New -> Server.
-* In the dialog that opens, expand the Apache folder and select Tomcat v7.0 Server, then click Finish.  You should now 
-see a server in the Servers view called "Tomcat v7.0 Server at localhost".
-* Right click on that server and choose 'Add and Remove'.
-* In the dialog that opens you should see `casda_vo_tools`.  Make sure it is in the Configured pane, then click 
-Finish.  
-* Now double-click on the server in the Servers view and then in the editor pane that opens click on the 'Open launch 
-configuration' link.
-* Click on the Arguments tab.  Under Working Directory click the Other radio button and then select your Apache's bin 
-directory. Click OK to save and close the dialog. (This step is necessary so that the local application properties
-file is found and used.)
-* Now select the server in the Servers view and click on the 'play' button.  You should now be able to access the 
-server using the URL above.
+### System Requirements
 
+* Java v8 SDK
+* Web container: tested with Tomcat 7
+* Postgres database running PostgReSQL 9.4 or later and pgShere v1.1 or later
+
+### Accessing the WAR file
+
+CASDA Vo Tools is distributed as a ready to install war file (web archive). This can be directly deployed in a Java web container such as Tomcat.
+
+The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.3 on CSIRO Data Access Portal](http://doi.org/10.4225/08/57985C82D5757)
+or you can build it using the instructions below.
+
+### Deployment
+
+1. Tomcat should be configured to expand war files (for ease of configuration).
+2. The casda_vo_tools.war file should be added to the webapps folder in Tomcat.
+3. Start Tomcat (or restart Tomcat if it is already running)
+4. Open `http://localhost:8080/casda_vo_tools/` to see a welcome message. 
+5. Then open `http://localhost:8080/casda_vo_tools/configure/home` to access the initial configuration screen.
+ 
+Note that the server name and port may vary depending on your deployment server and how tomcat is configured.
+ 
 
 Configuration
 -------------
 
+A full guide to interactive configuration is provided at 
+[Deploying_CASDA_VO_Tools.pdf](https://ws.data.csiro.au/collections/18710/support/1374) however a short intro is provided here.
+
 ### Application config
-Two configuration systems are in use in the CASDA VO Tools application.
+Two configuration systems are available for use in the CASDA VO Tools application.
 
 * Spring Boot's [externalized configuration](http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html) which 
 uses `application.properties` and `config/application-casda_vo_tools.properties`. These can be within 
@@ -111,28 +72,59 @@ further details.
 external data center would configure their VO Tools instance.
 
 Either config system can be used in a particular deployment. If present, the yaml will override the spring boot config. 
-Note that any new keys need to be added to the code for both systems. See the entries in 
-`/src/main/java/au/csiro/casda/votools/config/ConfigValueKeys.java` for examples of how to do this.
 
 The configuration can be interactively managed using the endpoint `/configure/home`. This is documented in 
-[/src/docs/Deploying CASDA VO Tools.docx](https://stash.csiro.au/projects/CASDA/repos/casda_vo_tools/browse/src/docs/Deploying%20CASDA%20VO%20Tools.docx)
+[/src/docs/Deploying CASDA VO Tools.docx](https://github.com/csiro-rds/casda_vo_tools/raw/master/src/docs/Deploying%20CASDA%20VO%20Tools.docx)
 
-When running under Eclipse, the `src/test/resources/config` folder is copied into the local Eclipse-managed server's WEB-INF/classes directory (as it's in the classpath by dint of being located under src/test/resources).
+For an initial installation, you should follow these basic steps:
 
-Test cases always load application.properties files manually.
+1. Go to `http://localhost:8080/casda_vo_tools/configure/home`
+2. If a database connection is detected then a login will be required. The default login details are User: `voadmin` Password: `password` 
+3. Click `Current` to see the current configuration
+4. Change the values for `connection.url`, `connection.username`, and `connection.password` to connect to your database.
+5. Select `Update` as the allowed access level and click `Explore` to read in the details of your database and create the TAP metadata tables 
+6. Add schema and table entries e.g.
+
+    schemas:  
+       ivoa: !au.csiro.casda.votools.config.SchemaConfig {}  
+    tables:  
+       ivoa.obscore: {}  
+  
+7. Select `Update` as the allowed access level and click `Apply` to save the configuration and update the TAP metadata tables 
+8. Edit `config/authz` to change the password to one of your choosing.
+9. Go to `http://localhost:8080/casda_vo_tools/tap`
+10. The UI you see at this address can be used to execute some ADQL queries.  eg:
+
+> `SELECT * FROM tap_schema.tables`
 
 ###Logging
 
-The log4j configuration file is detected using default behaviour of log4j, by being named according to convention (log4j2.xml) and provided on the classpath. When running locally or in the application environments, the log4j configuration file is bundled with the application. When running under Eclipse, the log configuration file is copied into the local Eclipse-managed server's WEB-INF/classes directory, because it's in the src/test/resources folder, and loaded via the classpath.
+The log4j configuration file is detected using default behaviour of log4j, by being named according to convention (log4j2.xml) and provided on the classpath. When running locally or in the application environments, the log4j configuration file is bundled with the application. When running under Eclipse, the log configuration file is copied into the local Eclipse-managed server's WEB-INF/classes directory, because it's in the src/test/resources folder, and loaded via the classpath. A custom logging config can be placed at config/CasdaVoTools-log4j2.xml under the Tomcat working directory. 
 
-We have decided to use a single log configuration file common to local and server environments. Consequently, in your local environment, you will see log4j configuration errors as the logging system tries to talk to syslog. All the logs will be written to:
+Logs will be written by default to the following location, relative to the working directory of the Tomcat process:
 
-    /CASDA/application/tomcat/logs/casda_vo_tools.log
+    logs/casda_vo_tools.log
+
+Building
+--------
+
+CASDA VO Tools is a Java web application. It has a fairly standard layout and the build is managed using the [Gradle Build Tool](http://gradle.org/getting-started-gradle-java) .
+
+The Gradle build is configured to download all dependencies, compile the code, run the unit tests and build the war file. 
+
+On Windows:
+
+> `gradlew clean build`
+
+On Unix or Mac:
+
+> `./gradlew clean build`
+
+ 
 
 
-Update the license header of the current project source files
---------------------------------------------------------------
-Change the relevant value in pom.xml then run this command in command prompt to ensure all files carry the correct license header:
+Development
+-----------
 
-$ mvn license:update-file-header
+For information on developing CASDA VO Tools, see [DEVELOPERS.md](./DEVELOPERS.md)
 

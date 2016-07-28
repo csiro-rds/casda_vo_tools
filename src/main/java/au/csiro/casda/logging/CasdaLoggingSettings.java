@@ -64,7 +64,7 @@ public class CasdaLoggingSettings
      * @param applicationName
      *            the name of the application for the log messages
      * @param logfilePath
-     *            the path to the logfile, preferable to use a path relative to the user.dir, eg
+     *            the path to the log config file, preferable to use a path relative to the user.dir, eg
      *            config/Application-log4j2.xml
      */
     public CasdaLoggingSettings(String applicationName, String logfilePath)

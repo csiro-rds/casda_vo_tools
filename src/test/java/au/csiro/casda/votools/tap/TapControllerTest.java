@@ -312,7 +312,7 @@ public class TapControllerTest
     {
         when(mockService.isTrustedUserId(any(HttpServletRequest.class))).thenReturn(false);
 
-        this.mockMvc.perform(get("/tap/async/")).andExpect(status().isUnauthorized()).andDo(print());
+        this.mockMvc.perform(get("/tap/async/")).andExpect(status().isOk()).andDo(print());
     }
     
     /**

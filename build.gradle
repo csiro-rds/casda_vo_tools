@@ -34,7 +34,7 @@ description = """CSIRO CASDA Project - CASDA VO Tools web application"""
 
 ext {
     majorVersion = 1
-    minorVersion = 2
+    minorVersion = 3
     springBootVer = '1.1.12.RELEASE'
     tomcatVer = '7.0.54'
 }
@@ -45,8 +45,12 @@ targetCompatibility = 1.8
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url "http://jenkins-cdc.it.csiro.au:8085/nexus/content/repositories/cd/" }
-    maven { url "http://jenkins-cdc.it.csiro.au:8085/nexus/content/repositories/thirdparty/" }
+    ivy {
+        url 'https://github.com/csiro-rds/casda_vo_tools/raw/master/'
+        layout ('pattern') {
+            artifact 'external-libs/[artifact]-[revision](-[classifier])(.[ext])'
+        }
+    }
 }
 
 configurations { 
@@ -67,7 +71,7 @@ dependencies {
     compile('org.apache.httpcomponents:httpclient:4.5')
     compile("fr.unistra.saada:uws:4")
     compile("cds:adql:1.3")
-    compile("nom.tam:fits:1.11.0")
+    compile("gov.nasa.gsfc.heasarc:nom-tam-fits:1.12.0")
     compile("org.springframework.boot:spring-boot-starter-jdbc:${springBootVer}")
     compile("org.springframework.boot:spring-boot-starter-integration:${springBootVer}")
     compile("org.springframework.boot:spring-boot-starter-actuator:${springBootVer}")

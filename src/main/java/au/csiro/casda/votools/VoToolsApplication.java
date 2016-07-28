@@ -50,6 +50,8 @@ public class VoToolsApplication extends SpringBootServletInitializer
      */
     public static final String APPLICATION_NAME = "CasdaVoTools";
 
+    private static final String LOG_PROPERTIES_FILE_SUFFIX = "-log4j2.xml";
+
     private static final String CONFIG_FOLDER = "config";
 
     @Override
@@ -58,15 +60,46 @@ public class VoToolsApplication extends SpringBootServletInitializer
         File userDir = new File(System.getProperty("user.dir"));
         File configDir = new File(userDir, CONFIG_FOLDER);
 
-        CasdaLoggingSettings loggingSettings = new CasdaLoggingSettings(APPLICATION_NAME); 
+        String logPropertiesLocation = getLogPropertiesLocation();
+        File logPropertiesFile = new File(logPropertiesLocation);
+        CasdaLoggingSettings loggingSettings;
+        boolean useLogPropertiesFile = logPropertiesFile.exists() && logPropertiesFile.canRead();
+        if (useLogPropertiesFile)
+        {
+            loggingSettings = new CasdaLoggingSettings(APPLICATION_NAME, logPropertiesLocation);
+        }
+        else
+        {
+            loggingSettings = new CasdaLoggingSettings(APPLICATION_NAME);
+        }
+
         loggingSettings.addGeneralLoggingSettings();
 
         logger.info("Config being read from {} and {}", configDir.getAbsolutePath(), userDir.getAbsolutePath());
+        if (useLogPropertiesFile)
+        {
+            logger.info("Log properties location: {}", new File(logPropertiesLocation).getAbsolutePath());
+        }
+        else
+        {
+            logger.info("Using default log properties. Custom log properties can be set at : {}",
+                    logPropertiesFile.getAbsolutePath());
+        }
 
         SpringApplicationBuilder app = application.sources(VoToolsApplication.class);
         app.profiles("casda_vo_tools");
         
         return app;
+    }
+
+    /**
+     * Gets the location of the log properties file.
+     * 
+     * @return String application's log file in the config folder.
+     */
+    public static String getLogPropertiesLocation()
+    {
+        return CONFIG_FOLDER + File.separator + APPLICATION_NAME + LOG_PROPERTIES_FILE_SUFFIX;
     }
 
 }

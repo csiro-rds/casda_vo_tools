@@ -319,7 +319,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         {
             map.put(columnConfig.gtName(), columnConfig);
             columnConfig.setName(null);
-            columnConfig.put(ColumnConfig.ORDER, String.valueOf(colCounter++)); // This does not look right
+            columnConfig.put(ColumnConfig.ORDER, String.valueOf(colCounter++)); 
             columnConfig.put(ColumnConfig.SIZE, sizeByType(columnConfig.getType()));
         }
         addColumnComments(fullTableName, map);
@@ -1208,13 +1208,15 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         // for each column in the configuration table
         for (ColumnConfig c : cfgTable.getColumns().values())
         {
+            String dbColName = c.get(ColumnConfig.DB_COLUMN_NAME) == null ? Utils.sql(c.gtName())
+                    : c.sql(ColumnConfig.DB_COLUMN_NAME);
             insertUpdate(
                     createOnly,
                     COLUMNS_TABLE_NAME,
                     String.format("column_name='%s' AND table_name='%s'", c.gtName(), tapTableName),
                     new String[] { "column_name", "table_name", "db_column_name", "description", "unit", "ucd", "utype",
                             "datatype", "size", "principal", "indexed", "std", "scs_verbosity", "column_order" },
-                    new String[] { Utils.sql(c.gtName()), Utils.sql(tapTableName), c.sql(ColumnConfig.DB_COLUMN_NAME),
+                    new String[] { Utils.sql(c.gtName()), Utils.sql(tapTableName), dbColName,
                             c.sql(ColumnConfig.DESCRIPTION), c.sql(ColumnConfig.UNIT), c.sql(ColumnConfig.UCD),
                             c.sql(ColumnConfig.UTYPE), Utils.sql(c.getType()), c.sql(ColumnConfig.SIZE),
                             c.sql(ColumnConfig.PRINCIPAL), c.sql(ColumnConfig.INDEXED), c.sql(ColumnConfig.STD),

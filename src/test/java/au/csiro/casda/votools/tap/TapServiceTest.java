@@ -71,6 +71,7 @@ import au.csiro.casda.votools.jpa.TapTable;
 import au.csiro.casda.votools.jpa.repository.VoTableRepositoryService;
 import au.csiro.casda.votools.logging.CasdaVoToolsEvents;
 import au.csiro.casda.votools.result.OutputFormat;
+import au.csiro.casda.votools.tap.TapService.TapStatementCreator;
 import au.csiro.casda.votools.utils.VoKeys;
 
 /*
@@ -476,19 +477,20 @@ public class TapServiceTest
         params.put(VoKeys.VO_TABLE_HEADING, "Vo heading");
         params.put(VoKeys.SUBMITTED_TIME, ZonedDateTime.now().toString());
         params.put(VoKeys.SUBMITTED_MODE, TapService.SUBMITTED_MODE_SYNC);
-        when(syncJdbcTemplate.query(eq("sqlQuery"), any(ResultSetExtractor.class))).thenAnswer(new Answer<Boolean>()
-        {
-            @Override
-            public Boolean answer(InvocationOnMock invocation) throws Throwable
-            {
-                ResultSetExtractor<Boolean> extractor = invocation.getArgumentAt(1, ResultSetExtractor.class);
-                ResultSet emptyResultSet = mock(ResultSet.class);
-                ResultSetMetaData metadata = mock(ResultSetMetaData.class);
-                when(emptyResultSet.getMetaData()).thenReturn(metadata);
-                when(metadata.getColumnCount()).thenReturn(0);
-                return extractor.extractData(emptyResultSet);
-            }
-        });
+        when(syncJdbcTemplate.query(any(TapStatementCreator.class), any(ResultSetExtractor.class)))
+                .thenAnswer(new Answer<Boolean>()
+                {
+                    @Override
+                    public Boolean answer(InvocationOnMock invocation) throws Throwable
+                    {
+                        ResultSetExtractor<Boolean> extractor = invocation.getArgumentAt(1, ResultSetExtractor.class);
+                        ResultSet emptyResultSet = mock(ResultSet.class);
+                        ResultSetMetaData metadata = mock(ResultSetMetaData.class);
+                        when(emptyResultSet.getMetaData()).thenReturn(metadata);
+                        when(metadata.getColumnCount()).thenReturn(0);
+                        return extractor.extractData(emptyResultSet);
+                    }
+                });
         tapService.runTapQuery("sqlQuery", OutputFormat.VOTABLE, writer, 10, params, ZonedDateTime.now(), null);
 
         assertThat(writer.toString(), containsString("Vo heading"));

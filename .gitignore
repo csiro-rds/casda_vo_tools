@@ -12,3 +12,7 @@ temp/
 *.log
 dep.txt
 config/configuration.yaml
+src/main/resources/rebel.xml
+src/main/resources/version.properties
+*.iml
+*.gz

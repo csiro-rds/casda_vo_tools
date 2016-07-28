@@ -23,11 +23,15 @@ import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import au.csiro.casda.votools.config.ConfigValueKeys;
+import au.csiro.casda.votools.config.Configuration;
+import au.csiro.casda.votools.config.ConfigurationRegistry;
 import au.csiro.casda.votools.result.OutputFormat;
 
 /**
@@ -38,9 +42,11 @@ import au.csiro.casda.votools.result.OutputFormat;
  */
 public class BasicUiControllerTest
 {
-
-    @InjectMocks
-    private BasicUiController controller;
+    @Mock
+    private Configuration config;
+    
+    @Mock
+    private ConfigurationRegistry configReg;
 
     private MockMvc mockMvc;
 
@@ -54,6 +60,12 @@ public class BasicUiControllerTest
     public void setUp() throws Exception
     {
         MockitoAnnotations.initMocks(this);
+        
+        Mockito.when(config.get(ConfigValueKeys.ENVIRONMENT)).thenReturn("local");
+        
+        BasicUiController controller = new BasicUiController(configReg);  
+        controller.setConfiguration(config);
+            
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 

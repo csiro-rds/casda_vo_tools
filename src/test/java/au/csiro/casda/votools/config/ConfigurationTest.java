@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import javax.sql.DataSource;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -55,6 +56,7 @@ import au.csiro.casda.votools.jpa.TapTable;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ConfigurationTest.Config.class })
+@Ignore("Database modification tests should be used only when modifying the config handling")
 public class ConfigurationTest
 {
     @Autowired

@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.ui.ExtendedModelMap;
@@ -29,6 +28,7 @@ import org.springframework.ui.Model;
 
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
+import au.csiro.casda.votools.config.ConfigurationRegistry;
 import au.csiro.casda.votools.scs.ScsService;
 import au.csiro.casda.votools.tap.TapService;
 
@@ -45,10 +45,13 @@ public class VoToolsUiControllerTest
 
     @Mock
     private ScsService scsService;
+    
+    @Mock
+    private ConfigurationRegistry configReg;
 
+    @Mock
     private Configuration config;
 
-    @InjectMocks
     private VoToolsUiController voToolsUiController;
 
     /**
@@ -62,6 +65,8 @@ public class VoToolsUiControllerTest
     {
         MockitoAnnotations.initMocks(this);
         config = new Configuration();
+        voToolsUiController = new VoToolsUiController(tapService, scsService, configReg);
+        
         config.putDefault("log.timezone", "UTC");
         config.putDefault("application.message", "some message");
         when(tapService.getConfig()).thenReturn(config);

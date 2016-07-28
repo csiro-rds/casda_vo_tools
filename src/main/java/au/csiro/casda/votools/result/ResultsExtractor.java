@@ -23,12 +23,17 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.translate.NumericEntityEscaper;
+import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
+
 
 /**
  * Contains common functionality for different format ResultsExtractors.
@@ -130,7 +135,7 @@ public abstract class ResultsExtractor
      *             If the value cannot be retrieved form the result set.
      */
     protected String getFieldValue(ResultSet rs, int dataType, int columnIndex) throws SQLException
-    {
+    {   
         final int binaryRadix = 2;
         String value = null;
         switch (dataType)
@@ -163,7 +168,7 @@ public abstract class ResultsExtractor
             String baseUrlPlaceholder = "#{baseUrl}";
             if (value != null && value.startsWith(baseUrlPlaceholder))
             {
-                value = value.replace(baseUrlPlaceholder, baseUrl);
+                value = value.replace(baseUrlPlaceholder, StringUtils.isBlank(proxyUrl) ? baseUrl : proxyUrl);
             }
             break;
         }
@@ -172,40 +177,48 @@ public abstract class ResultsExtractor
         {
             value = "";
         }
-        return value;
+        final int lowestNonAsciiChar = 0x7f;
+        return StringEscapeUtils.ESCAPE_XML11.with(NumericEntityEscaper.between(lowestNonAsciiChar, Integer.MAX_VALUE))
+                .translate(value);
     }
 
     private String getOtherTypeValue(ResultSet rs, int columnIndex, final int binaryRadix, String value) throws SQLException
     {
-        String rawValue = rs.getString(columnIndex);
-        if (rawValue != null)
+        Object pgObject = rs.getObject(columnIndex);
+        //conversion only performed on postgres var bit type 
+        if(pgObject instanceof PGobject && ((PGobject) pgObject).getType().equals("varbit"))
         {
-            String columnTypeName = rs.getMetaData().getColumnTypeName(columnIndex);
-            if ("geometry".equals(columnTypeName))
+            value = String.valueOf(Integer.parseInt(((PGobject) pgObject).getValue(), binaryRadix));
+        }
+        else
+        {
+            String rawValue = rs.getString(columnIndex);
+
+            if (rawValue != null)
             {
-                // Convert the geometry field to readable text
-                WKBReader reader = new WKBReader();
-                try
+                String columnTypeName = rs.getMetaData().getColumnTypeName(columnIndex);
+                if ("geometry".equals(columnTypeName))
                 {
-                    Geometry geometry = reader.read(WKBReader.hexToBytes(rawValue));
-                    value = geometry.toText();
+                    // Convert the geometry field to readable text
+                    WKBReader reader = new WKBReader();
+                    try
+                    {
+                        Geometry geometry = reader.read(WKBReader.hexToBytes(rawValue));
+                        value = geometry.toText();
+                    }
+                    catch (ParseException e)
+                    {
+                        logger.error("Unable to convert geometry {} to string, reporting raw string.", rawValue, e);
+                        value = rawValue;
+                    }
                 }
-                catch (ParseException e)
+                else if ("spoly".equals(columnTypeName))
                 {
-                    logger.error("Unable to convert geometry {} to string, reporting raw string.", rawValue, e);
                     value = rawValue;
                 }
-            }
-            else if ("spoly".equals(columnTypeName))
-            {
-                value = rawValue;
-            }
-            else
-            {
-                // Ensure bit varying binary value is converted to decimal
-                value = String.valueOf(Integer.parseInt(rawValue, binaryRadix));
-            }
+            } 
         }
+
         return value;
     }
 

@@ -19,6 +19,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.postgresql.util.PGobject;
 
 import au.csiro.casda.votools.jpa.TapColumn;
 import au.csiro.casda.votools.jpa.TapColumnPK;
@@ -370,6 +371,29 @@ public class VoTableResultsExtractorTest
         assertThat(writer.toString(), matchesPattern(BASE_HEADER_PART1 + FIELD_DEFS + BASE_HEADER_PART2
                 + "           <TR><TD>Foo</TD><TD>1</TD><TD>2</TD><TD>211.1</TD></TR>\n" + EMPTY_FOOTER + "$"));
     }
+    
+    /**
+     * Tests escaping on non utf-8 chars
+     * 
+     * @throws Exception
+     *             Not expected.
+     */
+    @Test
+    public void testExtractDataNonUtf8() throws Exception
+    {
+        StringWriter writer = new StringWriter();
+        VoTableResultsExtractor extractor = new VoTableResultsExtractor(writer, 1, votableFieldMap,
+                TapService.CASDA_TAP_RESULT_NAME, metadataMap, APP_BASE_URL);
+        ResultSetMetaData mockMetaData = create4ColMetadata();
+        ResultSet mockResults = create4ColResultSetNonUtf8(mockMetaData);
+        Mockito.when(mockResults.isAfterLast()).thenReturn(true);
+
+        extractor.extractData(mockResults);
+        assertThat(writer.toString(), matchesPattern(BASE_HEADER_PART1 + FIELD_DEFS + BASE_HEADER_PART2
+                + "           "
+                + "<TR><TD>&quot;finan&#269;n&#233; slu&#382;by&quot;</TD><TD>1</TD><TD>2</TD><TD>211.1</TD></TR>\n" 
+                + EMPTY_FOOTER + "$"));
+    }
 
     /**
      * Tests outputting a single record result set.
@@ -451,6 +475,10 @@ public class VoTableResultsExtractorTest
         String realColStr = VoTableResultsExtractor.buildVoTableFieldHeader(realCol);
         assertThat(realColStr, is("<FIELD name=\"dub\" ID=\"dub\" datatype=\"float\" />\r\n"));
 
+        TapColumn textCol = this.buildTapColumn("dub", "text", "", "", "", 5, null);
+        String textColStr = VoTableResultsExtractor.buildVoTableFieldHeader(textCol);
+        assertThat(textColStr, is("<FIELD name=\"dub\" ID=\"dub\" datatype=\"char\" arraysize=\"5\" />\r\n"));
+
         TapColumn allCol = this.buildTapColumn("all", "INTEGER", "unitA", "UCD1", "Utype2", 5, "The Desc");
         String allColStr = VoTableResultsExtractor.buildVoTableFieldHeader(allCol);
         assertThat(allColStr,
@@ -500,7 +528,7 @@ public class VoTableResultsExtractorTest
         extractor.outputHeader(mockMetaData);
         assertThat(writer.toString(), matchesPattern(BASE_HEADER_PART1 + FIELD_DEFS + BASE_HEADER_PART2 + "$"));
     }
-
+    
     private ResultSetMetaData create4ColMetadata() throws SQLException
     {
         ResultSetMetaData mockMetaData = Mockito.mock(ResultSetMetaData.class);
@@ -526,7 +554,34 @@ public class VoTableResultsExtractorTest
         Mockito.when(mockResults.next()).thenReturn(true).thenReturn(true).thenReturn(false);
         Mockito.when(mockResults.getString(1)).thenReturn("Foo").thenReturn("Bar");
         Mockito.when(mockResults.getString(2)).thenReturn("1").thenReturn(null);
-        Mockito.when(mockResults.getString(3)).thenReturn("10").thenReturn("101010");
+        PGobject pgo1 = new PGobject();
+        pgo1.setType("varbit");
+        pgo1.setValue("10");
+        PGobject pgo2 = new PGobject();
+        pgo2.setType("varbit");
+        pgo2.setValue("101010");
+        Mockito.when(mockResults.getObject(3)).thenReturn(pgo1).thenReturn(pgo2);
+        Mockito.when(mockResults.getString(4)).thenReturn("BAD").thenReturn("BAD");
+        Mockito.when(mockResults.getFloat(4)).thenReturn(211.1f).thenReturn(190.05f);
+        return mockResults;
+    }
+    
+    // PMD warning not applicable to setting up mocks
+    @SuppressWarnings("PMD.CheckResultSet")
+    private ResultSet create4ColResultSetNonUtf8(ResultSetMetaData mockMetaData) throws SQLException
+    {
+        ResultSet mockResults = Mockito.mock(ResultSet.class);
+        Mockito.when(mockResults.getMetaData()).thenReturn(mockMetaData);
+        Mockito.when(mockResults.next()).thenReturn(true).thenReturn(true).thenReturn(false);
+        Mockito.when(mockResults.getString(1)).thenReturn("\"finan\u010Dn\u00E9 slu\u017Eby\"").thenReturn("Bar");
+        Mockito.when(mockResults.getString(2)).thenReturn("1").thenReturn(null);
+        PGobject pgo1 = new PGobject();
+        pgo1.setType("varbit");
+        pgo1.setValue("10");
+        PGobject pgo2 = new PGobject();
+        pgo2.setType("varbit");
+        pgo2.setValue("101010");
+        Mockito.when(mockResults.getObject(3)).thenReturn(pgo1).thenReturn(pgo2);
         Mockito.when(mockResults.getString(4)).thenReturn("BAD").thenReturn("BAD");
         Mockito.when(mockResults.getFloat(4)).thenReturn(211.1f).thenReturn(190.05f);
         return mockResults;

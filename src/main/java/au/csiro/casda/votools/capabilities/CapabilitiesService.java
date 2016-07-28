@@ -61,9 +61,9 @@ import au.csiro.casda.votools.scs.ScsService;
 
 /**
  * Service to generate service capability information
- *
+ * 
  * Copyright 2014, CSIRO Australia All rights reserved.
- *
+ * 
  */
 @Service
 public class CapabilitiesService extends Configurable
@@ -79,7 +79,7 @@ public class CapabilitiesService extends Configurable
     private static final String SCS_STD = "ivo://ivoa.net/std/SCS";
     private static final String DATALINK_STD = "ivo://ivoa.net/std/DataLink#links-1.0";
     private static final String SIAP2_STD = "ivo://ivoa.net/std/SIA#query-2.0";
-    private static final String ACCESS_DATA_STD = "ivo://ivoa.net/std/AccessData#sync";
+    private static final String SODA_STD = "ivo://ivoa.net/std/SODA#sync-1.0";
     private static Logger logger = LoggerFactory.getLogger(CapabilitiesController.class);
 
     private String baseUrl;
@@ -127,7 +127,7 @@ public class CapabilitiesService extends Configurable
 
     /**
      * A constructor
-     *
+     * 
      * @param configRegistry
      *            Configuration registry
      * @throws ConfigurationException
@@ -199,7 +199,7 @@ public class CapabilitiesService extends Configurable
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see au.csiro.casda.votools.config.Configurable#setConfiguration(au.csiro.casda.votools.config.Configuration)
      */
     @Override
@@ -211,7 +211,7 @@ public class CapabilitiesService extends Configurable
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see au.csiro.casda.votools.config.Configurable#isReady()
      */
     @Override
@@ -252,7 +252,7 @@ public class CapabilitiesService extends Configurable
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see au.csiro.casda.votools.config.Configurable#invalidate()
      */
     @Override
@@ -264,7 +264,7 @@ public class CapabilitiesService extends Configurable
 
     /**
      * Generate a capability description for a standard VOSI service.
-     *
+     * 
      * @param std
      *            the IVOA-standard function
      * @param accessUrl
@@ -280,11 +280,11 @@ public class CapabilitiesService extends Configurable
         cap.getInterface().add(this.getParamHTTPInterface(accessUrl, use));
         return cap;
     }
-
+    
     /**
      * Generate a TAP capability using the TableAccess TAP extension class. Attributes are populated from application
      * properties.
-     *
+     * 
      * @param accessUrl
      *            base url for the TAP endpoint
      * @return capability object representing the TAP standard endpoint
@@ -372,7 +372,7 @@ public class CapabilitiesService extends Configurable
     /**
      * Generate an SCS capability using the ConeSearch extension class. Attributes are populated from aplication
      * properties.
-     *
+     * 
      * @param accessUrl
      *            base url for the SCS endpoint
      * @param description
@@ -393,7 +393,7 @@ public class CapabilitiesService extends Configurable
 
     /**
      * Generate a capability description for a SIA v2 query service.
-     *
+     * 
      * @param accessUrl
      *            To access the service
      * @return Capability object representing the SIAv2 standard endpoint
@@ -407,10 +407,10 @@ public class CapabilitiesService extends Configurable
         cap.getInterface().add(paramHTTPInterface);
         return cap;
     }
-
+    
     /**
      * Generate a Data Link capability description for the data link service.
-     *
+     * 
      * @param accessUrl
      *            base url for the TAP endpoint
      * @return capability object representing the TAP standard endpoint
@@ -422,12 +422,12 @@ public class CapabilitiesService extends Configurable
         ParamHTTP paramHTTPInterface = this.getParamHTTPInterface(accessUrl, null);
         paramHTTPInterface.setVersion("1.0");
         paramHTTPInterface.setResultType("application/x-votable+xml;content=datalink");
-        paramHTTPInterface.getQueryType().add(HTTPQueryType.POST);
+        paramHTTPInterface.getQueryType().add(HTTPQueryType.POST);       
         paramHTTPInterface.getParam().add(createHttpInterfaceInputParam());
         cap.getInterface().add(paramHTTPInterface);
         return cap;
     }
-
+    
     private InputParam createHttpInterfaceInputParam()
     {
         InputParam param = new InputParam();
@@ -445,7 +445,7 @@ public class CapabilitiesService extends Configurable
     private Capability buildAccessDataInterfaceCapability(String accessUrl)
     {
         Capability cap = new Capability();
-        cap.setStandardID(ACCESS_DATA_STD);
+        cap.setStandardID(SODA_STD);
         ParamHTTP paramHTTPInterface = this.getParamHTTPInterface(accessUrl, "full");
         paramHTTPInterface.setVersion("1.0");
         cap.getInterface().add(paramHTTPInterface);

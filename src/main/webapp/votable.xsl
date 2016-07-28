@@ -18,7 +18,6 @@
     <!-- Hide everything by default. --> 
     <xsl:template match="text()"/>
 
-
 	<!--  VO Table -->
 
     <xsl:template match="vot:TD">
@@ -163,7 +162,14 @@
                      <xsl:otherwise>
                          <h2></h2>
                      </xsl:otherwise>
-                </xsl:choose>                
+                </xsl:choose>  
+                <xsl:if test="contains(vot:VOTABLE/vot:RESOURCE/@name,'Datalink')">
+	                <P>
+	                	The SIAP services are primarily intended for use with scripts and programmatic data access. 
+	                	Please refer to the <a href="http://www.atnf.csiro.au/observers/data/casdaguide.html" target="_blank">CASDA User Guide</a> for information and examples.
+	                </P>               
+                </xsl:if>
+       
                 <xsl:apply-templates select="*"/>
             </body>
         </html>

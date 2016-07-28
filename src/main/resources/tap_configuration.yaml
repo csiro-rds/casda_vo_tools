@@ -52,6 +52,16 @@ tables:
                std: 0
                column_order: 1
             type: character varying(64)
+         db_column_name: !Column
+            notnull: true
+            options: !Map
+               description: The database column name by which this table must be referenced in SQL.
+               size: 64
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 14
+            type: character varying(64)
          utype: !Column
             options: !Map
                description: UTYPE if table corresponds to a data model
