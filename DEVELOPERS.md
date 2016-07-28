@@ -10,7 +10,7 @@ configuration rather than via code.
 Setting up
 ----------
 
-This project assumes that Eclipse / STS is being used. Having checked out the project from git into the standard project location (ie: 'C:\Projects\Casda'), you can import it into Eclipse as a Gradle project. You will then need to right-click on the project and do a Gradle -> Refresh All. 
+This project assumes that Eclipse is being used. Having checked out the project from git into the standard project location (ie: 'C:\Projects\Casda'), you can import it into Eclipse as a Gradle project. You will then need to right-click on the project and do a Gradle -> Refresh All. 
 
 Please then follow the instructions at [https://wiki.csiro.au/display/CASDA/CASDA+Application+setup+-+common](https://wiki.csiro.au/display/CASDA/CASDA+Application+setup+-+common) to ensure you're using the standard code formatting and templates.
 
