@@ -1,5 +1,19 @@
 # CASDA VO Tools Release Notes
 
+## v1.4 - Planned for October 2016
+
+* New Features
+    *   Removed PostGIS health check
+	*   Allow for a separate higher volume SODA endpoint in datalink responses
+	*   Hide services with blank descriptions in datalink responses
+	
+
+* Bug fixes
+    *   Length for character type was incorrectly set as 0
+	*   Invalid VOTable types in results tables for automatically discovered table columns
+	*   Tap UI page has broken links
+	*   Blank metadata entries cause error on xml output
+
 ## v1.3 - 2016-07-28
 
 * New Features
