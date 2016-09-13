@@ -22,7 +22,7 @@ package au.csiro.casda.logging;
 public enum DataLocation
 {
     /**
-     * The Pawsey archive (NGAS + HSM)
+     * The archive (NGAS + HSM)
      */
     ARCHIVE,
 
@@ -32,7 +32,7 @@ public enum DataLocation
     NGAS,
 
     /**
-     * FS3/Scratch/Cache on pawsey where files are ready for download through web or for bbcp push.
+     * FS3/Scratch/Cache where files are ready for download through web.
      */
     DATA_ACCESS,
 

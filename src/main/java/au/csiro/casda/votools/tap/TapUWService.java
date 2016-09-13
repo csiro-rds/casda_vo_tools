@@ -20,6 +20,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,8 @@ import au.csiro.casda.votools.uws.UWServiceInterface;
 @Scope("singleton")
 public class TapUWService extends Configurable implements UWServiceInterface
 {
+
+    private static Logger logger = LoggerFactory.getLogger(TapUWService.class);
 
     private UWSService uws;
 
@@ -152,7 +156,18 @@ public class TapUWService extends Configurable implements UWServiceInterface
 
         if (uws == null) // create new service, changing configuration parameters requires restart
         {
-            uws = new UWSService(new TapUWSFactory(tapService), new LocalUWSFileManager(resultsDir, false, false),
+            LocalUWSFileManager fileManager;
+            try
+            {
+                fileManager = new LocalUWSFileManager(resultsDir, false, false);
+            }
+            catch (UWSException e)
+            {
+                logger.error("Failure trying to find or create " + resultsDir.getAbsolutePath());
+                throw e;
+            }
+            
+            uws = new UWSService(new TapUWSFactory(tapService), fileManager,
                     new TapUWSUrl(asyncBaseUrl));
             uws.setDescription(asyncDescription);
             JobList jobList = new JobList(asyncJobListName, new QueuedExecutionManager(uws.getLogger(), maxRunningJobs));

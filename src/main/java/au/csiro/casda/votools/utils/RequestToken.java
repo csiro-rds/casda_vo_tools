@@ -27,17 +27,26 @@ import java.util.regex.Pattern;
  */
 public class RequestToken
 {
-    private static final Pattern TOKEN_FORMAT = Pattern.compile("^(.+)\\|(.+)\\|(.+)\\|(\\d+)$");
+    /** Constant for a cutout request*/
+    public static final String CUTOUT = "CUTOUT";
+    /** Constant for a web download request*/
+    public static final String WEB_DOWNLOAD = "WEB";
+    /** Constant for a download to internal account request*/
+    public static final String INTERNAL_DOWNLOAD = "INTERNAL";
+    
+    private static final Pattern TOKEN_FORMAT = Pattern.compile("^(.+)\\|(.+)\\|(.+)\\|(.+)\\|(\\d+)$");
     private static final int TOKEN_ID_GROUP_INDEX = 1;
     private static final int TOKEN_USERID_GROUP_INDEX = 2;
     private static final int TOKEN_LOGIN_SYSTEM_INDEX = 3;
-    private static final int TOKEN_DATE_GROUP_INDEX = 4;
-
+    private static final int TOKEN_DOWNLOAD_MODE_INDEX = 4;
+    private static final int TOKEN_DATE_GROUP_INDEX = 5;
+    
     private String id;
     private String userId;
     private String loginSystem;
     private Date accessDate;
-    private String key;
+    private String downloadMode;
+    private String key;   
 
     /**
      * Constructor used to create a new RequestToken for based on the given id, userId, and accessDate
@@ -89,6 +98,7 @@ public class RequestToken
         this.id = matcher.group(TOKEN_ID_GROUP_INDEX);
         this.userId = matcher.group(TOKEN_USERID_GROUP_INDEX);
         this.loginSystem = matcher.group(TOKEN_LOGIN_SYSTEM_INDEX);
+        this.downloadMode = matcher.group(TOKEN_DOWNLOAD_MODE_INDEX);
         try
         {
             this.accessDate = new Date(Long.parseLong(matcher.group(TOKEN_DATE_GROUP_INDEX)));
@@ -119,7 +129,7 @@ public class RequestToken
     @Override
     public String toString()
     {
-        return id + "|" + userId + "|" + loginSystem + "|" + String.valueOf(accessDate.getTime());
+        return id + "|" + userId + "|" + loginSystem + "|" + downloadMode + "|" + String.valueOf(accessDate.getTime());
     }
 
     public String getId()
@@ -146,6 +156,14 @@ public class RequestToken
     {
         this.loginSystem = loginSystem;
     }
-    
-    
+
+    public String getDownloadMode()
+    {
+        return downloadMode;
+    }
+
+    public void setDownloadMode(String downloadMode)
+    {
+        this.downloadMode = downloadMode;
+    }
 }

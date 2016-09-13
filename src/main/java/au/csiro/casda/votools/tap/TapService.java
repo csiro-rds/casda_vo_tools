@@ -520,21 +520,24 @@ public class TapService extends Configurable
             ZonedDateTime started, String singleTableName) throws InterruptedException, IOException
     {
         int recsLimit = Math.min(maxrecs, maxRecords);
-        // create map of metadata properties
 
+        // create map of metadata properties
         Map<String, String[]> metaDataMap = new LinkedHashMap<String, String[]>();
-        metaDataMap.put("instrument", config.get(Configuration.METADATA_PREFIX + "instrument").split("\\|"));
-        metaDataMap.put("server", config.get(Configuration.METADATA_PREFIX + "server").split("\\|"));
-        metaDataMap.put("serviceShortName",
-                config.get(Configuration.METADATA_PREFIX + "serviceShortName").split("\\|"));
-        metaDataMap.put("serviceTitle", config.get(Configuration.METADATA_PREFIX + "serviceTitle").split("\\|"));
-        metaDataMap.put("identifier", config.get(Configuration.METADATA_PREFIX + "identifier").split("\\|"));
-        metaDataMap.put("servicePublisher",
-                config.get(Configuration.METADATA_PREFIX + "servicePublisher").split("\\|"));
-        metaDataMap.put("furtherInformation",
-                config.get(Configuration.METADATA_PREFIX + "furtherInformation").split("\\|"));
-        metaDataMap.put("contactPerson", config.get(Configuration.METADATA_PREFIX + "contactPerson").split("\\|"));
-        metaDataMap.put("copyright", config.get(Configuration.METADATA_PREFIX + "copyright").split("\\|"));
+        String[] metaDataKeys = new String[] { "instrument", "server", "serviceShortName", "serviceTitle", "identifier",
+                "servicePublisher", "furtherInformation", "contactPerson", "copyright" };
+        for (String key : metaDataKeys)
+        {
+            String entry =  config.get(Configuration.METADATA_PREFIX + key);
+            if (StringUtils.isNotBlank(entry))
+            {
+                String[] values = entry.split("\\|");
+                if (values.length > 1)
+                {
+                    metaDataMap.put(key, values);
+                }
+            }
+        }
+
         if (params.get(VoKeys.STR_KEY_SIAP_QUERY) != null)
         {
             metaDataMap.put("SIAP query",

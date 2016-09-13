@@ -33,13 +33,22 @@ public abstract class ConfigValueKeys
     public static final String DATALINK_CUTOUT_SERVICE_NAME = "datalink.cutout.service.name";
 
     /** Constant for the sync service name */
-    public static final String DATALINK_SYNC_SERVICE_NAME = "datalink.sync.service.name";
+    public static final String DATALINK_SYNC_SERVICE_NAME_WEB = "datalink.sync.service.name";
+    
+    /** Constant for the sync service name */
+    public static final String DATALINK_SYNC_SERVICE_NAME_INTERNAL = "datalink.sync.service.name.internal";
     
     /** Constant for the data link sync URL */
     public static final String DATALINK_SYNC_SERVICE_URL = "datalink.sync.service.url";
     
+    /** Constant for the data link sync internal URL */
+    public static final String DATALINK_SYNC_SERVICE_URL_INTERNAL = "datalink.sync.service.url.internal";
+    
     /** Constant for the web service name */
-    public static final String DATALINK_ASYNC_SERVICE_NAME = "datalink.async.service.name";
+    public static final String DATALINK_ASYNC_SERVICE_NAME_WEB = "datalink.async.service.name";
+    
+    /** Constant for the web service name */
+    public static final String DATALINK_ASYNC_SERVICE_NAME_INTERNAL = "datalink.async.service.name.internal";
     
     /** Constant for the data link async URL */
     public static final String DATALINK_ASYNC_SERVICE_URL = "datalink.async.service.url";
@@ -64,6 +73,9 @@ public abstract class ConfigValueKeys
 
     /** Constant for the cut-out user interface service name */
     public static final String DATALINK_CUTOUT_UI_SERVICE_NAME = "datalink.cutout.ui.service.name";
+    
+    /** Constant for the web download size limit */
+    public static final String DATALINK_DOWNLOAD_LIMIT_HTTP = "datalink.download.limit.http";
     
     /** Constant for the build number */
     public static final String BUILD_NUMBER = "build.number";

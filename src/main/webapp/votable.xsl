@@ -73,14 +73,23 @@
     </xsl:template>
 
     <xsl:template match="vot:FIELD">
-    	<th>
-	    	<xsl:value-of select="@name"/>
-	    	<xsl:choose>
-				<xsl:when test="@name='authenticated_id_token'">
-					<br/>(ID: <xsl:value-of select="@ID" />)
-				</xsl:when>				
-			</xsl:choose>
-		</th>
+    	<xsl:choose>
+    		<xsl:when test="@name='description'">
+    			<th class="tableHeaderDesc">
+			    	<xsl:value-of select="@name"/>
+				</th>
+    		</xsl:when>
+    		<xsl:otherwise>
+		    	<th>
+			    	<xsl:value-of select="@name"/>
+			    	<xsl:choose>
+						<xsl:when test="@name='authenticated_id_token'">
+							<br/>(ID: <xsl:value-of select="@ID" />)
+						</xsl:when>				
+					</xsl:choose>
+				</th>
+    		</xsl:otherwise>
+		</xsl:choose>
     </xsl:template>
 
     <xsl:template match="vot:VOTABLE[vot:RESOURCE/vot:INFO/@name='Table Name' and vot:RESOURCE/vot:INFO/@value='ivoa.obscore']">
