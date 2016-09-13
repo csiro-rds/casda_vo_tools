@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><?xml-stylesheet href='http://localhost:8040/casda_vo_proxy/vo/votable.xsl' type='text/xsl' ?>
+
+<VOT:VOTABLE xmlns:VOT="http://www.ivoa.net/xml/VOTable/v1.3">
+    <VOT:RESOURCE name="CASDA Datalink Result" type="results">
+        <VOT:TABLE>
+            <VOT:FIELD datatype="char" name="ID" ucd="meta.id;meta.main" arraysize="*"/>
+            <VOT:FIELD datatype="char" name="access_url" ucd="meta.ref.url" arraysize="*"/>
+            <VOT:FIELD datatype="char" name="service_def" ucd="meta.ref" arraysize="*"/>
+            <VOT:FIELD datatype="char" name="error_message" ucd="meta.code.error" arraysize="*"/>
+            <VOT:FIELD datatype="char" name="description" ucd="meta.note" arraysize="*"/>
+            <VOT:FIELD datatype="char" name="semantics" ucd="meta.code" arraysize="*"/>
+            <VOT:FIELD datatype="char" name="content_type" ucd="meta.code.mime" arraysize="*"/>
+            <VOT:FIELD unit="byte" datatype="long" name="content_length" ucd="phys.size;meta.file"/>
+            <VOT:FIELD ID="authenticatedIdToken" datatype="char" name="authenticated_id_token" ucd="meta.id" arraysize="*"/>
+            <VOT:DATA>
+                <VOT:TABLEDATA>
+                    <VOT:TR>
+                        <VOT:TD>cube-123456</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD>DefaultFault: This option is unavailable due to the file size exceeding 200 GB in size</VOT:TD>
+                        <VOT:TD>Download data product via web</VOT:TD>
+                        <VOT:TD>#error</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                    </VOT:TR>
+                    <VOT:TR>
+                        <VOT:TD>cube-123456</VOT:TD>
+                        <VOT:TD>http://localhost:8080/casda_data_access/data/sync/pawsey?id=-SDgmfVcIqFb486Xg_h4CVerwQFQLiZuG43RZWVzaFfmg77Yoc36IDpv94w0JOo3</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD>Download data at Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</VOT:TD>
+                        <VOT:TD>#this</VOT:TD>
+                        <VOT:TD>application/fits</VOT:TD>
+                        <VOT:TD>214750412800</VOT:TD>
+                        <VOT:TD/>
+                    </VOT:TR>
+                    <VOT:TR>
+                        <VOT:TD>cube-123456</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD>DefaultFault: This option is unavailable due to the file size exceeding 200 GB in size</VOT:TD>
+                        <VOT:TD>Scripted file access via Web</VOT:TD>
+                        <VOT:TD>#error</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                    </VOT:TR>
+                    <VOT:TR>
+                        <VOT:TD>cube-123456</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>async_service</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>Scripted file access via Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</VOT:TD>
+                        <VOT:TD>#this</VOT:TD>
+                        <VOT:TD>application/fits</VOT:TD>
+                        <VOT:TD>214750412800</VOT:TD>
+                        <VOT:TD>-SDgmfVcIqFb486Xg_h4CVerwQFQLiZuG43RZWVzaFfmg77Yoc36IDpv94w0JOo3</VOT:TD>
+                    </VOT:TR>
+                    <VOT:TR>
+                        <VOT:TD>cube-123456</VOT:TD>
+                        <VOT:TD>http://localhost:8080/casda_data_access/cutoutui?id=-SDgmfVcIqFb486Xg_h4CZLlRHc9zY4GWIJVnvr8p_JHr2hTMYzDVpOvORCT4fAp</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD>Simple cut-out service</VOT:TD>
+                        <VOT:TD>#cutout</VOT:TD>
+                        <VOT:TD>application/fits</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                    </VOT:TR>
+                    <VOT:TR>
+                        <VOT:TD>cube-123456</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>cutout_service</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>Scripted cut-out service</VOT:TD>
+                        <VOT:TD>#cutout</VOT:TD>
+                        <VOT:TD>application/fits</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>-SDgmfVcIqFb486Xg_h4CZLlRHc9zY4GWIJVnvr8p_JHr2hTMYzDVpOvORCT4fAp</VOT:TD>
+                    </VOT:TR>
+                </VOT:TABLEDATA>
+            </VOT:DATA>
+        </VOT:TABLE>
+    </VOT:RESOURCE>
+    <VOT:RESOURCE ID="async_service" utype="adhoc:service" type="meta">
+        <VOT:PARAM value="ivo://ivoa.net/std/SODA#async-1.0" datatype="char" name="standardID" arraysize="*"/>
+        <VOT:PARAM value="http://localhost:8080/casda_data_access/data/async" datatype="char" name="accessURL" arraysize="*"/>
+        <VOT:GROUP name="inputParams">
+            <VOT:PARAM value="" datatype="char" ref="authenticatedIdToken" name="ID" arraysize="*"/>
+        </VOT:GROUP>
+    </VOT:RESOURCE>
+    <VOT:RESOURCE ID="cutout_service" utype="adhoc:service" type="meta">
+        <VOT:PARAM value="ivo://ivoa.net/std/SODA#async-1.0" datatype="char" name="standardID" arraysize="*"/>
+        <VOT:PARAM value="http://localhost:8080/casda_data_access/data/async" datatype="char" name="accessURL" arraysize="*"/>
+        <VOT:GROUP name="inputParams">
+            <VOT:PARAM value="" datatype="char" ref="authenticatedIdToken" name="ID" arraysize="*"/>
+            <VOT:PARAM datatype="char" xtype="circle" name="POS" arraysize="*"/>
+            <VOT:PARAM datatype="char" xtype="range" name="POS" arraysize="*"/>
+            <VOT:PARAM datatype="char" xtype="polygon" name="POS" arraysize="*"/>
+            <VOT:PARAM unit="m" datatype="double" xtype="interval" name="BAND" arraysize="*"/>
+            <VOT:PARAM datatype="char" name="POL" arraysize="*"/>
+            <VOT:PARAM datatype="char" name="COORD" arraysize="*"/>
+        </VOT:GROUP>
+    </VOT:RESOURCE>
+</VOT:VOTABLE>
