@@ -213,13 +213,22 @@ public class ConfigurationRegistry
     private String datalinkCutoutUiServiceName;
     
     @Value("${datalink.sync.service.name}")
-    private String datalinkSyncServiceName;
+    private String datalinkSyncServiceNameWeb;
+    
+    @Value("${datalink.sync.service.name.internal:}")
+    private String datalinkSyncServiceNameInternal;
     
     @Value("${datalink.sync.service.url}")
     private String datalinkSyncServiceUrl;
     
+    @Value("${datalink.sync.service.url.internal}")
+    private String datalinkSyncServiceUrlInternal;
+    
     @Value("${datalink.async.service.name}")
     private String datalinkAsyncServiceName;
+    
+    @Value("${datalink.async.service.name.internal:}")
+    private String datalinkAsyncServiceNameInternal;
     
     @Value("${datalink.async.service.url}")
     private String datalinkAsyncServiceUrl;
@@ -232,6 +241,9 @@ public class ConfigurationRegistry
     
     @Value("${datalink.links.url}")
     private String datalinkLinksUrl;
+    
+    @Value("${datalink.download.limit.http:}")
+    private String datalinkDownloadLimitHttp;
     
     @Value("${build.environment}")
     private String environment;
@@ -961,16 +973,26 @@ public class ConfigurationRegistry
         this.datalinkCutoutUiServiceName = datalinkCutoutUiServiceName;
     }
 
-    public String getDatalinkSyncServiceName()
+    public String getDatalinkSyncServiceNameWeb()
     {
-        return datalinkSyncServiceName;
+        return datalinkSyncServiceNameWeb;
     }
 
-    public void setDatalinkSyncServiceName(String datalinkSyncServiceName)
+    public void setDatalinkSyncServiceNameWeb(String datalinkSyncServiceNameWeb)
     {
-        this.datalinkSyncServiceName = datalinkSyncServiceName;
+        this.datalinkSyncServiceNameWeb = datalinkSyncServiceNameWeb;
     }
-    
+
+    public String getDatalinkSyncServiceNameInternal()
+    {
+        return datalinkSyncServiceNameInternal;
+    }
+
+    public void setDatalinkSyncServiceNameInternal(String datalinkSyncServiceNameInternal)
+    {
+        this.datalinkSyncServiceNameInternal = datalinkSyncServiceNameInternal;
+    }
+
     public String getDatalinkSyncServiceUrl()
     {
         return datalinkSyncServiceUrl;
@@ -979,6 +1001,16 @@ public class ConfigurationRegistry
     public void setDatalinkSyncServiceUrl(String datalinkSyncServiceUrl)
     {
         this.datalinkSyncServiceUrl = datalinkSyncServiceUrl;
+    }
+    
+    public void setDatalinkSyncServiceUrlInternal(String datalinkSyncServiceUrlInternal)
+    {
+        this.datalinkSyncServiceUrlInternal = datalinkSyncServiceUrlInternal;
+    }
+    
+    public String getDatalinkSyncServiceUrlInternal()
+    {
+        return datalinkSyncServiceUrlInternal;
     }
     
     public String getDatalinkAsyncServiceName()
@@ -990,7 +1022,17 @@ public class ConfigurationRegistry
     {
         this.datalinkAsyncServiceName = datalinkAsyncServiceName;
     }
-    
+
+    public String getDatalinkAsyncServiceNameInternal()
+    {
+        return datalinkAsyncServiceNameInternal;
+    }
+
+    public void setDatalinkAsyncServiceNameInternal(String datalinkAsyncServiceNameInternal)
+    {
+        this.datalinkAsyncServiceNameInternal = datalinkAsyncServiceNameInternal;
+    }
+
     public String getDatalinkAsyncServiceUrl()
     {
         return datalinkAsyncServiceUrl;
@@ -1049,6 +1091,16 @@ public class ConfigurationRegistry
     public void setEnvironment(String environment)
     {
         this.environment = environment;
+    }
+
+    public String getDatalinkDownloadLimitHttp()
+    {
+        return datalinkDownloadLimitHttp;
+    }
+
+    public void setDatalinkDownloadLimitHttp(String datalinkDownloadLimitHttp)
+    {
+        this.datalinkDownloadLimitHttp = datalinkDownloadLimitHttp;
     }
 
     public String getCss()

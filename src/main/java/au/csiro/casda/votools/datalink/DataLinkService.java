@@ -63,6 +63,8 @@ public class DataLinkService extends Configurable
      * Name to use in generated VOTable results
      */
     private static final String CASDA_DATALINK_RESULT_NAME = "CASDA Data Link";
+    
+    private static final int KB_IN_GB= 1024 * 1024;
 
     private static Logger logger = LoggerFactory.getLogger(DataLinkService.class);
 
@@ -74,22 +76,21 @@ public class DataLinkService extends Configurable
 
     private boolean ready;
     private String linksUrl;
-    private String syncServiceName;
+    private String syncServiceNameWeb;
+    private String syncServiceNameInternal;
     private String syncServiceUrl;
-    private String asyncServiceName;
+    private String syncServiceUrlInternal;
+    private String asyncServiceNameWeb;
+    private String asyncServiceNameInternal;
     private String asyncServiceUrl;
-    private String webServiceUrlTemplate;
     private String cutoutServiceName;
     private String cutoutServiceUrl;
-
     private String baseUrl;
     private String dataLinkBaseUrl;
-
     private String dataLinkAccessEncriptionSecretKey;
-
     private String cutoutUiServiceUrl;
-
     private String cutoutUiServiceName;
+    private long datalinkDownloadLimitHttp;
 
     /**
      * Constructor
@@ -108,19 +109,38 @@ public class DataLinkService extends Configurable
         // Register for callbacks when configuration changes.
         configRegistry.register(this);
         linksUrl = config.get(ConfigValueKeys.DATALINK_LINKS_URL);
-        syncServiceName = config.get(ConfigValueKeys.DATALINK_SYNC_SERVICE_NAME);
+        syncServiceNameWeb = config.get(ConfigValueKeys.DATALINK_SYNC_SERVICE_NAME_WEB);
+        syncServiceNameInternal = config.get(ConfigValueKeys.DATALINK_SYNC_SERVICE_NAME_INTERNAL);
         syncServiceUrl = config.get(ConfigValueKeys.DATALINK_SYNC_SERVICE_URL);
-        asyncServiceName = config.get(ConfigValueKeys.DATALINK_ASYNC_SERVICE_NAME);
+        syncServiceUrlInternal = config.get(ConfigValueKeys.DATALINK_SYNC_SERVICE_URL_INTERNAL);
+        asyncServiceNameWeb = config.get(ConfigValueKeys.DATALINK_ASYNC_SERVICE_NAME_WEB);
+        asyncServiceNameInternal = config.get(ConfigValueKeys.DATALINK_ASYNC_SERVICE_NAME_INTERNAL);
         asyncServiceUrl = config.get(ConfigValueKeys.DATALINK_ASYNC_SERVICE_URL);
-        webServiceUrlTemplate = config.get(ConfigValueKeys.DATALINK_WEB_SERVICE_URL);
         dataLinkBaseUrl = config.get(ConfigValueKeys.DATALINK_BASE_URL);
         dataLinkAccessEncriptionSecretKey = config.get(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY);
         cutoutServiceUrl = config.get(ConfigValueKeys.DATALINK_CUTOUT_URL);
         cutoutServiceName = config.get(ConfigValueKeys.DATALINK_CUTOUT_SERVICE_NAME);
         cutoutUiServiceUrl = config.get(ConfigValueKeys.DATALINK_CUTOUT_UI_URL);
         cutoutUiServiceName = config.get(ConfigValueKeys.DATALINK_CUTOUT_UI_SERVICE_NAME);
+        
+        datalinkDownloadLimitHttp = convertLimit(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP);
 
         this.voTableRepositoryService = voTableRepositoryService;
+    }
+
+    private long convertLimit(String limit)
+    {
+        try
+        {
+            String value =  config.get(limit);
+            //converts limit from GB to KB
+            return Long.parseLong(value) * KB_IN_GB;
+        }
+        catch(NumberFormatException e)
+        {
+            logger.info("Value for {} could not be retrieved, property may not exist or is not a valid number", limit);
+            return 0;
+        }
     }
 
     /**
@@ -271,7 +291,7 @@ public class DataLinkService extends Configurable
     {
         if (StringUtils.isEmpty(id) || !(id.matches("^cube-[0-9]+$") || id.matches("^visibility-[0-9]+$")))
         {
-            builder.withErrorResult(StringEscapeUtils.escapeXml10(id),
+            builder.withErrorResult(id,
                     "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(id));
             return;
         }
@@ -357,22 +377,72 @@ public class DataLinkService extends Configurable
 
                     RequestToken requestToken =
                             new RequestToken(id, userId, loginSystem, accessTime, dataLinkAccessEncriptionSecretKey);
+                    
                     if (StringUtils.isNotBlank(syncServiceUrl))
                     {
-                        builder.withAccessUrlResult(id, syncServiceUrl + requestToken.toEncryptedString(),
-                                syncServiceName, contentType, (long) contentLengthKb * Utils.ONE_KB_IN_BYTES);
+                        //web download
+                        requestToken.setDownloadMode(RequestToken.WEB_DOWNLOAD);
+                        //if less than limit or there is not limit
+                        if(contentLengthKb <= datalinkDownloadLimitHttp || datalinkDownloadLimitHttp == 0)
+                        {
+                            builder.withAccessUrlResult(id, syncServiceUrl + requestToken.toEncryptedString(),
+                                    syncServiceNameWeb, contentType, (long) contentLengthKb * Utils.ONE_KB_IN_BYTES); 
+                        }
+                        else
+                        {
+                            String message = "DefaultFault: This option is unavailable due to the file size exceeding " 
+                                    + datalinkDownloadLimitHttp / KB_IN_GB + " GB in size";
+                            builder.withErrorResult(id, syncServiceNameWeb, message);
+                        }
+                        
+                        //to internal account, this can be disabled by removing property.
+                        if (StringUtils.isNotBlank(syncServiceUrlInternal))
+                        {
+                            requestToken.setDownloadMode(RequestToken.INTERNAL_DOWNLOAD);
+                            builder.withAccessUrlResult(id, syncServiceUrlInternal + requestToken.toEncryptedString(),
+                                  syncServiceNameInternal, contentType, (long) contentLengthKb * Utils.ONE_KB_IN_BYTES);
+                        }
+
                     }
+
                     if (StringUtils.isNotBlank(asyncServiceUrl))
                     {
-                        builder.withServiceDefResult(id, "async_service", asyncServiceName, contentType,
-                                (long) contentLengthKb * Utils.ONE_KB_IN_BYTES, requestToken.toEncryptedString());
+                        //web download
+                        requestToken.setDownloadMode(RequestToken.WEB_DOWNLOAD);
+                        //if lesss than limit or there is not limit
+                        if(contentLengthKb <= datalinkDownloadLimitHttp || datalinkDownloadLimitHttp == 0)
+                        {
+                            builder.withServiceDefResult(id, "async_service", asyncServiceNameWeb, contentType,
+                                    (long) contentLengthKb * Utils.ONE_KB_IN_BYTES, requestToken.toEncryptedString());
+                        }
+                        else
+                        {
+                            String message = "DefaultFault: This option is unavailable due to the file size exceeding " 
+                                    + datalinkDownloadLimitHttp / KB_IN_GB + " GB in size";
+                            builder.withErrorResult(id, asyncServiceNameWeb, message);
+                            
+                        }
+
+                        //to internal account, this can be disabled by removing property.
+                        if (StringUtils.isNotBlank(asyncServiceNameInternal))
+                        {
+                            requestToken.setDownloadMode(RequestToken.INTERNAL_DOWNLOAD);
+                            builder.withServiceDefResult(id, "async_service", asyncServiceNameInternal, contentType,
+                                    (long) contentLengthKb * Utils.ONE_KB_IN_BYTES, requestToken.toEncryptedString());
+                        }
+                        
                         builder.withServiceDefinition("async_service", "ivo://ivoa.net/std/SODA#async-1.0",
                                 asyncServiceUrl);
                     }
-
+                    
+                    /*
+                     *  Cutout services have no maximum limit as the size of the cutout is not known at this point.
+                     */
+                    
                     // cutouts UI link
                     if (StringUtils.isNotBlank(cutoutUiServiceUrl))
                     {
+                        requestToken.setDownloadMode(RequestToken.CUTOUT);
                         builder.withAccessUrlResult(id, cutoutUiServiceUrl + requestToken.toEncryptedString(),
                                 cutoutUiServiceName, contentType, null, "#cutout");
                     }
@@ -380,6 +450,7 @@ public class DataLinkService extends Configurable
                     // cutouts link
                     if (StringUtils.isNotBlank(cutoutServiceUrl))
                     {
+                        requestToken.setDownloadMode(RequestToken.CUTOUT);
                         builder.withServiceDefResult(id, "cutout_service", cutoutServiceName, "#cutout", contentType,
                                 null, requestToken.toEncryptedString());
                         builder.withServiceDefinition("cutout_service", "ivo://ivoa.net/std/SODA#async-1.0",
@@ -389,7 +460,7 @@ public class DataLinkService extends Configurable
                 else if(!VoKeys.ANONYMOUS_USER.equals(userId))
                 {
                     builder.withErrorResult(userId,
-                            "Sorry, but you do not have permission to access this data product");
+                            "DefaultFault: Sorry, but you do not have permission to access this data product");
                 }
             }
 
@@ -402,7 +473,7 @@ public class DataLinkService extends Configurable
         }
         else
         {
-            builder.withErrorResult(StringEscapeUtils.escapeXml10(id),
+            builder.withErrorResult(id,
                     "NotFoundFault: " + StringEscapeUtils.escapeXml10(id) + " cannot be found");
         }
     }

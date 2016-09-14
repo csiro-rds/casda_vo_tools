@@ -2,6 +2,7 @@ package au.csiro.casda.votools.result;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 
@@ -527,6 +528,34 @@ public class VoTableResultsExtractorTest
 
         extractor.outputHeader(mockMetaData);
         assertThat(writer.toString(), matchesPattern(BASE_HEADER_PART1 + FIELD_DEFS + BASE_HEADER_PART2 + "$"));
+    }
+    
+    
+    @Test
+    public void testTranslateTapColumnTypeToVoTableType()
+    {
+        assertEquals("char", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("CHARACTER VARYING (13)"));
+        assertEquals("char", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("character varying(255)"));
+        assertEquals("char", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("spoly"));
+        assertEquals("char", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("CHARACTER(100)"));
+        assertEquals("double", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("DOUBLE PRECISION"));
+        assertEquals("double", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("double precision"));
+    }
+    
+    @Test
+    public void testBuildVoTableFieldHeaderLength()
+    {
+        TapColumn tapColumn = buildTapColumn("CharTest", "character(100)", "Jy", "src.flux", "peak", 0, "Description");
+        String header = VoTableResultsExtractor.buildVoTableFieldHeader(tapColumn);
+        assertEquals("<FIELD name=\"CharTest\" ID=\"CharTest\" datatype=\"char\" "
+                + "arraysize=\"*\" unit=\"Jy\" ucd=\"src.flux\" utype=\"peak\" >\r\n"
+                + " <DESCRIPTION>Description</DESCRIPTION>\r\n" + "</FIELD>", header.trim());
+
+        tapColumn.setSize(100);
+        header = VoTableResultsExtractor.buildVoTableFieldHeader(tapColumn);
+        assertEquals("<FIELD name=\"CharTest\" ID=\"CharTest\" datatype=\"char\" "
+                + "arraysize=\"100\" unit=\"Jy\" ucd=\"src.flux\" utype=\"peak\" >\r\n"
+                + " <DESCRIPTION>Description</DESCRIPTION>\r\n" + "</FIELD>", header.trim());
     }
     
     private ResultSetMetaData create4ColMetadata() throws SQLException

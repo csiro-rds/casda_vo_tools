@@ -414,8 +414,16 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
         }
         if ("char".equals(voTableColType))
         {
+            Integer size = tapColumn.getSize();
             fieldDef.append(" arraysize=\"");
-            fieldDef.append(tapColumn.getSize());
+            if (size == null || size <= 0)
+            {
+                fieldDef.append("*");
+            }
+            else
+            {
+                fieldDef.append(size);
+            }
             fieldDef.append("\"");
         }
         if (StringUtils.isNotBlank(tapColumn.getUnit()))
@@ -452,7 +460,12 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
         return fieldDef.toString();
     }
 
-    private static String translateTapColumnTypeToVoTableType(String tapColumnType)
+    /**
+     * Convert a SQL or TAP column type into a VOTable type.
+     * @param tapColumnType The SQL or TAP c0olumn type to be converted.
+     * @return The VOTable type
+     */
+    static String translateTapColumnTypeToVoTableType(String tapColumnType)
     {
         String datatype;
         switch (tapColumnType.toUpperCase())
@@ -470,6 +483,7 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
         case "CLOB":
         case "TIMESTAMP":
         case "TEXT":
+        case "SPOLY":
             datatype = "char";
             break;
 
@@ -491,8 +505,16 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
             datatype = "short";
             break;
 
-        default: // The rest can be switched to lowercase - ie DOUBLE -> double
-            datatype = tapColumnType.toLowerCase();
+        default:
+            if (tapColumnType.toUpperCase().startsWith("CHARACTER"))
+            {
+                datatype = "char";
+            }
+            else
+            {
+                // The rest can be switched to lowercase - ie DOUBLE -> double
+                datatype = tapColumnType.toLowerCase();
+            }
             break;
         }
         return datatype;
@@ -518,8 +540,12 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
 
         for (String key : serviceMetaDataMap.keySet())
         {
-            writer.append("<INFO name=\"" + Utils.convertCamelCase(key) + "\" value=\"" + serviceMetaDataMap.get(key)[0]
-                    + "\">" + serviceMetaDataMap.get(key)[1] + "</INFO>\r\n");
+            String[] info = serviceMetaDataMap.get(key);
+            if (info.length > 1)
+            {
+                writer.append("<INFO name=\"" + Utils.convertCamelCase(key) + "\" value=\"" + info[0] + "\">" + info[1]
+                        + "</INFO>\r\n");
+            }
         }
     }
     

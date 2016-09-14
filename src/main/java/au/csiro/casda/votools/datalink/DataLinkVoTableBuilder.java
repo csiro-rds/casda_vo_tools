@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.apache.commons.lang3.CharEncoding;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sun.xml.internal.bind.marshaller.NamespacePrefixMapper;
@@ -284,7 +285,7 @@ public class DataLinkVoTableBuilder
     public DataLinkVoTableBuilder withAccessUrlResult(String id, String accessUrl, String description, String mimeType,
             Long size)
     {
-        return withAccessUrlResult(id, accessUrl, description, mimeType, size, "#this");
+        return withAccessUrlResult(StringEscapeUtils.escapeXml10(id), accessUrl, description, mimeType, size, "#this");
     }
 
     /**
@@ -312,7 +313,7 @@ public class DataLinkVoTableBuilder
         {
             throw new IllegalStateException("A results table must be made before a result row can be added.");
         }
-        addRow(id, accessUrl, null, null, description, semantics, mimeType, size, null);
+        addRow(StringEscapeUtils.escapeXml10(id), accessUrl, null, null, description, semantics, mimeType, size, null);
         return this;
     }
 
@@ -337,7 +338,8 @@ public class DataLinkVoTableBuilder
     public DataLinkVoTableBuilder withServiceDefResult(String id, String serviceDefXmlId, String description,
             String mimeType, Long size, String authenticatedIdToken)
     {
-        return withServiceDefResult(id, serviceDefXmlId, description, "#this", mimeType, size, authenticatedIdToken);
+        return withServiceDefResult(StringEscapeUtils.escapeXml10(id), serviceDefXmlId, description, "#this", 
+                mimeType, size, authenticatedIdToken);
     }
 
     /**
@@ -367,7 +369,8 @@ public class DataLinkVoTableBuilder
         {
             throw new IllegalStateException("A results table must be made before a result row can be added.");
         }
-        addRow(id, null, serviceDefXmlId, null, description, semantics, mimeType, size, authenticatedIdToken);
+        addRow(StringEscapeUtils.escapeXml10(id), null, serviceDefXmlId, null, description, semantics, mimeType, 
+                size, authenticatedIdToken);
         return this;
     }
 
@@ -387,7 +390,29 @@ public class DataLinkVoTableBuilder
         {
             throw new IllegalStateException("A results table must be made before a result row can be added.");
         }
-        addRow(id, null, null, error, null, "#error", null, null, null);
+        addRow(StringEscapeUtils.escapeXml10(id), null, null, error, null, "#error", null, null, null);
+        return this;
+    }
+    
+    /**
+     * Adds a result row to the results table that represents an error associated with getting access data information
+     * for the given item. Must not be called until withResultsTable() has been called.
+     * 
+     * @param id
+     *            the id of the item
+     * @param description
+     *             a description of the service (optional)
+     * @param error
+     *            a description of the error
+     * @return this builder instance
+     */
+    public DataLinkVoTableBuilder withErrorResult(String id, String description, String error)
+    {
+        if (resultsTable == null)
+        {
+            throw new IllegalStateException("A results table must be made before a result row can be added.");
+        }
+        addRow(StringEscapeUtils.escapeXml10(id), null, null, error, description, "#error", null, null, null);
         return this;
     }
 
@@ -407,7 +432,7 @@ public class DataLinkVoTableBuilder
 
         Tr row = new Tr();
         List<Td> tdList = row.getTD();
-        tdList.add(buildTd(id));
+        tdList.add(buildTd(StringEscapeUtils.escapeXml10(id)));
         tdList.add(buildTd(accessUrl));
         tdList.add(buildTd(serviceDef));
         tdList.add(buildTd(errorMessage));

@@ -10,6 +10,7 @@ form .form-field label {
     font-weight: bold;
 }
         </style>
+        <c:url value="/tap" var="tapBaseUrl" />`
     </head>
     <body>
         <jsp:include page="../includes/header.jsp" />
@@ -21,17 +22,17 @@ form .form-field label {
             <br/>
             <div id="capabilities">
                 <h2>Availability</h2>
-                <a href="tap/availability">VO Tools Availability</a>
+                <a href="${tapBaseUrl}/availability">VO Tools Availability</a>
             </div>
             <br/>
             <div id="capabilities">
                 <h2>Capabilities</h2>
-                <a href="tap/capabilities">VO Tools Capabilities</a>
+                <a href="${tapBaseUrl}/capabilities">VO Tools Capabilities</a>
             </div>
             <br/>
             <div id="synchronous_query">
                 <h2>Synchronous Query</h2>
-                <form action="tap/sync" method="get">
+                <form action="${tapBaseUrl}/sync" method="get">
                     <input type="hidden" name="request" value="doQuery"/>
                     <input type="hidden" name="lang" value="ADQL"/>
                     <div class="form-field">

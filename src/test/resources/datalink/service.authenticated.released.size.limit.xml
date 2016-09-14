@@ -16,13 +16,13 @@
                 <VOT:TABLEDATA>
                     <VOT:TR>
                         <VOT:TD>cube-123456</VOT:TD>
-                        <VOT:TD>http://localhost:8080/casda_data_access/data/sync?id=-SDgmfVcIqFb486Xg_h4CT_9UIpaH2XJpnTlWjMWWCb5Z2oXeX5yelXXKqyJxZ03</VOT:TD>
                         <VOT:TD/>
                         <VOT:TD/>
+                        <VOT:TD>DefaultFault: This option is unavailable due to the file size exceeding 200 GB in size</VOT:TD>
                         <VOT:TD>Download data product via web</VOT:TD>
-                        <VOT:TD>#this</VOT:TD>
-                        <VOT:TD>application/fits</VOT:TD>
-                        <VOT:TD>1024</VOT:TD>
+                        <VOT:TD>#error</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
                         <VOT:TD/>
                     </VOT:TR>
                     <VOT:TR>
@@ -33,19 +33,19 @@
                         <VOT:TD>Download data at Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</VOT:TD>
                         <VOT:TD>#this</VOT:TD>
                         <VOT:TD>application/fits</VOT:TD>
-                        <VOT:TD>1024</VOT:TD>
+                        <VOT:TD>214750412800</VOT:TD>
                         <VOT:TD/>
                     </VOT:TR>
                     <VOT:TR>
                         <VOT:TD>cube-123456</VOT:TD>
                         <VOT:TD/>
-                        <VOT:TD>async_service</VOT:TD>
                         <VOT:TD/>
+                        <VOT:TD>DefaultFault: This option is unavailable due to the file size exceeding 200 GB in size</VOT:TD>
                         <VOT:TD>Scripted file access via Web</VOT:TD>
-                        <VOT:TD>#this</VOT:TD>
-                        <VOT:TD>application/fits</VOT:TD>
-                        <VOT:TD>1024</VOT:TD>
-                        <VOT:TD>-SDgmfVcIqFb486Xg_h4CT_9UIpaH2XJpnTlWjMWWCb5Z2oXeX5yelXXKqyJxZ03</VOT:TD>
+                        <VOT:TD>#error</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD/>
                     </VOT:TR>
                     <VOT:TR>
                         <VOT:TD>cube-123456</VOT:TD>
@@ -55,7 +55,7 @@
                         <VOT:TD>Scripted file access via Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</VOT:TD>
                         <VOT:TD>#this</VOT:TD>
                         <VOT:TD>application/fits</VOT:TD>
-                        <VOT:TD>1024</VOT:TD>
+                        <VOT:TD>214750412800</VOT:TD>
                         <VOT:TD>-SDgmfVcIqFb486Xg_h4CVerwQFQLiZuG43RZWVzaFfmg77Yoc36IDpv94w0JOo3</VOT:TD>
                     </VOT:TR>
                     <VOT:TR>

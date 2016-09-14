@@ -337,6 +337,10 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         {
             return dataType.replace(FieldTypes.TYPE_VARCHAR.keyword, "").replace(")", "");
         }
+        else if (dataType.startsWith(FieldTypes.TYPE_CHAR.keyword))
+        {
+            return dataType.replace(FieldTypes.TYPE_CHAR.keyword, "").replace(")", "");
+        }
         for (FieldTypes ft : FieldTypes.values())
         {
             if (dataType.equals(ft.keyword))
@@ -1534,7 +1538,8 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         TYPE_DOUBLE("double precision", "8"),
         TYPE_BOOLEAN("boolean", "1"),
         TYPE_GEOMETRY("geometry", null),
-        TYPE_VARCHAR("character varying(",null);
+        TYPE_VARCHAR("character varying(",null),
+        TYPE_CHAR("character(",null);
         
         
         private String keyword;

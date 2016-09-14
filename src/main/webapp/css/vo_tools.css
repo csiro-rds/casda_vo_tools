@@ -58,6 +58,11 @@ fieldset {
 	border: solid 1px black;
 }
 
+.tableHeaderDesc {
+	padding-left:90px;
+	padding-right:90px;
+}
+
 .jobsTable {
 	border: solid 1px black;
 }

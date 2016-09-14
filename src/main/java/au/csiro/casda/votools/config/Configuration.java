@@ -243,9 +243,12 @@ public class Configuration extends Options
         putDefault("auth.trusted.userId", registry.getAuthTrustedUserId());
         putDefault(ConfigValueKeys.DATALINK_BASE_URL, registry.getDatalinkBaseUrl());
         putDefault(ConfigValueKeys.DATALINK_LINKS_URL, registry.getDatalinkLinksUrl());
-        putDefault(ConfigValueKeys.DATALINK_SYNC_SERVICE_NAME, registry.getDatalinkSyncServiceName());
+        putDefault(ConfigValueKeys.DATALINK_SYNC_SERVICE_NAME_WEB, registry.getDatalinkSyncServiceNameWeb());
+        putDefault(ConfigValueKeys.DATALINK_SYNC_SERVICE_NAME_INTERNAL, registry.getDatalinkSyncServiceNameInternal());
         putDefault(ConfigValueKeys.DATALINK_SYNC_SERVICE_URL, registry.getDatalinkSyncServiceUrl());
-        putDefault(ConfigValueKeys.DATALINK_ASYNC_SERVICE_NAME, registry.getDatalinkAsyncServiceName());
+        putDefault(ConfigValueKeys.DATALINK_SYNC_SERVICE_URL_INTERNAL, registry.getDatalinkSyncServiceUrlInternal());
+        putDefault(ConfigValueKeys.DATALINK_ASYNC_SERVICE_NAME_WEB, registry.getDatalinkAsyncServiceName());
+        putDefault(ConfigValueKeys.DATALINK_ASYNC_SERVICE_NAME_INTERNAL, registry.getDatalinkAsyncServiceNameInternal());
         putDefault(ConfigValueKeys.DATALINK_ASYNC_SERVICE_URL, registry.getDatalinkAsyncServiceUrl());
         putDefault(ConfigValueKeys.DATALINK_WEB_SERVICE_NAME, registry.getDatalinkWebServiceName());
         putDefault(ConfigValueKeys.DATALINK_WEB_SERVICE_URL, registry.getDatalinkWebUrl());
@@ -253,7 +256,8 @@ public class Configuration extends Options
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_SERVICE_NAME, registry.getDatalinkCutoutServiceName());
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_UI_URL, registry.getDatalinkCutoutUiUrl());
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_UI_SERVICE_NAME, registry.getDatalinkCutoutUiServiceName());
-        putDefault(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY, registry.getSiapSharedSecretKey());
+        putDefault(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY, registry.getSiapSharedSecretKey());      
+        putDefault(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP, registry.getDatalinkDownloadLimitHttp());     
         putDefault(ConfigValueKeys.ENVIRONMENT, registry.getEnvironment());
         putDefault(ConfigValueKeys.CSS, registry.getCss());
         putDefault(ConfigValueKeys.LOGO_URL, registry.getLogoUrl());

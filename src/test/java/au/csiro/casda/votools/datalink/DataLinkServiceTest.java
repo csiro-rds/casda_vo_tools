@@ -81,7 +81,15 @@ public class DataLinkServiceTest
 
     // keep the date same through out the testing 12 Nov 2015 10:16
     private static final Date ACCESS_DATE = new Date(1447283779875l);
+    
+    private static final String SYNC_DESCRIPTION = "Download data at Pawsey Centre. Note: Only users from within "
+                                                + "PSC network can access the data through this link. Only use if "
+                                                + "you currently have access to Pawsey facilities.";
 
+    private static final String ASYNC_DESCRIPTION = "Scripted file access via Pawsey Centre. Note: Only users from "
+                                                + "within PSC network can access the data through this link. Only "
+                                                + "use if you currently have access to Pawsey facilities.";
+    
     /**
      * Set up the ui controller before each test.
      * 
@@ -136,6 +144,23 @@ public class DataLinkServiceTest
                 true, ACCESS_DATE);
 
         checkXmlAgainstTestCaseFile("service.authenticated.released", writer.getBuffer().toString());
+    }
+    
+    @Test
+    public void processQueryWithFileSizeGreaterThanLimitTest() throws Exception
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+                .thenReturn(Arrays.asList(123l, 456l, 789l));
+        Map<String, Object> result = new HashMap<>();
+        result.put("filesize", 209717200L);
+        result.put("released_date", "13-01-2016:16:29:39:00");
+        when(jdbcTemplate.queryForMap(any(), eq(123456L))).thenReturn(result);
+
+        StringWriter writer = new StringWriter();
+        dataLinkService.processQuery(writer, new String[] { "cube-123456" }, "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST,
+                true, ACCESS_DATE);
+
+        checkXmlAgainstTestCaseFile("service.authenticated.released.size.limit", writer.getBuffer().toString());
     }
 
     @Test
