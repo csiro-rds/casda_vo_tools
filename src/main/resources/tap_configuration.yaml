@@ -171,6 +171,16 @@ tables:
          tap.table.name: columns
    'schema'.tap_schemas: 
       columns: 
+         schema_order: !Column
+            defaultvalue: 0
+            options: !Map
+               description: The order in which the schema should appear in the tables end point.
+               size: 4
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 4
+            type: integer
          utype: !Column
             options: !Map
                description: The UTYPE if schema corresponds to a data model.

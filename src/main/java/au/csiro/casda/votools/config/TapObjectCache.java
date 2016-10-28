@@ -254,7 +254,8 @@ public class TapObjectCache
             String name = rs.getString(TapSchema.NAME);
             TapSchema schema = new TapSchema(name);
             schema.setDescription(rs.getString(TapSchema.DESCRIPTION));
-            schema.setDescription(rs.getString(TapSchema.UTYPE));
+            schema.setUtype(rs.getString(TapSchema.UTYPE));
+            schema.setSchemaOrder(rs.getInt(TapSchema.SCHEMA_ORDER));
             try
             {
                 schemas.put(name, schema);
@@ -436,8 +437,8 @@ public class TapObjectCache
         }
     }
 
-    private static final String GET_SCHEMAS_SQL = "SELECT schema_name, description, utype FROM 'schema'."
-            + ConfigurationDAOImpl.SCHEMAS_TABLE_NAME + " ORDER BY upper(schema_name)";
+    private static final String GET_SCHEMAS_SQL = "SELECT schema_name, description, utype, schema_order FROM 'schema'."
+            + ConfigurationDAOImpl.SCHEMAS_TABLE_NAME + " ORDER BY schema_order, upper(schema_name)";
 
     private static final String GET_TABLES_SQL = "SELECT table_name, table_type, schema_name, description, "
             + "utype, db_schema_name, db_table_name, scs_enabled, release_required, description_long, params FROM 'schema'."

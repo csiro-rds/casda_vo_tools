@@ -15,6 +15,8 @@ package au.csiro.casda.votools.tap;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -80,6 +82,7 @@ public class TablesController
         checkReady();
         Tableset ts = new Tableset();
         List<TapSchema> schemas = tableService.getSchemas();
+        Collections.sort(schemas, new TapSchemaComparator());
         for (TapSchema tSchema : schemas)
         {
             ts.getSchema().add(getSchema(tSchema));
@@ -186,5 +189,40 @@ public class TablesController
 
     }
 
+    
+    /**
+     * Comparator to ensure schemas are presented in the order listed in the database.
+     */
+    private static class TapSchemaComparator implements Comparator<TapSchema>
+    {
+
+        /** {@inheritDoc} */
+        @Override
+        public int compare(TapSchema ts0, TapSchema ts1)
+        {
+            if (ts0 == ts1)
+            {
+                return 0;
+            }
+
+            if (ts0.getSchemaOrder() != ts1.getSchemaOrder())
+            {
+                return ts0.getSchemaOrder() - ts1.getSchemaOrder();
+            }
+            
+            // If the order has not been configured, default the TAP_SCHEMA to be last
+            if ("TAP_SCHEMA".equals(ts0.getSchemaName()))
+            {
+                return 1;
+            }
+            if ("TAP_SCHEMA".equals(ts1.getSchemaName()))
+            {
+                return -1;
+            }
+            
+            return ts0.getSchemaName().compareTo(ts1.getSchemaName());
+        }
+        
+    }
 
 }

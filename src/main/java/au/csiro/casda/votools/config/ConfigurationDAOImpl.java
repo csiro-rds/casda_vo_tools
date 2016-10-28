@@ -1222,9 +1222,9 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
                             "datatype", "size", "principal", "indexed", "std", "scs_verbosity", "column_order" },
                     new String[] { Utils.sql(c.gtName()), Utils.sql(tapTableName), dbColName,
                             c.sql(ColumnConfig.DESCRIPTION), c.sql(ColumnConfig.UNIT), c.sql(ColumnConfig.UCD),
-                            c.sql(ColumnConfig.UTYPE), Utils.sql(c.getType()), c.sql(ColumnConfig.SIZE),
-                            c.sql(ColumnConfig.PRINCIPAL), c.sql(ColumnConfig.INDEXED), c.sql(ColumnConfig.STD),
-                            Utils.sql(c.get(ColumnConfig.SCS_VERBOSITY, "3")),
+                            c.sql(ColumnConfig.UTYPE), Utils.sql(convertToTapType(c.getType())),
+                            c.sql(ColumnConfig.SIZE), c.sql(ColumnConfig.PRINCIPAL), c.sql(ColumnConfig.INDEXED),
+                            c.sql(ColumnConfig.STD), Utils.sql(c.get(ColumnConfig.SCS_VERBOSITY, "3")),
                             // column order can't be null, setting 0 as the default means the columns are unordered
                             Utils.sql(c.get(ColumnConfig.ORDER, "0")) });
 
@@ -1252,6 +1252,38 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         }
     }
 
+    /**
+     * Convert database type names to TAP type names for use in the TAP_SCHEMA.columns table.
+     *  
+     * @param dbType The database type to be converted
+     * @return The TAP type.
+     */
+    String convertToTapType(String dbType)
+    {
+        switch (dbType.toLowerCase())
+        {
+        case "double precision":
+            return "DOUBLE";
+
+        case "geometry":
+        case "spoly":
+            return "REGION";
+
+        case "text":
+            return "VARCHAR";
+            
+        default:
+            if (dbType.toLowerCase().startsWith("character varying"))
+            {
+                return "VARCHAR";
+            }
+            if (dbType.toLowerCase().startsWith("character"))
+            {
+                return "CHAR";
+            }
+            return dbType.toUpperCase();
+        }
+    }
     /*
      * (non-Javadoc)
      * 
