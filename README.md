@@ -23,7 +23,7 @@ configuration rather than via code.
 Release History
 ---------------
 
-Current Release: v1.3
+Current Release: v1.4
 
 Notes for each release are available at  [release_notes.md](./release_notes.md)
 
@@ -35,13 +35,13 @@ Installation
 
 * Java v8 SDK
 * Web container: tested with Tomcat 7
-* Postgres database running PostgReSQL 9.4 or later and pgShere v1.1 or later
+* Postgres database running PostgreSQL 9.4 or later and pgShere v1.1 or later
 
 ### Accessing the WAR file
 
 CASDA Vo Tools is distributed as a ready to install war file (web archive). This can be directly deployed in a Java web container such as Tomcat.
 
-The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.3 on CSIRO Data Access Portal](http://doi.org/10.4225/08/57985C82D5757)
+The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.4 on CSIRO Data Access Portal](http://doi.org/10.4225/08/5809a21cb22c6)
 or you can build it using the instructions below.
 
 ### Deployment
@@ -59,7 +59,7 @@ Configuration
 -------------
 
 A full guide to interactive configuration is provided at 
-[Deploying_CASDA_VO_Tools.pdf](https://ws.data.csiro.au/collections/18710/support/1374) however a short intro is provided here.
+[Deploying_CASDA_VO_Tools.pdf](https://ws.data.csiro.au/collections/19821/support/1556) however a short intro is provided here.
 
 ### Application config
 Two configuration systems are available for use in the CASDA VO Tools application.
