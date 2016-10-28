@@ -38,6 +38,8 @@ public class TapSchema implements Serializable
     public static final String DESCRIPTION = "description" ;
     /** name of utype column in the TAP metadata table */
     public static final String UTYPE = "utype" ;
+    /** name of schema order column in the TAP metadata table */
+    public static final String SCHEMA_ORDER = "schema_order" ;
 
     @Override
     public String toString()
@@ -52,6 +54,8 @@ public class TapSchema implements Serializable
     private String description;
 
     private String utype;
+
+    private int schemaOrder;
 
     // bi-directional many-to-one association to TapTable
     //@OneToMany(mappedBy = "schema")
@@ -106,6 +110,16 @@ public class TapSchema implements Serializable
     public void setUtype(String utype)
     {
         this.utype = utype;
+    }
+
+    public int getSchemaOrder()
+    {
+        return schemaOrder;
+    }
+
+    public void setSchemaOrder(int schemaOrder)
+    {
+        this.schemaOrder = schemaOrder;
     }
 
     /**

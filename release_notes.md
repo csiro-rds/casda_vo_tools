@@ -1,6 +1,6 @@
 # CASDA VO Tools Release Notes
 
-## v1.4 - Planned for October 2016
+## v1.4 - 2016-10-28
 
 * New Features
     *   Removed PostGIS health check
