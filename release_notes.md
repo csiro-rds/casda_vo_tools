@@ -1,5 +1,19 @@
 # CASDA VO Tools Release Notes
 
+## v1.6 - 2016-10-28
+
+* New Features
+    *   Complete SSAP support for discovering and downloading spectra
+	*   Allow deployers to provide a custom XSL stylesheet for votable results	
+
+* Bug fixes
+    *   SIAP - error.txt could not be downloaded if only file in results
+
+## v1.5 - 2016-12-15
+
+* New Features
+    *   Initial support for SSAP - spectra discovery
+
 ## v1.4 - 2016-10-28
 
 * New Features
