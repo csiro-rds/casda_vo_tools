@@ -95,6 +95,11 @@ public class VoKeys
      * TAP request parameter map's key for the original SIAP submitted query
      */
     public static final String STR_KEY_SIAP_QUERY = "siapQuery";
+
+    /**
+     * TAP request parameter map's key for the original SSAP submitted query
+     */
+    public static final String STR_KEY_SSAP_QUERY = "ssapQuery";
     
     /**
      * Parameter key to indicate the heading to use in a VO Table result.
@@ -115,5 +120,8 @@ public class VoKeys
      * TAP request parameter map's key for maximum records to retrieve
      */
     public static final String STR_KEY_MAXREC = "maxrec";
+
+    /** SSAP service protocol info parameter key */
+    public static final String STR_KEY_SERVICE_PROTOCOL = "SERVICE_PROTOCOL";
     
 }

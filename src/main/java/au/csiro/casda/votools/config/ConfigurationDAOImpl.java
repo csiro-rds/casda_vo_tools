@@ -220,6 +220,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         try
         {
             begin();
+            logger.info("Checking tap metadata tables against standard config.");
             YamlParser parser = new YamlBeansParser();
             Configuration tapConfig = new Configuration(parser, tapConfigText);
             tapConfig.put(ConfigValueKeys.CONNECTION_URL, config.get(ConfigValueKeys.CONNECTION_URL));
@@ -248,9 +249,11 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
                 String msg = e.getMessage();
                 if (!msg.contains("relation") || !msg.contains("not exist"))
                 {
+                    logger.error("Failed to query tap metadata tables." , e);
                     throw e;
                 }
             }
+
             // Read information relevant to the configuration
             tapCurrent = tapCurrent.export(false);
             // Update tables structure

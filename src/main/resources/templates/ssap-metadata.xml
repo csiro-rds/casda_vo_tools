@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.ivoa.net/xml/VOTable/v1.3" xmlns:stc="http://www.ivoa.net/xml/STC/v1.30"
+	xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/VOTable/v1.3 http://www.ivoa.net/xml/STC/v1.30 http://www.ivoa.net/xml/STC/v1.30">
+	<RESOURCE name="CASDA SSAP Result" type='results'>
+		<INFO name="QUERY_STATUS" value="OK">Successful query</INFO>
+		<INFO name="SERVICE_PROTOCOL" value="1.1">SSAP</INFO>
+		<INFO name="REQUEST" value="querydata" />
+
+		<!-- Input parameters -->
+		<PARAM name="INPUT:POS" value="" datatype="char" arraysize="*">
+			<DESCRIPTION>
+				The center of the region of interest.
+				The coordinate values are specified in list format (comma separated) in decimal
+				degrees with no embedded white space followed by an optional coord.
+				systems such as GALACTIC, GALACTIC-II, FK5; default is ICRS.
+			</DESCRIPTION>
+		</PARAM>
+
+		<PARAM name="INPUT:SIZE" value="0.05" datatype="double" unit="deg">
+			<DESCRIPTION>
+				The radius of the circular region of interest in decimal degrees.
+			</DESCRIPTION>
+			<VALUES>
+				<MIN value="0" />
+				<MAX value="${maxSizeDegrees}" />
+			</VALUES>
+		</PARAM>
+		<PARAM name="INPUT:BAND" value="ALL" datatype="char" arraysize="*">
+			<DESCRIPTION>
+				Spectral coverage: Several values can be combined in a
+				comma separated list. The wavelength can be given in meters or as a range thereof.
+			</DESCRIPTION>
+		</PARAM>
+
+		<PARAM name="INPUT:TIME" value="" datatype="char" arraysize="*">
+			<DESCRIPTION>
+				If a single value is specified it matches any spectrum for which the
+				time
+				coverage includes the specified value. If a range is specified it matches
+				any spectrum which contains any data in the specified range. Dates
+				are
+				expected in ISO 8601 UTC format. E.g. 1998-05-21/1999-01-01 will search
+				for all spectra taken in the given time period, that is starting 21st
+				May,
+				1998 to Jan 1st, 1999 inclusive.
+			</DESCRIPTION>
+		</PARAM>
+		<PARAM name="INPUT:FORMAT" value="ALL" datatype="char"
+			arraysize="*">
+			<DESCRIPTION>
+				Desired format of retrieved data.
+				Note: The exact description of the output format
+				(binary table or 1d image, definition of axes)
+				is outside the scope of the access protocol.
+				Below format values are treated case insensitive.
+			</DESCRIPTION>
+			<VALUES>
+				<OPTION value="ALL" /> <!-- search any format -->
+				<OPTION value="COMPLIANT" /> <!-- short for searching xml, votable, fits -->
+				<OPTION value="NATIVE" /> <!-- short for searching jpeg,png,legacy fits -->
+				<OPTION value="votable" /> <!-- short for application/x-votable+xml -->
+				<OPTION value="application/x-votable+xml" />
+				<OPTION value="fits" /> <!-- short for application/fits -->
+				<OPTION value="application/fits" />
+				<OPTION value="image/fits" />
+				<OPTION value="xml" /> <!-- short for application/xml -->
+				<OPTION value="application/xml" />
+				<OPTION value="text/xml" />
+				<OPTION value="GRAPHIC" /> <!-- short for searching jpeg and gif -->
+				<OPTION value="image/jpg" />
+				<OPTION value="image/jpeg" />
+				<OPTION value="image/png" />
+				<OPTION value="image/gif" />
+				<OPTION value="image/tiff" />
+				<OPTION value="METADATA" />
+			</VALUES>
+		</PARAM>
+		<PARAM name="INPUT:REQUEST" value="" datatype="char" arraysize="*">
+			<DESCRIPTION>
+				SSA protocol versions supported by this service.
+				Reserved words for future extensions are:
+				getData, stageData, getCapabilities, getAvailability
+				Values are treated case-insensitive.
+			</DESCRIPTION>
+			<VALUES>
+				<OPTION value="queryData" />
+			</VALUES>
+		</PARAM>
+
+		<!-- optional/recommended parameters and service defined input parameters -->
+		<PARAM name="INPUT:MAXREC" value="" datatype="double">
+			<DESCRIPTION>The maximum number of records to be returned. 
+			</DESCRIPTION>
+		</PARAM>
+		<PARAM name="INPUT:VERSION" value="" datatype="long">
+			<DESCRIPTION>SSA protocol versions supported by this service.
+			</DESCRIPTION>
+			<VALUES>
+				<OPTION value="1.0" />
+				<OPTION value="1.1" />
+			</VALUES>
+		</PARAM>
+
+
+		<!-- Output parameters -->
+		<PARAM name="OUTPUT:access_url" ID="access_url" value="" datatype="char"
+			arraysize="2000" ucd="meta.ref.url" utype="Access.Reference">
+			<DESCRIPTION>URL used to access dataset</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:access_format" ID="access_format" value="" datatype="char"
+			arraysize="255" utype="Access.Format">
+			<DESCRIPTION>Content or MIME type of dataset</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:access_estsize" ID="access_estsize"
+			value="" datatype="long" unit="kbyte" utype="Access.Size">
+			<DESCRIPTION>Estimated dataset size</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:spectrum_type" ID="spectrum_type" value="" datatype="char"
+			arraysize="50" ucd="meta.id">
+			<DESCRIPTION>Further description of the type of spectrum
+			</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:num_chan" ID="num_chan" value="" datatype="long"
+			ucd="meta.number" utype="Dataset.Length">
+			<DESCRIPTION>Number of points</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:title" ID="title" value="" datatype="char" arraysize="255"
+			ucd="meta.title;meta.dataset" utype="DataID.Title">
+			<DESCRIPTION>Dataset Title</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:obs_collection" ID="obs_collection"
+			value="" datatype="char" arraysize="255" utype="DataID.Collection">
+			<DESCRIPTION>Data collection to which dataset belongs</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:obs_creator_did" ID="obs_creator_did"
+			value="" datatype="char" arraysize="255" ucd="meta.id" utype="DataID.CreatorDID">
+			<DESCRIPTION>Creator's ID for the dataset</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:data_source" ID="data_source" value="" datatype="char"
+			arraysize="255" utype="DataID.DataSource">
+			<DESCRIPTION>Original source of the data</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:creation_type" ID="creation_type" value="" datatype="char"
+			arraysize="255" utype="DataID.CreationType">
+			<DESCRIPTION>Dataset creation type</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:publisher" ID="publisher" value="" datatype="char"
+			arraysize="255" ucd="meta.curation" utype="Curation.Publisher">
+			<DESCRIPTION>Dataset publisher</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:obs_publisher_id" ID="obs_publisher_id"
+			value="" datatype="char" arraysize="255" ucd="meta.ref.url;meta.curation"
+			utype="Curation.PublisherDID">
+			<DESCRIPTION>Publisher's ID for the dataset ID</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:s_ra" ID="s_ra" value="" datatype="double" unit="deg"
+			ucd="pos.eq.ra;meta.main">
+			<DESCRIPTION>J2000 right ascension in decimal degrees</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:s_dec" ID="s_dec" value="" datatype="double" unit="deg"
+			ucd="pos.eq.dec;meta.main">
+			<DESCRIPTION>J2000 declination in decimal degrees</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:s_pos" ID="s_pos" value="" datatype="char" arraysize="255"
+			unit="deg" ucd="pos.eq" utype="Char.SpatialAxis.Coverage.Location.Value">
+			<DESCRIPTION>Spatial Position</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:s_fov" ID="s_fov" value="" datatype="double" unit="deg"
+			ucd="instr.fov" utype="Char.SpatialAxis.Coverage.Bounds.Extent">
+			<DESCRIPTION>Aperture angular size</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:s_resolution" ID="s_resolution" value="" datatype="double"
+			unit="deg" ucd="pos.angResolution" utype="Char.SpatialAxis.Resolution">
+			<DESCRIPTION>Spatial resolution of data</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:em_midpoint" ID="em_midpoint" value="" datatype="double"
+			unit="m" ucd="em.wl;instr.bandpass" utype="Char.SpectralAxis.Coverage.Location.Value">
+			<DESCRIPTION>Spectral coord value</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:em_width" ID="em_width" value="" datatype="double"
+			unit="m" ucd="em.wl;instr.bandwidth" utype="Char.SpectralAxis.Coverage.Bounds.Extent">
+			<DESCRIPTION>Width of spectrum</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:em_min" ID="em_min" value="" datatype="double" unit="m"
+			ucd="em.wl;stat.min" utype="Char.SpectralAxis.Coverage.Bounds.Start">
+			<DESCRIPTION>Start in spectral coordinate</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:em_max" ID="em_max" value="" datatype="double" unit="m"
+			ucd="em.wl;stat.max" utype="Char.SpectralAxis.Coverage.Bounds.Stop">
+			<DESCRIPTION>Stop in spectral coordinate</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:em_resolution" ID="em_resolution" value="" datatype="double"
+			unit="m" ucd="spect.resolution;em" utype="Char.SpectralAxis.Resolution">
+			<DESCRIPTION>Spectral resolution FWHM</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:t_midpoint" ID="t_midpoint" value="" datatype="double"
+			unit="d" ucd="time.epoch" utype="Char.TimeAxis.Coverage.Location.Value">
+			<DESCRIPTION>Midpoint of exposure on MJD scale</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:t_exptime" ID="t_exptime" value="" datatype="double"
+			unit="d" ucd="time.duration" utype="Char.TimeAxis.Coverage.Bounds.Extent">
+			<DESCRIPTION>Total exposure time</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:t_min" ID="t_min" value="" datatype="double" unit="d"
+			ucd="time.start;obs.exposure" utype="Char.TimeAxis.Coverage.Bounds.Start">
+			<DESCRIPTION>Observation start time</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:t_max" ID="t_max" value="" datatype="double" unit="d"
+			ucd="time.end;obs.exposure" utype="Char.TimeAxis.Coverage.Bounds.Stop">
+			<DESCRIPTION>Observation end time</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:released_date" ID="released_date" value="" datatype="char"
+			arraysize="24">
+			<DESCRIPTION>The date that this data product was released
+			</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:quality_level" ID="quality_level" value="" datatype="char"
+			arraysize="15">
+			<DESCRIPTION>Indicator of quality level, updated by validators
+			</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:s_region" ID="s_region" value="" datatype="char"
+			arraysize="200" ucd="phys.angArea;obs">
+			<DESCRIPTION>Region covered as specified in STC or ADQL</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:datamodel" ID="datamodel" value="" datatype="char"
+			arraysize="30" utype="Dataset.DataModel">
+			<DESCRIPTION>Datamodel name and version</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:creator" ID="creator" value="" datatype="char"
+			arraysize="30" utype="DataID.Creator">
+			<DESCRIPTION>Dataset creator</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:spaceframe" ID="spaceframe" value="" datatype="char"
+			arraysize="30" utype="CoordSys.SpaceFrame.Name">
+			<DESCRIPTION>Spatial coordinate frame name</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:spatialaxis_calibration" ID="spatialaxis_calibration"
+			value="" datatype="char" arraysize="30" ucd="meta.code.qual" utype="Char.SpatialAxis.Calibration">
+			<DESCRIPTION>Type of spatial coord calibration</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:spectralaxis_ucd" ID="spectralaxis_ucd"
+			value="" datatype="char" arraysize="30" ucd="meta.ucd" utype="Char.SpectralAxis.Ucd">
+			<DESCRIPTION>UCD for spectral coord</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:spectralaxis_calibration" ID="spectralaxis_calibration"
+			value="" datatype="char" arraysize="30" ucd="meta.code.qual" utype="Char.SpectralAxis.Calibration">
+			<DESCRIPTION>Type of spectral coord calibration</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:fluxaxis_ucd" ID="fluxaxis_ucd" value="" datatype="char"
+			arraysize="30" ucd="meta.ucd" utype="Char.FluxAxis.Ucd">
+			<DESCRIPTION>UCD for flux</DESCRIPTION>
+		</PARAM>
+		<PARAM name="OUTPUT:fluxaxis_calibration" ID="fluxaxis_calibration"
+			value="" datatype="char" arraysize="30" utype="Char.FluxAxis.Calibration">
+			<DESCRIPTION>Type of flux calibration</DESCRIPTION>
+		</PARAM>
+
+	</RESOURCE>
+</VOTABLE>

@@ -8,6 +8,7 @@ This web application provides access to astronomical data using the following Vi
 |---------|--------|---------|
 | [Table Access Protocol](http://www.ivoa.net/Documents/TAP/) | v1.0 | /tap |
 | [Simple Cone Search](http://www.ivoa.net/Documents/latest/ConeSearch.html) | v1.03 | /scs |
+| [Simple Spectral Access](http://www.ivoa.net/documents/SSA/) | v1.1  | /ssa |
 | [Simple Image Access](http://www.ivoa.net/documents/SIA/) | v2.0  | /sia2 |
 | [Datalink](http://www.ivoa.net/documents/DataLink/index.html) | v1.0 | /datalink |
  
@@ -23,7 +24,7 @@ configuration rather than via code.
 Release History
 ---------------
 
-Current Release: v1.4
+Current Release: v1.6
 
 Notes for each release are available at  [release_notes.md](./release_notes.md)
 
@@ -34,14 +35,14 @@ Installation
 ### System Requirements
 
 * Java v8 SDK
-* Web container: tested with Tomcat 7
+* Web container: tested with Tomcat 8
 * Postgres database running PostgreSQL 9.4 or later and pgShere v1.1 or later
 
 ### Accessing the WAR file
 
 CASDA Vo Tools is distributed as a ready to install war file (web archive). This can be directly deployed in a Java web container such as Tomcat.
 
-The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.4 on CSIRO Data Access Portal](http://doi.org/10.4225/08/5809a21cb22c6)
+The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.6 on CSIRO Data Access Portal](http://hdl.handle.net/102.100.100/38462)
 or you can build it using the instructions below.
 
 ### Deployment
@@ -59,7 +60,7 @@ Configuration
 -------------
 
 A full guide to interactive configuration is provided at 
-[Deploying_CASDA_VO_Tools.pdf](https://ws.data.csiro.au/collections/19821/support/1556) however a short intro is provided here.
+[Deploying_CASDA_VO_Tools.pdf](https://ws.data.csiro.au/collections/22853/support/2016) however a short intro is provided here.
 
 ### Application config
 Two configuration systems are available for use in the CASDA VO Tools application.

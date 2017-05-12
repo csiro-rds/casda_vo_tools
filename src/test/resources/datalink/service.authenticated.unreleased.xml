@@ -60,17 +60,6 @@
                     </VOT:TR>
                     <VOT:TR>
                         <VOT:TD>cube-123456</VOT:TD>
-                        <VOT:TD>http://localhost:8080/casda_data_access/cutoutui?id=-SDgmfVcIqFb486Xg_h4CZLlRHc9zY4GWIJVnvr8p_JHr2hTMYzDVpOvORCT4fAp</VOT:TD>
-                        <VOT:TD/>
-                        <VOT:TD/>
-                        <VOT:TD>Simple cut-out service</VOT:TD>
-                        <VOT:TD>#cutout</VOT:TD>
-                        <VOT:TD>application/fits</VOT:TD>
-                        <VOT:TD/>
-                        <VOT:TD/>
-                    </VOT:TR>
-                    <VOT:TR>
-                        <VOT:TD>cube-123456</VOT:TD>
                         <VOT:TD/>
                         <VOT:TD>cutout_service</VOT:TD>
                         <VOT:TD/>

@@ -1,27 +1,15 @@
 package au.csiro.casda.votools.capabilities;
 
-/*
- * #%L
- * CSIRO ASKAP Science Data Archive
- * %%
- * Copyright (C) 2015 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230.
- * %%
- * Licensed under the CSIRO Open Source License Agreement (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License in the LICENSE file.
- * #L%
- */
-
-
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.Assert.assertThat;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,17 +23,12 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import au.csiro.casda.votools.VoServiceType;
-import au.csiro.casda.votools.VoToolsApplication;
 import au.csiro.casda.votools.TestUtils;
+import au.csiro.casda.votools.VoToolsApplication;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
 import au.csiro.casda.votools.config.ConfigurationTest;
-import au.csiro.casda.votools.jaxb.conesearch.ConeSearch;
-import au.csiro.casda.votools.jaxb.tapregext.TableAccess;
-import au.csiro.casda.votools.jaxb.voresource.Capability;
-import au.csiro.casda.votools.jaxb.voresource.Interface;
 import au.csiro.casda.votools.jpa.TapColumn;
 import au.csiro.casda.votools.jpa.TapSchema;
 import au.csiro.casda.votools.jpa.TapTable;
@@ -53,7 +36,7 @@ import au.csiro.casda.votools.jpa.repository.VoTableRepositoryService;
 import au.csiro.casda.votools.scs.ScsService;
 
 /**
- * Unit tests for availability service layer
+ * Unit tests for capability service layer
  * 
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
@@ -62,16 +45,12 @@ import au.csiro.casda.votools.scs.ScsService;
 @ContextConfiguration(classes = { CapabilitiesServiceTest.Config.class })
 public class CapabilitiesServiceTest
 {
-    private static String SCS_STD = "ivo://ivoa.net/std/SCS";
     
     @Autowired
     private ConfigurationRegistry configRegistry;
 
     @Autowired
     private CapabilitiesService capabilityService;
-
-    private static final int EXPECTED_TAP_CAPABILITY_SIZE = 4;
-    private static final int EXPECTED_SCS_CAPABILITY_SIZE = 3;
 
     /**
      * Set up a configuration object
@@ -87,122 +66,82 @@ public class CapabilitiesServiceTest
     }
 
     @Test
-    public void testGetTapCapabilities() throws ConfigurationException
+    public void testGetScsConfigParams() throws ConfigurationException
     {
         configRegistry.register(capabilityService);
         capabilityService.isReady();
-        List<Capability> caps = capabilityService.getCapabilities(VoServiceType.tap, null).getCapability();
-        assertThat(caps.size(), is(EXPECTED_TAP_CAPABILITY_SIZE));
-        assertThat(caps.get(0).getInterface().get(0).getAccessURL().get(0).getValue(),
-                is("http://localhost:8040/casda_vo_tools//tap/capabilities"));
-        assertThat(caps.get(3), is(CoreMatchers.instanceOf(TableAccess.class)));
-        TableAccess tapCap = (TableAccess) caps.get(3);
-        assertThat(tapCap.getDataModel().size(), is(1));
-        assertThat(tapCap.getDataModel().get(0).getIvoId(), is("ivo://ivoa.net/std/ObsCore/v1.0"));
-    }
 
-    @Test
-    public void testGetTapCapabilitiesWithUrl() throws ConfigurationException
-    {
-        configRegistry.register(capabilityService);
-        capabilityService.isReady();
-        List<Capability> caps =
-                capabilityService.getCapabilities(VoServiceType.tap, "http://my.proxy.url/vo").getCapability();
-        assertThat(caps.size(), is(EXPECTED_TAP_CAPABILITY_SIZE));
-        assertThat(caps.get(0).getInterface().get(0).getAccessURL().get(0).getValue(),
-                is("http://my.proxy.url/vo/tap/capabilities"));
-        assertThat(caps.get(3), is(CoreMatchers.instanceOf(TableAccess.class)));
-        TableAccess tapCap = (TableAccess) caps.get(3);
-        assertThat(tapCap.getDataModel().size(), is(1));
-        assertThat(tapCap.getDataModel().get(0).getIvoId(), is("ivo://ivoa.net/std/ObsCore/v1.0"));
-    }
-
-    @Test
-    public void testGetScsCapabilities() throws ConfigurationException
-    {
-        configRegistry.register(capabilityService);
-        capabilityService.isReady();
-        List<Capability> caps = capabilityService.getCapabilities(VoServiceType.scs, null).getCapability();
-        assertThat(caps.size(), is(EXPECTED_SCS_CAPABILITY_SIZE));
-        assertThat(caps.get(0).getInterface().get(0).getAccessURL().get(0).getValue(),
-                is("http://localhost:8040/casda_vo_tools//scs/capabilities"));
-        // check we have a scs Capability
-        boolean scsFound = false;
-        for (Capability cap : caps)
+        Map<String, Object> scsConfigParams = capabilityService.getScsConfigParams("");
+        @SuppressWarnings("unchecked")
+        List<String[]> scsCatalogues = (List<String[]>) scsConfigParams.get("scsCatalogues");
+        assertThat(scsCatalogues, is(not(empty())));
+        for (String[] entry : scsCatalogues)
         {
-            if (cap.getStandardID().equals(SCS_STD))
-            {
-                scsFound = true;
-                assertThat(cap, is(CoreMatchers.instanceOf(ConeSearch.class)));
-                ConeSearch coneSearch = (ConeSearch) cap;
-                assertThat(coneSearch.getMaxRecords(), is(BigInteger.valueOf(20000)));
-                Interface scsInterface = cap.getInterface().get(0);
-                assertThat(scsInterface.getAccessURL().get(0).getValue(),
-                        containsString("http://localhost:8040/casda_vo_tools//scs/"));
-            }
+            assertThat(entry.length, is(2));
         }
-        assertThat(scsFound, is(true));
     }
 
     @Test
-    public void testGetScsCapabilitiesWithUrl() throws ConfigurationException
+    public void testGetSsaConfigParams() throws ConfigurationException
     {
         configRegistry.register(capabilityService);
         capabilityService.isReady();
-        List<Capability> caps =
-                capabilityService.getCapabilities(VoServiceType.scs, "http://my.proxy.url/vo").getCapability();
-        assertThat(caps.size(), is(EXPECTED_SCS_CAPABILITY_SIZE));
-        assertThat(caps.get(0).getInterface().get(0).getAccessURL().get(0).getValue(),
-                is("http://my.proxy.url/vo/scs/capabilities"));
-        // check we have a scs Capability
-        boolean scsFound = false;
-        for (Capability cap : caps)
-        {
-            if (cap.getStandardID().equals(SCS_STD))
-            {
-                scsFound = true;
-                assertThat(cap, is(CoreMatchers.instanceOf(ConeSearch.class)));
-                ConeSearch coneSearch = (ConeSearch) cap;
-                assertThat(coneSearch.getMaxRecords(), is(BigInteger.valueOf(20000)));
-                Interface scsInterface = cap.getInterface().get(0);
-                assertThat(scsInterface.getAccessURL().get(0).getValue(), containsString("http://my.proxy.url/vo/scs/"));
-            }
-        }
-        assertThat(scsFound, is(true));
+        
+        Map<String, String> ssaConfigParams = capabilityService.getSsaConfigParams("");
+        assertThat(ssaConfigParams,
+                hasEntry("capabilitiesURL", "http://localhost:8040/casda_vo_tools/ssa/capabilities"));
+        assertThat(ssaConfigParams, hasEntry("outputLimit.hard", "20000000"));
     }
 
     @Test
-    public void testGetAccessDataCapabilitiesWithUrl() throws ConfigurationException
+    public void testGetSia2ConfigParams() throws ConfigurationException
     {
         configRegistry.register(capabilityService);
         capabilityService.isReady();
-        List<Capability> caps =
-                capabilityService.getCapabilities(VoServiceType.data, "http://my.proxy.url/vo").getCapability();
-        assertThat(caps.size(), is(3));
-        assertThat(caps.get(0).getInterface().get(0).getAccessURL().get(0).getValue(),
-                is("http://my.proxy.url/vo/data/capabilities"));
-        Capability cap = caps.get(2);
-        assertThat(cap.getStandardID(), is("ivo://ivoa.net/std/SODA#sync-1.0"));
-        Interface scsInterface = cap.getInterface().get(0);
-        assertThat(scsInterface.getAccessURL().get(0).getValue(), containsString("http://my.proxy.url/vo/data/"));
+        
+        Map<String, String> ssaConfigParams = capabilityService.getSia2ConfigParams("");
+        assertThat(ssaConfigParams,
+                hasEntry("capabilitiesURL", "http://localhost:8040/casda_vo_tools/sia2/capabilities"));
     }
 
     @Test
-    public void testGetSia2CapabilitiesWithUrl() throws ConfigurationException
+    public void testGetDatalinkConfigParams() throws ConfigurationException
     {
         configRegistry.register(capabilityService);
         capabilityService.isReady();
-        List<Capability> caps =
-                capabilityService.getCapabilities(VoServiceType.sia2, "http://my.proxy.url/vo").getCapability();
-        assertThat(caps.size(), is(3));
-        assertThat(caps.get(0).getInterface().get(0).getAccessURL().get(0).getValue(),
-                is("http://my.proxy.url/vo/sia2/capabilities"));
-        Capability cap = caps.get(2);
-        assertThat(cap.getStandardID(), is("ivo://ivoa.net/std/SIA#query-2.0"));
-        Interface scsInterface = cap.getInterface().get(0);
-        assertThat(scsInterface.getAccessURL().get(0).getValue(), containsString("http://my.proxy.url/vo/sia2/"));
+        
+        Map<String, String> datalinkConfigParams = capabilityService.getDatalinkConfigParams("");
+        assertThat(datalinkConfigParams,
+                hasEntry("capabilitiesURL", "http://localhost:8040/casda_vo_tools/datalink/capabilities"));
+        assertThat(datalinkConfigParams,
+                hasEntry("datalinkURL", "http://localhost:8040/casda_vo_tools/datalink/links"));
     }
 
+    @Test
+    public void testGetTapConfigParams() throws ConfigurationException
+    {
+        configRegistry.register(capabilityService);
+        capabilityService.isReady();
+        
+        Map<String, String> tapConfigParams = capabilityService.getTapConfigParams("");
+        assertThat(tapConfigParams,
+                hasEntry("capabilitiesURL", "http://localhost:8040/casda_vo_tools/tap/capabilities"));
+        assertThat(tapConfigParams, hasEntry("outputLimitHard", "20000000"));
+    }
+
+    @Test
+    public void testGetTapConfigParamsWithUrl() throws ConfigurationException
+    {
+        configRegistry.register(capabilityService);
+        capabilityService.isReady();
+        
+        Map<String, String> tapConfigParams = capabilityService.getTapConfigParams("https://some.proxy/vo");
+        assertThat(tapConfigParams,
+                hasEntry("capabilitiesURL", "https://some.proxy/vo/tap/capabilities"));
+        assertThat(tapConfigParams, hasEntry("outputLimitHard", "20000000"));
+    }
+
+    
     /**
      * Test-specific Configuration class
      */

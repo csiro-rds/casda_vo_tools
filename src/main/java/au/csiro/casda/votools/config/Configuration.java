@@ -254,8 +254,6 @@ public class Configuration extends Options
         putDefault(ConfigValueKeys.DATALINK_WEB_SERVICE_URL, registry.getDatalinkWebUrl());
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_URL, registry.getDatalinkCutoutUrl());
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_SERVICE_NAME, registry.getDatalinkCutoutServiceName());
-        putDefault(ConfigValueKeys.DATALINK_CUTOUT_UI_URL, registry.getDatalinkCutoutUiUrl());
-        putDefault(ConfigValueKeys.DATALINK_CUTOUT_UI_SERVICE_NAME, registry.getDatalinkCutoutUiServiceName());
         putDefault(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY, registry.getSiapSharedSecretKey());      
         putDefault(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP, registry.getDatalinkDownloadLimitHttp());     
         putDefault(ConfigValueKeys.ENVIRONMENT, registry.getEnvironment());
@@ -274,6 +272,15 @@ public class Configuration extends Options
         putDefault("metadata.contactPerson", registry.getMetadataContactPerson());
         putDefault("metadata.copyright", registry.getMetadataCopyright());
         
+        // Add all ConfigKeys other than those in endpoints
+        for (ConfigKeys configKey : ConfigKeys.values())
+        {
+            String key = configKey.getKey();
+            if (!key.startsWith("tap") && !key.startsWith("scs"))
+            {
+                putDefault(key, registry.getConfigValue(key));
+            }
+        }
 
         // Try to create a DAO if it is not created yet
         if (dao == null)

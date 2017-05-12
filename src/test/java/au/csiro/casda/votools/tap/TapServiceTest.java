@@ -433,7 +433,7 @@ public class TapServiceTest
 
         doThrow(new IOException(STR_MSG_IO_PROBLEM)).when(tapService).runTapQuery(any(String.class),
                 any(OutputFormat.class), any(Writer.class), any(Integer.class), anyMapOf(String.class, String.class),
-                any(ZonedDateTime.class), any(String.class));
+                any(ZonedDateTime.class), any(String.class), anyMapOf(String.class, String[].class));
         assertThat(tapService.processQuery(writer, params), is(false));
         // no results due to mock JdbcTemplate
         assertThat(writer.toString(), containsString(StringUtils.EMPTY));
@@ -460,7 +460,7 @@ public class TapServiceTest
                 new DataAccessResourceFailureException("canceling statement due to user request");
         doThrow(dataAccessResourceFailureException).when(tapService).runTapQuery(any(String.class),
                 any(OutputFormat.class), any(Writer.class), any(Integer.class), anyMapOf(String.class, String.class),
-                any(ZonedDateTime.class), any(String.class));
+                any(ZonedDateTime.class), any(String.class), anyMapOf(String.class, String[].class));
         assertThat(tapService.processQuery(writer, params), is(false));
         assertThat(writer.toString(), containsString("Could not finish query due to timeout."));
         testAppender.verifyLogMessage(Level.ERROR, "Could not finish query due to timeout.",
@@ -491,7 +491,7 @@ public class TapServiceTest
                         return extractor.extractData(emptyResultSet);
                     }
                 });
-        tapService.runTapQuery("sqlQuery", OutputFormat.VOTABLE, writer, 10, params, ZonedDateTime.now(), null);
+        tapService.runTapQuery("sqlQuery", OutputFormat.VOTABLE, writer, 10, params, ZonedDateTime.now(), null, null);
 
         assertThat(writer.toString(), containsString("Vo heading"));
     }

@@ -67,12 +67,6 @@ public abstract class ConfigValueKeys
     
     /** Constant for the web service name */
     public static final String DATA_LINK_ACCESS_SECRET_KEY = "siap.shared.secret.key";
-
-    /** Constant for the cut-out user interface URL */
-    public static final String DATALINK_CUTOUT_UI_URL = "datalink.cutout.ui.url";
-
-    /** Constant for the cut-out user interface service name */
-    public static final String DATALINK_CUTOUT_UI_SERVICE_NAME = "datalink.cutout.ui.service.name";
     
     /** Constant for the web download size limit */
     public static final String DATALINK_DOWNLOAD_LIMIT_HTTP = "datalink.download.limit.http";
@@ -86,6 +80,8 @@ public abstract class ConfigValueKeys
     /** Constant for the server environment */
     public static final String CSS = "stylesheet.address";
     
-    /** Constant for the server environment */
+    /** Constant for the url of the logo image */
     public static final String LOGO_URL = "logo.url";
+    
+    /* New entries should be placed in the ConfigKeys enum to provide automatic configuration. */
 }

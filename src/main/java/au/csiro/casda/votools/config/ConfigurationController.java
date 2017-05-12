@@ -140,6 +140,10 @@ public class ConfigurationController extends Configurable
         logger.info("Hit the controller for the '/configure/act' url mapping - servicing {} request.",
                 request.getMethod());
         Map<String, String> paramsMap = UWSToolBox.getParamsMap(request);
+        String action = paramsMap.get("submit");
+        String changeLevel = paramsMap.get("changelevel");
+        logger.info("Processing request to {} with changeLevel {}.", action, changeLevel);
+
         ModelAndView result = new ModelAndView("configure");
         result.getModel().put("applied", false);
         result.getModel().put("explored", false);
@@ -173,12 +177,12 @@ public class ConfigurationController extends Configurable
                 {
                     String text = cfgService.process(request, response, paramsMap);
                     result.getModel().put("config", text);
-                    if ("APPLY".equals(paramsMap.get("submit")))
+                    if ("APPLY".equals(action))
                     {
                         result.getModel().put("success", true);
                         result.getModel().put("successMessage", "New configuration successfully saved!");
                     }
-                    else if ("EXPLORE".equals(paramsMap.get("submit")))
+                    else if ("EXPLORE".equals(action))
                     {
                         result.getModel().put("success", true);
                         result.getModel().put("successMessage", "Exploration successful!");

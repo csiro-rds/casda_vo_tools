@@ -129,6 +129,23 @@ public class EndPoint extends Options
         scs.putDefault("scs.test.catalog", registry.getScsTestCatalog());
         scs.putDefault("scs.test.verbose", String.valueOf(registry.getScsTestVerbose()));
         scs.putDefault("scs.test.extras", registry.getScsTestExtras());
+        
+        
+        // Add ConfigKeys to appropriate endpoints
+        for (ConfigKeys configKey : ConfigKeys.values())
+        {
+            String key = configKey.getKey();
+            if (key.startsWith("tap"))
+            {
+                tap.putDefault(key, registry.getConfigValue(key));
+            }
+            else if (key.startsWith("scs"))
+            {
+                scs.putDefault(key, registry.getConfigValue(key));
+            } 
+            
+        }
+        
     }
 
     /*

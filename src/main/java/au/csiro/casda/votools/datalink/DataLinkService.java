@@ -120,8 +120,6 @@ public class DataLinkService extends Configurable
         dataLinkAccessEncriptionSecretKey = config.get(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY);
         cutoutServiceUrl = config.get(ConfigValueKeys.DATALINK_CUTOUT_URL);
         cutoutServiceName = config.get(ConfigValueKeys.DATALINK_CUTOUT_SERVICE_NAME);
-        cutoutUiServiceUrl = config.get(ConfigValueKeys.DATALINK_CUTOUT_UI_URL);
-        cutoutUiServiceName = config.get(ConfigValueKeys.DATALINK_CUTOUT_UI_SERVICE_NAME);
         
         datalinkDownloadLimitHttp = convertLimit(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP);
 
@@ -289,84 +287,51 @@ public class DataLinkService extends Configurable
     private void buildDataAccessForId(DataLinkVoTableBuilder builder, String id, String userId, String loginSystem,
             List<Long> projectIds, boolean casdaAdmin, Date accessTime) throws Exception
     {
-        if (StringUtils.isEmpty(id) || !(id.matches("^cube-[0-9]+$") || id.matches("^visibility-[0-9]+$")))
+        String contentType;
+        String table= "";
+        
+        if(StringUtils.isBlank(id))
         {
             builder.withErrorResult(id,
                     "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(id));
             return;
         }
-
-        long contentLengthKb = 0;
-        boolean dataProductReleased = true;
-        String contentType;
-
-        // TODO take out hard-coded DB check and allow for entry of tables into properties so people can
-        // use with their custom databases.
-        // will also have to allow for mime-types
-        String table = id.toLowerCase().startsWith("cube") ? "casda.image_cube" : "casda.measurement_set";
+        else if(id.toLowerCase().matches("^cube-[0-9]+$"))
+        {
+        	table = "casda.image_cube";
+        }
+        else if(id.toLowerCase().matches("^visibility-[0-9]+$"))
+        {
+        	table = "casda.measurement_set";
+        }
+        else if(id.toLowerCase().matches("^spectrum-[0-9]+$"))
+        {
+        	table = "casda.spectrum";
+        }
+        else if(id.toLowerCase().matches("^moment_map-[0-9]+$"))
+        {
+        	table = "casda.moment_map";
+        }
+        else
+        {
+            builder.withErrorResult(id,
+                    "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(id));
+            return;
+        }
         Long dataProductId = Long.parseLong(id.split("-")[1]);
-        String sql = "select filesize, released_date from " + table + " where id = ?";
-        try
-        {
-            Map<String, Object> result = config.gtDao().getTemplate().queryForMap(sql, dataProductId);
-            if (result != null && !result.isEmpty())
-            {
-                contentLengthKb = (Long) result.get("filesize");
-                // the data product will only have a released date if it is released
-                dataProductReleased = result.get("released_date") != null;
-            }
-        }
-        catch (EmptyResultDataAccessException e)
-        {
-            // not too worried here as this just means there is not matching file for this id in the database
-            contentLengthKb = 0;
-        }
-
+        
+        long contentLengthKb = getContentLength(table, dataProductId);
+        
         if (contentLengthKb > 0)
         {
             if (StringUtils.isNotBlank(syncServiceUrl) || StringUtils.isNotBlank(asyncServiceUrl)
                     || StringUtils.isNotBlank(cutoutServiceUrl) || StringUtils.isNotBlank(cutoutUiServiceUrl))
             {
-                boolean allowAccessDataLink = casdaAdmin;
-
-                // perform project wise access check if not a casdaAdmin
-                // Note: File access is restricted to authenticated users, even for released data products.
-                boolean authenticated = !VoKeys.ANONYMOUS_USER.equals(userId);
-                if (!casdaAdmin && authenticated)
-                {
-                    if (CollectionUtils.isEmpty(projectIds))
-                    {
-                        projectIds = new ArrayList<>();
-                        projectIds.add(-1L);
-                    }
-
-                    String query = "select id from " + table + " where id = ?"
-                            + " and (released_date is not null or project_id in ("
-                            /*
-                             * adding the ids as a string here is ok because ids are Longs and data is from a trusted
-                             * source
-                             */
-                            + projectIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + "))";
-
-                    String result;
-                    try
-                    {
-                        result = config.gtDao().getTemplate().queryForObject(query, new Object[] { dataProductId },
-                                String.class);
-                    }
-                    catch (EmptyResultDataAccessException e)
-                    {
-                        // No row means that the user does not have access to this data product
-                        result = null;
-                    }
-
-                    allowAccessDataLink = result != null;
-                }
-
                 // show access data link to casdaAdmins or project members
-                if (allowAccessDataLink)
+                if (isAccessAllowed(casdaAdmin, userId, projectIds, table, dataProductId))
                 {
-                    if (id.toLowerCase().startsWith("cube"))
+                    if (id.toLowerCase().startsWith("cube") || id.toLowerCase().startsWith("spectrum") 
+                    		|| id.toLowerCase().startsWith("moment_map"))
                     {
                         contentType = "application/fits";
                     }
@@ -438,17 +403,7 @@ public class DataLinkService extends Configurable
                     /*
                      *  Cutout services have no maximum limit as the size of the cutout is not known at this point.
                      */
-                    
-                    // cutouts UI link
-                    if (StringUtils.isNotBlank(cutoutUiServiceUrl))
-                    {
-                        requestToken.setDownloadMode(RequestToken.CUTOUT);
-                        builder.withAccessUrlResult(id, cutoutUiServiceUrl + requestToken.toEncryptedString(),
-                                cutoutUiServiceName, contentType, null, "#cutout");
-                    }
-
-                    // cutouts link
-                    if (StringUtils.isNotBlank(cutoutServiceUrl))
+                    if(id.toLowerCase().startsWith("cube") && StringUtils.isNotBlank(cutoutServiceUrl))
                     {
                         requestToken.setDownloadMode(RequestToken.CUTOUT);
                         builder.withServiceDefResult(id, "cutout_service", cutoutServiceName, "#cutout", contentType,
@@ -475,6 +430,140 @@ public class DataLinkService extends Configurable
         {
             builder.withErrorResult(id,
                     "NotFoundFault: " + StringEscapeUtils.escapeXml10(id) + " cannot be found");
+        }
+    }
+    
+    /**
+     * Process a request to provide a link to a file as identified by its id in the param map. The resulting url
+     * will be returned or in the case of an error, the error will be written in VOTABLE format to
+     * the writer.
+     *
+     * @param requestedId
+     *            The requestedId to be processed.
+     * @param userId
+     *            The user Id.
+     * @param loginSystem
+     *            the user's login system
+     * @param projectCodes
+     *            Project codes list
+     * @param casdaAdmin
+     *            Boolean whether is casda admin
+     * @param accessTime
+     *            The date and time when access was requested.
+     * @return the link if file exists and is accessible, else a votable containing the error
+     */
+    public Object processDownload(String requestedId, String userId, String loginSystem,
+            List<String> projectCodes, boolean casdaAdmin, Date accessTime)
+    {
+    	List<Long> projectIds = null;
+        if (!casdaAdmin && !CollectionUtils.isEmpty(projectCodes))
+        {
+            projectIds = voTableRepositoryService.fetchProjectIdsFromCodes(projectCodes, config.gtDao().getSchema());
+        }
+        
+        boolean authenticated = !VoKeys.ANONYMOUS_USER.equals(userId);
+		DataLinkVoTableBuilder builder = new DataLinkVoTableBuilder(authenticated ? dataLinkBaseUrl : baseUrl);
+		builder.withResultsTable();
+
+        if (StringUtils.isEmpty(requestedId) || !(requestedId.matches("^spectrum-[0-9]+$") 
+        		|| requestedId.matches("^moment_map-[0-9]+$")))
+        {
+            builder.withErrorResult(requestedId,
+                    "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(requestedId));
+        }
+        else
+        {
+            String table = requestedId.toLowerCase().startsWith("spectrum") ? "casda.spectrum" : "casda.moment_map";
+            
+            Long dataProductId = Long.parseLong(requestedId.split("-")[1]);
+
+            boolean allowAccessDataLink = isAccessAllowed(casdaAdmin, userId, projectIds, table, dataProductId);
+            long contentLengthKb = getContentLength(table, dataProductId);
+            
+            if(allowAccessDataLink && contentLengthKb > 0)
+        	{
+                RequestToken requestToken =
+                        new RequestToken(requestedId, userId, loginSystem, accessTime, dataLinkAccessEncriptionSecretKey);
+                requestToken.setDownloadMode(RequestToken.WEB_DOWNLOAD);
+                
+            	return syncServiceUrl +  requestToken.toEncryptedString();
+        	}
+        	else
+        	{
+                builder.withErrorResult(requestedId,
+                        "NotFoundFault: " + StringEscapeUtils.escapeXml10(requestedId) + " cannot be found");
+        	}
+        }
+    	return builder;
+    }
+    
+    private long getContentLength(String table, Long dataProductId)
+    {
+
+        // TODO take out hard-coded DB check and allow for entry of tables into properties so people can
+        // use with their custom databases.
+        // will also have to allow for mime-types
+    	long contentLengthKb = 0;
+    	String sql = "select filesize, released_date from " + table + " where id = ?";
+        try
+        {
+            Map<String, Object> result = config.gtDao().getTemplate().queryForMap(sql, dataProductId);
+            if (result != null && !result.isEmpty())
+            {
+                contentLengthKb = (Long) result.get("filesize");
+            }
+            return contentLengthKb;
+        }
+        catch (EmptyResultDataAccessException e)
+        {
+            // not too worried here as this just means there is not matching file for this id in the database
+            return 0;
+        }
+    }
+    
+    private boolean isAccessAllowed
+    		(boolean casdaAdmin, String userId, List<Long> projectIds, String table, Long dataProductId)
+    {
+        // perform project wise access check if not a casdaAdmin
+        // Note: File access is restricted to authenticated users, even for released data products.
+        boolean authenticated = !VoKeys.ANONYMOUS_USER.equals(userId);
+        if(casdaAdmin)
+        {
+        	return true;
+        }
+        else if (authenticated)
+        {
+            if (CollectionUtils.isEmpty(projectIds))
+            {
+                projectIds = new ArrayList<>();
+                projectIds.add(-1L);
+            }
+
+            String query = "select id from " + table + " where id = ?"
+                    + " and (released_date is not null or project_id in ("
+                    /*
+                     * adding the ids as a string here is ok because ids are Longs and data is from a trusted
+                     * source
+                     */
+                    + projectIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + "))";
+
+            String result;
+            try
+            {
+                result = config.gtDao().getTemplate().queryForObject(query, new Object[] { dataProductId },
+                        String.class);
+            }
+            catch (EmptyResultDataAccessException e)
+            {
+                // No row means that the user does not have access to this data product
+                result = null;
+            }
+
+            return result != null;
+        }
+        else
+        {
+        	return casdaAdmin;
         }
     }
 

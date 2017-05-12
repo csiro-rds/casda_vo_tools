@@ -1,6 +1,7 @@
 package au.csiro.casda.votools.util;
 
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -131,6 +132,14 @@ public class UtilTest
         assertThat(paramsMap.get("one"), arrayContainingInAnyOrder("a", "b", "c", "d"));
     }
 
+    @Test
+    public void testConvertCamelCase()
+    {
+        assertThat(Utils.convertCamelCase("thisIsExample"), is("This Is Example"));
+        assertThat(Utils.convertCamelCase("SSAPQuery"), is("SSAP Query"));
+    }
+    
+    
     @After
     public void doAfter()
     {

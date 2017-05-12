@@ -30,13 +30,14 @@ apply plugin: 'ssh'
 
 group = 'au.csiro'
 
-description = """CSIRO CASDA Project - CASDA VO Tools web application"""
+project.ext.baseName = 'casda_vo_tools'
+project.description = """CSIRO CASDA Project - CASDA VO Tools web application"""
 
 ext {
     majorVersion = 1
-    minorVersion = 4
-    springBootVer = '1.1.12.RELEASE'
-    tomcatVer = '7.0.54'
+    minorVersion = 5
+    springBootVer = '1.3.6.RELEASE'
+    tomcatVer = '8.0.14'
 }
 
 sourceCompatibility = 1.8
@@ -75,20 +76,18 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-jdbc:${springBootVer}")
     compile("org.springframework.boot:spring-boot-starter-integration:${springBootVer}")
     compile("org.springframework.boot:spring-boot-starter-actuator:${springBootVer}")
-    compile("org.springframework.boot:spring-boot-starter-web:${springBootVer}")
     compile("org.springframework.boot:spring-boot-starter-ws:${springBootVer}") 
     compile("org.springframework.boot:spring-boot-starter-security:${springBootVer}")
     
     compile("org.apache.commons:commons-lang3:3.4")
 	compile "org.apache.commons:commons-collections4:4.0"
-	compile "org.apache.logging.log4j:log4j-slf4j-impl:2.1"
 	compile "com.vividsolutions:jts:1.13"
 	compile "org.hibernate:hibernate-core:4.3.10.Final"
 	// for date time with time zone information
     compile "joda-time:joda-time:2.8.2"
     
     // reinstate this when upgrade to spring 1.2.5
-    // compile("org.springframework.boot:spring-boot-starter-log4j2:${springBootVer}")
+    compile("org.springframework.boot:spring-boot-starter-log4j2:${springBootVer}")
     compile 'org.apache.logging.log4j:log4j-web:2.1'
     
     compile("com.google.guava:guava:18.0")
