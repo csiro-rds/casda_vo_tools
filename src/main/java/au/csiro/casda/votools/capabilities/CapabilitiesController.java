@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import au.csiro.casda.votools.VoServiceType;
 import au.csiro.casda.votools.config.ConfigurationException;
-import au.csiro.casda.votools.jaxb.capabilities.Capabilities;
 import au.csiro.casda.votools.utils.VoKeys;
 
 /**
@@ -65,12 +65,73 @@ public class CapabilitiesController
      * @return the capabilities of the VO Service type
      */
     @RequestMapping(method = RequestMethod.GET, produces = "application/xml")
-    public @ResponseBody Capabilities getCapabilities(@PathVariable() VoServiceType voServiceType, @RequestHeader(
+    public @ResponseBody Object getCapabilities(@PathVariable() VoServiceType voServiceType, @RequestHeader(
             value = VoKeys.VO_HEADER_CAPABILITIES_URL, required = false) String capabilitiesUrl)
     {
         logger.info("Hit the controller for the '/{}/capabilities' url mapping - servicing request", voServiceType);
         checkReady();
-        return capabilitiesService.getCapabilities(voServiceType, capabilitiesUrl);
+        
+        if (voServiceType == VoServiceType.ssa)
+        {
+            return getSsaCapabilities(capabilitiesUrl);
+        }
+        else if (voServiceType == VoServiceType.sia2)
+        {
+            return getSia2Capabilities(capabilitiesUrl);
+        }
+        else if (voServiceType == VoServiceType.datalink)
+        {
+            return getDatalinkCapabilities(capabilitiesUrl);
+        }
+        else if (voServiceType == VoServiceType.tap)
+        {
+            return getTapCapabilities(capabilitiesUrl);
+        }
+        else if (voServiceType == VoServiceType.scs)
+        {
+            return getScsCapabilities(capabilitiesUrl);
+        }
+        return null;
+    }
+
+    private ModelAndView getScsCapabilities(String capabilitiesUrl)
+    {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("scs/capabilities.xml");
+        mav.getModel().putAll(capabilitiesService.getScsConfigParams(capabilitiesUrl));
+        return mav;
+    }
+
+    private ModelAndView getTapCapabilities(String capabilitiesUrl)
+    {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("tap/capabilities.xml");
+        mav.getModel().putAll(capabilitiesService.getTapConfigParams(capabilitiesUrl));
+        return mav;
+    }
+
+    private ModelAndView getDatalinkCapabilities(String capabilitiesUrl)
+    {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("datalink/capabilities.xml");
+        mav.getModel().putAll(capabilitiesService.getDatalinkConfigParams(capabilitiesUrl));
+        return mav;
+    }
+
+    private ModelAndView getSia2Capabilities(String capabilitiesUrl)
+    {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("sia2/capabilities.xml");
+        mav.getModel().putAll(capabilitiesService.getSia2ConfigParams(capabilitiesUrl));
+        return mav;
+    }
+
+    private ModelAndView getSsaCapabilities(String capabilitiesUrl)
+    {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("ssa/capabilities.xml");
+        mav.getModel().putAll(capabilitiesService.getSsaConfigParams(capabilitiesUrl));
+        return mav;
     }
 
     /**

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import au.csiro.casda.votools.VoServiceType;
 import au.csiro.casda.votools.jaxb.availability.Availability;
+import au.csiro.casda.votools.ssap.SsapService;
 
 /**
  * Service to generate service availability information
@@ -41,6 +42,8 @@ public class AvailabilityService
     private final SystemStatus systemStatus;
 
     private final HealthEndpoint healthEndpoint;
+    
+    private SsapService ssapService; 
 
     private static Logger logger = LoggerFactory.getLogger(AvailabilityService.class);
 
@@ -49,12 +52,15 @@ public class AvailabilityService
      *            Spring Actuator HealthEndpoint - used here to check application
      * @param systemStatus
      *            contains system upSince
+     * @param ssapService
+     *            The SsapService 
      */
     @Autowired
-    public AvailabilityService(HealthEndpoint healthEndpoint, SystemStatus systemStatus)
+    public AvailabilityService(HealthEndpoint healthEndpoint, SystemStatus systemStatus, SsapService ssapService)
     {
         this.systemStatus = systemStatus;
         this.healthEndpoint = healthEndpoint;
+        this.ssapService = ssapService;
     }
 
     /**
@@ -65,16 +71,24 @@ public class AvailabilityService
     public Availability getAvailability(VoServiceType voServiceType)
     {
         Availability avail = new Availability();
-        Status status = healthEndpoint.invoke().getStatus();
-        if (Status.UP.equals(status))
+        if (voServiceType == VoServiceType.ssa && !ssapService.isEnabled())
         {
-            avail.setAvailable(true);
-            avail.getNote().add("");
+            avail.setAvailable(false);
+            avail.getNote().add("SSAP is not supported by this service");
         }
         else
         {
-            avail.setAvailable(false);
-            avail.getNote().add("Health check FAILED");
+            Status status = healthEndpoint.invoke().getStatus();
+            if (Status.UP.equals(status))
+            {
+                avail.setAvailable(true);
+                avail.getNote().add("");
+            }
+            else
+            {
+                avail.setAvailable(false);
+                avail.getNote().add("Health check FAILED");
+            }
         }
         try
         {

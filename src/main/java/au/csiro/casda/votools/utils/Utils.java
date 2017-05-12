@@ -88,6 +88,11 @@ public class Utils
      */
     public static String convertCamelCase(String s)
     {
+        // Don't convert text which is all uppercase and underscores
+        if (s.matches("^[A-Z_]+$"))
+        {
+            return s;
+        }
         s = s.substring(0, 1).toUpperCase() + s.substring(1);
         return s.replaceAll(String.format("%s|%s|%s", "(?<=[A-Z])(?=[A-Z][a-z])", "(?<=[^A-Z])(?=[A-Z])",
                 "(?<=[A-Za-z])(?=[^A-Za-z])"), " ");

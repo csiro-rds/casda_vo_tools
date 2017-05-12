@@ -37,6 +37,10 @@ public enum VoServiceType
      * SIAP v2 - Simple Image Access Protocol v2.
      */
     sia2,
+    
+    /** Simple Spectral Access - search for spectra.*/
+    ssa,
+    
     /** Access data - downloads and cutouts of image data and other files.*/
     data
 }

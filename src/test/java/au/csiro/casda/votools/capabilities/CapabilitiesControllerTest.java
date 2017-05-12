@@ -20,8 +20,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,14 +35,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import au.csiro.casda.votools.VoServiceType;
-import au.csiro.casda.votools.jaxb.capabilities.Capabilities;
-import au.csiro.casda.votools.jaxb.conesearch.ConeSearch;
-import au.csiro.casda.votools.jaxb.tapregext.Language;
-import au.csiro.casda.votools.jaxb.tapregext.TableAccess;
-import au.csiro.casda.votools.jaxb.tapregext.Version;
-import au.csiro.casda.votools.jaxb.vodataservice.ParamHTTP;
-import au.csiro.casda.votools.jaxb.voresource.AccessURL;
 import au.csiro.casda.votools.utils.VoKeys;
 
 /**
@@ -70,34 +66,6 @@ public class CapabilitiesControllerTest
         MockitoAnnotations.initMocks(this);
         this.mockMvc = MockMvcBuilders.standaloneSetup(capabilitiesController).build();
 
-        Capabilities caps = new Capabilities();
-        TableAccess ta = new TableAccess();
-        ta.setStandardID("someStdId");
-        ta.setDescription("bob");
-        AccessURL au = new AccessURL();
-        au.setValue("http://some.url");
-        au.setUse("base");
-        ParamHTTP param = new ParamHTTP();
-        param.getAccessURL().add(au);
-        param.setRole("std");
-        ta.getInterface().add(param);
-        Language lan = new Language();
-        lan.setName("ADQL");
-        Version ver = new Version();
-        ver.setValue("2.0");
-        lan.getVersion().add(ver);
-        lan.setDescription("ADQL 2.0");
-        ta.getLanguage().add(lan);
-        caps.getCapability().add(ta);
-        when(mockService.getCapabilities(eq(VoServiceType.tap), anyString())).thenReturn(caps);
-
-        caps = new Capabilities();
-        ConeSearch cs = new ConeSearch();
-        cs.setStandardID("someStdConeId");
-        cs.setDescription("bob_cone");
-        cs.setMaxSR(10.2f);
-        caps.getCapability().add(cs);
-        when(mockService.getCapabilities(eq(VoServiceType.scs), anyString())).thenReturn(caps);
         doReturn(true).when(mockService).isReady();
     }
 
@@ -110,13 +78,15 @@ public class CapabilitiesControllerTest
     @Test
     public void testGetCapabilities() throws Exception
     {
+        Map<String, String> configParams = new HashMap<>();
+        configParams.put("tapURL", "http://nowhere/tap");
+        when(mockService.getTapConfigParams(anyString())).thenReturn(configParams);
+        
         this.mockMvc.perform(get("/tap/capabilities")).andExpect(status().isOk()).andDo(print())
-                .andExpect(xpath("/capabilities/capability/description").string("bob"))
-                .andExpect(xpath("/capabilities/capability/@standardID").string("someStdId"))
-                .andExpect(xpath("/capabilities/capability/interface/accessURL").string("http://some.url"))
-                .andExpect(xpath("/capabilities/capability/language/version").string("2.0"));
+                .andExpect(forwardedUrl("tap/capabilities.xml"))
+                .andExpect(model().attribute("tapURL", "http://nowhere/tap"));
 
-        verify(mockService).getCapabilities(eq(VoServiceType.tap), eq(null));
+        verify(mockService).getTapConfigParams(eq(null));
     }
 
     @Test
@@ -126,7 +96,7 @@ public class CapabilitiesControllerTest
                 get("/tap/capabilities").header(VoKeys.VO_HEADER_CAPABILITIES_URL, "http://my.proxy.url"))
                 .andExpect(status().isOk());
 
-        verify(mockService).getCapabilities(eq(VoServiceType.tap), eq("http://my.proxy.url"));
+        verify(mockService).getTapConfigParams(eq("http://my.proxy.url"));
     }
 
     /**
@@ -150,8 +120,63 @@ public class CapabilitiesControllerTest
     @Test
     public void testCapabilitiesWithConeSearchVoType() throws Exception
     {
+        Map<String, Object> configParams = new HashMap<>();
+        configParams.put("scsTestCatalog", "casda.continuum_component");
+        configParams.put("scsMaxRadius", "10.2");
+        when(mockService.getScsConfigParams(anyString())).thenReturn(configParams);
+        
         this.mockMvc.perform(get("/scs/capabilities")).andExpect(status().isOk()).andDo(print())
-                .andExpect(xpath("/capabilities/capability/maxSR").string("10.2"));
+                .andExpect(forwardedUrl("scs/capabilities.xml"))
+                .andExpect(model().attribute("scsTestCatalog", "casda.continuum_component"))
+                .andExpect(model().attribute("scsMaxRadius", "10.2"));
+    }
+
+    /**
+     * Test capabilities with simple image access v2 with VO type
+     *
+     * @throws Exception
+     *             from performing get request
+     */
+    @Test
+    public void testCapabilitiesWithSia2VoType() throws Exception
+    {
+        Map<String, String> configParams = new HashMap<>();
+        configParams.put("ssapURL", "http://nowhere/sia2/query?");
+        when(mockService.getSia2ConfigParams(anyString())).thenReturn(configParams);
+        
+        this.mockMvc.perform(get("/sia2/capabilities")).andExpect(status().isOk()).andDo(print())
+                .andExpect(forwardedUrl("sia2/capabilities.xml"))
+                .andExpect(model().attribute("ssapURL", "http://nowhere/sia2/query?"));
+    }
+
+    /**
+     * Test capabilities for datalink
+     */
+    @Test
+    public void testCapabilitiesWithDatalinkVoType() throws Exception
+    {
+        Map<String, String> configParams = new HashMap<>();
+        configParams.put("datalinkURL", "http://nowhere/datalink/links");
+        when(mockService.getDatalinkConfigParams(anyString())).thenReturn(configParams);
+        
+        this.mockMvc.perform(get("/datalink/capabilities")).andExpect(status().isOk()).andDo(print())
+                .andExpect(forwardedUrl("datalink/capabilities.xml"))
+                .andExpect(model().attribute("datalinkURL", "http://nowhere/datalink/links"));
+    }
+
+    /**
+     * Test capabilities for Simple Spectral Access
+     */
+    @Test
+    public void testCapabilitiesWithSsaVoType() throws Exception
+    {
+        Map<String, String> configParams = new HashMap<>();
+        configParams.put("ssapURL", "http://nowhere/ssa/query?");
+        when(mockService.getSsaConfigParams(anyString())).thenReturn(configParams);
+        
+        this.mockMvc.perform(get("/ssa/capabilities")).andExpect(status().isOk()).andDo(print())
+                .andExpect(forwardedUrl("ssa/capabilities.xml"))
+                .andExpect(model().attribute("ssapURL", "http://nowhere/ssa/query?"));
     }
 
 }

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.hamcrest.CoreMatchers.startsWith;
 
 import java.io.StringWriter;
 import java.sql.ResultSet;
@@ -247,7 +248,7 @@ public class VoTableResultsExtractorTest
     {
         StringWriter writer = new StringWriter();
         VoTableResultsExtractor extractor = new VoTableResultsExtractor(writer, 1, new HashMap<String, String>(),
-                TapService.CASDA_TAP_RESULT_NAME, metadataMap, APP_BASE_URL, PROXY_BASE_URL, true);
+                TapService.CASDA_TAP_RESULT_NAME, metadataMap, APP_BASE_URL, PROXY_BASE_URL, true, null);
 
         ResultSetMetaData mockMetaData = Mockito.mock(ResultSetMetaData.class);
         extractor.outputHeader(mockMetaData);
@@ -265,11 +266,57 @@ public class VoTableResultsExtractorTest
     {
         StringWriter writer = new StringWriter();
         VoTableResultsExtractor extractor = new VoTableResultsExtractor(writer, 1, new HashMap<String, String>(),
-                TapService.CASDA_TAP_RESULT_NAME, metadataMap, APP_BASE_URL, PROXY_BASE_URL, false);
+                TapService.CASDA_TAP_RESULT_NAME, metadataMap, APP_BASE_URL, PROXY_BASE_URL, false, "");
 
         ResultSetMetaData mockMetaData = Mockito.mock(ResultSetMetaData.class);
         extractor.outputHeader(mockMetaData);
         assertThat(writer.toString(), matchesPattern(String.format(CSS_HEADER_PART1, APP_BASE_URL) + BASE_HEADER_PART2));
+    }
+    
+    /**
+     * Tests outputting a header where an XSL stylesheet has been specified.
+     * 
+     * @throws Exception
+     *             Not expected.
+     */
+    @Test
+    public void testOutputHeaderSpecfiedStylesheet() throws Exception
+    {
+        StringWriter writer = new StringWriter();
+        VoTableResultsExtractor extractor =
+                new VoTableResultsExtractor(writer, 1, new HashMap<String, String>(), TapService.CASDA_TAP_RESULT_NAME,
+                        metadataMap, APP_BASE_URL, PROXY_BASE_URL, false, "http://someotherplace/mystylehseet.xsl");
+
+        String expectedPrefix =  "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+                + "<?xml-stylesheet href='http://someotherplace/mystylehseet.xsl' type='text/xsl'?>\r\n"
+                + "<VOTABLE version=\"1.3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance";
+        
+        ResultSetMetaData mockMetaData = Mockito.mock(ResultSetMetaData.class);
+        extractor.outputHeader(mockMetaData);
+        assertThat(writer.toString(), startsWith(expectedPrefix));
+        //assertThat(writer.toString(), matchesPattern(String.format(CSS_HEADER_PART1, APP_BASE_URL) + BASE_HEADER_PART2));
+    }
+    
+    /**
+     * Tests outputting a header where the XSL stylesheet is suppressed.
+     * 
+     * @throws Exception
+     *             Not expected.
+     */
+    @Test
+    public void testOutputHeaderNoStylesheet() throws Exception
+    {
+        StringWriter writer = new StringWriter();
+        VoTableResultsExtractor extractor =
+                new VoTableResultsExtractor(writer, 1, new HashMap<String, String>(), TapService.CASDA_TAP_RESULT_NAME,
+                        metadataMap, APP_BASE_URL, PROXY_BASE_URL, false, "NoNe");
+
+        String expectedPrefix = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n"
+                + "<VOTABLE version=\"1.3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance";
+
+        ResultSetMetaData mockMetaData = Mockito.mock(ResultSetMetaData.class);
+        extractor.outputHeader(mockMetaData);
+        assertThat(writer.toString(), startsWith(expectedPrefix));
     }
 
     /**

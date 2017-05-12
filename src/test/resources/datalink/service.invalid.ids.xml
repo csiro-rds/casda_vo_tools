@@ -3,7 +3,7 @@
 <VOT:VOTABLE xmlns:VOT="http://www.ivoa.net/xml/VOTable/v1.3">
     <VOT:RESOURCE name="CASDA Datalink Result" type="results">
         <VOT:TABLE>
-        	<VOT:FIELD datatype="char" name="ID" ucd="meta.id;meta.main" arraysize="*"/>
+            <VOT:FIELD datatype="char" name="ID" ucd="meta.id;meta.main" arraysize="*"/>
             <VOT:FIELD datatype="char" name="access_url" ucd="meta.ref.url" arraysize="*"/>
             <VOT:FIELD datatype="char" name="service_def" ucd="meta.ref" arraysize="*"/>
             <VOT:FIELD datatype="char" name="error_message" ucd="meta.code.error" arraysize="*"/>
@@ -30,6 +30,28 @@
                         <VOT:TD/>
                         <VOT:TD/>
                         <VOT:TD>NotFoundFault: cube-1 cannot be found</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>#error</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                    </VOT:TR>
+                    <VOT:TR>
+                        <VOT:TD>spectrum-1</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD>NotFoundFault: spectrum-1 cannot be found</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>#error</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                    </VOT:TR>
+                    <VOT:TR>
+                        <VOT:TD>moment_map-1</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD>NotFoundFault: moment_map-1 cannot be found</VOT:TD>
                         <VOT:TD/>
                         <VOT:TD>#error</VOT:TD>
                         <VOT:TD/>

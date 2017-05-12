@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -23,7 +24,8 @@ import org.apache.logging.log4j.Level;
 import org.custommonkey.xmlunit.DetailedDiff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.joda.time.DateTime;
-import org.junit.Assert;
+
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,13 +84,8 @@ public class DataLinkServiceTest
     // keep the date same through out the testing 12 Nov 2015 10:16
     private static final Date ACCESS_DATE = new Date(1447283779875l);
     
-    private static final String SYNC_DESCRIPTION = "Download data at Pawsey Centre. Note: Only users from within "
-                                                + "PSC network can access the data through this link. Only use if "
-                                                + "you currently have access to Pawsey facilities.";
-
-    private static final String ASYNC_DESCRIPTION = "Scripted file access via Pawsey Centre. Note: Only users from "
-                                                + "within PSC network can access the data through this link. Only "
-                                                + "use if you currently have access to Pawsey facilities.";
+    private static String VALID_REDIRECT = "http://localhost:8080/casda_data_access/data/sync?"
+    											+ "id=8pPzgfTsuvHqCb-D0ULq71Paz3rC-7tvqp2KY9liUTr92SpP0kSfaDliFMcNq8bV";
     
     /**
      * Set up the ui controller before each test.
@@ -121,7 +118,7 @@ public class DataLinkServiceTest
 
         StringWriter writer = new StringWriter();
         dataLinkService.processQuery(writer,
-                new String[] { "visibility-1", "cube-1", "", null, "invalid-123456",
+                new String[] { "visibility-1", "cube-1", "spectrum-1", "moment_map-1", "", null, "invalid-123456",
                         "cube-1;drop table casda.tablename" },
                 "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST, true, ACCESS_DATE);
 
@@ -238,6 +235,115 @@ public class DataLinkServiceTest
                         containsString("userId: pul052")),
                 (Throwable) runtimeException);
     }
+    
+    @Test
+    public void processDownloadInvalidIdTest() throws Exception
+    {
+    	when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+        .thenReturn(Arrays.asList(123l, 456l, 789l));
+		Map<String, Object> result = new HashMap<>();
+		result.put("filesize", 1L);
+		result.put("released_date", DateTime.now());
+		when(jdbcTemplate.queryForMap(any(), eq(123456L))).thenReturn(result);
+
+		DataLinkVoTableBuilder builder = (DataLinkVoTableBuilder) dataLinkService.processDownload
+				("spectrum-x", "gre497", "OPAL", PROJECT_CODE_SAMPLE_LIST, true, ACCESS_DATE);	
+
+        checkXmlAgainstTestCaseFile("ssap.download.invalid.id", builder.getXml());
+    }
+    
+    @Test
+    public void processDownloadValidNonExistentIdTest() throws Exception
+    {
+    	when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+        .thenReturn(Arrays.asList(123l, 456l, 789l));
+		Map<String, Object> result = new HashMap<>();
+		result.put("filesize", 0);
+		result.put("released_date", DateTime.now());
+		when(jdbcTemplate.queryForMap(any(), eq(123456L))).thenReturn(result);
+		
+		DataLinkVoTableBuilder builder = (DataLinkVoTableBuilder) dataLinkService.processDownload
+				("spectrum-3", "gre497", "OPAL", PROJECT_CODE_SAMPLE_LIST, true, ACCESS_DATE);	
+		
+        checkXmlAgainstTestCaseFile("ssap.download.non.exist.id", builder.getXml());
+    }
+    
+    @Test
+    public void processDownloadUnauthenticatedUneleasedTest() throws Exception
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+        .thenReturn(Arrays.asList());
+		Map<String, Object> result = new HashMap<>();
+		when(jdbcTemplate.queryForMap(any(), eq(3L))).thenReturn(result);
+		
+		DataLinkVoTableBuilder builder = (DataLinkVoTableBuilder) dataLinkService.processDownload
+				("spectrum-3", "anonymous", "OPAL", PROJECT_CODE_SAMPLE_LIST, false, ACCESS_DATE);	
+		checkXmlAgainstTestCaseFile("ssap.download.non.exist.id", builder.getXml());
+    }
+    
+    @Test
+    public void processDownloadAuthenticatedUnReleasedTest() throws Exception
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+        .thenReturn(Arrays.asList());
+		Map<String, Object> result = new HashMap<>();
+		result.put("filesize", 2L);
+		result.put("released_date", "");
+		when(jdbcTemplate.queryForMap(any(), eq(3L))).thenReturn(result);
+		
+		String url = (String) dataLinkService.processDownload
+				("spectrum-3", "gre497", "OPAL", PROJECT_CODE_SAMPLE_LIST, false, ACCESS_DATE);	
+		
+		assertEquals(VALID_REDIRECT, url);
+    }
+    
+    @Test
+    public void processDownloadAuthenticatedReleasedTest() throws Exception
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+        .thenReturn(Arrays.asList());
+		Map<String, Object> result = new HashMap<>();
+		result.put("filesize", 2L);
+		result.put("released_date", "13-01-2016:16:29:39:00");
+		when(jdbcTemplate.queryForMap(any(), eq(3L))).thenReturn(result);
+		
+		String url = (String) dataLinkService.processDownload
+				("spectrum-3", "gre497", "OPAL", PROJECT_CODE_SAMPLE_LIST, false, ACCESS_DATE);	
+		
+		assertEquals(VALID_REDIRECT, url);
+    }
+    
+    @Test
+    public void processDownloadUnauthenticatedReleasedTest() throws Exception
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+        .thenReturn(Arrays.asList());
+		Map<String, Object> result = new HashMap<>();
+		result.put("filesize", 2L);
+		result.put("released_date", "13-01-2016:16:29:39:00");
+		when(jdbcTemplate.queryForMap(any(), eq(3L))).thenReturn(result);
+		
+		DataLinkVoTableBuilder builder = (DataLinkVoTableBuilder) dataLinkService.processDownload
+				("spectrum-3", "anonymous", "OPAL", PROJECT_CODE_SAMPLE_LIST, false, ACCESS_DATE);	
+		
+		checkXmlAgainstTestCaseFile("ssap.download.non.exist.id", builder.getXml());
+    }
+    
+    @Test
+    public void processDownloadUnreleasedCasdaAdminTest()
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+        .thenReturn(Arrays.asList());
+		Map<String, Object> result = new HashMap<>();
+		result.put("filesize", 2L);
+		result.put("released_date", "");
+		when(jdbcTemplate.queryForMap(any(), eq(3L))).thenReturn(result);
+		
+		String url = (String) dataLinkService.processDownload
+				("spectrum-3", "gre497", "OPAL", PROJECT_CODE_SAMPLE_LIST, true, ACCESS_DATE);	
+		
+		assertEquals(VALID_REDIRECT, url);
+    }
 
     private void checkXmlAgainstTestCaseFile(String testCase, String xml) throws SAXException, IOException
     {
@@ -248,6 +354,6 @@ public class DataLinkServiceTest
                 FileUtils.readFileToString(new File("src/test/resources/datalink/" + testCase + ".xml")), xml));
 
         List<?> allDifferences = diff.getAllDifferences();
-        Assert.assertEquals("Differences found: " + diff.toString(), 0, allDifferences.size());
+        assertEquals("Differences found: " + diff.toString(), 0, allDifferences.size());
     }
 }

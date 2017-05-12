@@ -51,6 +51,8 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
     
     private boolean proxiedOutput;
 
+    private String votableXsl;
+
     /**
      * Creates a new instance of OutputTapQueryToVoTable for use outputting a single query only. Instances are not
      * reusable.
@@ -69,7 +71,7 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
     public VoTableResultsExtractor(Writer writer, int maxRec, Map<String, String> votableFieldMap, String resourceName,
             String baseUrl)
     {
-        this(writer, maxRec, votableFieldMap, resourceName, null, baseUrl, null, false);
+        this(writer, maxRec, votableFieldMap, resourceName, null, baseUrl, null, false, null);
     }
 
     /**
@@ -92,7 +94,7 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
     public VoTableResultsExtractor(Writer writer, int maxRec, Map<String, String> votableFieldMap, String resourceName,
             Map<String, String[]> serviceMetaDataMap, String baseUrl)
     {
-        this(writer, maxRec, votableFieldMap, resourceName, serviceMetaDataMap, baseUrl, null, false);
+        this(writer, maxRec, votableFieldMap, resourceName, serviceMetaDataMap, baseUrl, null, false, null);
     }
 
     /**
@@ -115,10 +117,13 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
      *            The web address at which this VO Proxy instance can be found.
      * @param proxiedOutput
      *            Whether the out should being catered for vo_proxy or to the user.
-     * 
+     * @param votableXsl
+     *            The address of the votable XSL stylesheet, NULL to default to the base or proxy address, or "None" to
+     *            suppress the stylesheet directive.
      */
     public VoTableResultsExtractor(Writer writer, int maxRec, Map<String, String> votableFieldMap, String resourceName,
-            Map<String, String[]> serviceMetaDataMap, String baseUrl, String proxyUrl, boolean proxiedOutput)
+            Map<String, String[]> serviceMetaDataMap, String baseUrl, String proxyUrl, boolean proxiedOutput,
+            String votableXsl)
     {
         super(baseUrl, StringUtils.isBlank(proxyUrl) ? baseUrl : proxyUrl);
         this.writer = writer;
@@ -127,6 +132,7 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
         this.resourceName = resourceName;
         this.serviceMetaDataMap = serviceMetaDataMap;
         this.proxiedOutput = proxiedOutput;
+        this.votableXsl = votableXsl;
     }
 
     /**
@@ -217,7 +223,11 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
     protected void outputHeader(ResultSetMetaData metaData) throws SQLException, IOException
     {
         writer.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n");
-        writer.append("<?xml-stylesheet href='" + fetchXslBaseUrl() + "votable.xsl' type='text/xsl'?>\r\n");
+        String stylesheetDirective = getStylesheetDirective();
+        if (stylesheetDirective != null)
+        {
+            writer.append(stylesheetDirective);
+        }
         writer.append("<VOTABLE version=\"1.3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
                 + "xmlns=\"http://www.ivoa.net/xml/VOTable/v1.3\" "
                 + "xmlns:stc=\"http://www.ivoa.net/xml/STC/v1.30\" >\r\n");
@@ -255,6 +265,25 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
         }
         writer.append("<DATA>\r\n");
         writer.append("<TABLEDATA>\r\n");
+    }
+
+    private String getStylesheetDirective()
+    {
+        if ("none".equalsIgnoreCase(votableXsl))
+        {
+            return null;
+        }
+
+        String stylesheet;
+        if (StringUtils.isBlank(votableXsl))
+        {
+            stylesheet = fetchXslBaseUrl() + "votable.xsl";
+        }
+        else
+        {
+            stylesheet = votableXsl;
+        }
+        return "<?xml-stylesheet href='" + stylesheet + "' type='text/xsl'?>\r\n";
     }
 
     /**
@@ -543,8 +572,9 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
             String[] info = serviceMetaDataMap.get(key);
             if (info.length > 1)
             {
-                writer.append("<INFO name=\"" + Utils.convertCamelCase(key) + "\" value=\"" + info[0] + "\">" + info[1]
-                        + "</INFO>\r\n");
+                writer.append("<INFO name=\"" + Utils.convertCamelCase(key) + "\" value=\"" + info[0] + "\"");
+                writer.append(StringUtils.isBlank(info[1]) ? "/>" : ">" + info[1] + "</INFO>");
+                writer.append("\r\n");
             }
         }
     }

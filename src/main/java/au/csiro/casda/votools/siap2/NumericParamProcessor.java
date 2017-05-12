@@ -31,7 +31,7 @@ public class NumericParamProcessor implements SiapParamProcessor
     private static final String NEGATIVE_INFINTY = "-Inf";
     private static final String POSITIVE_INFINTY = "+Inf";
 
-    private static final String SINGLE_NUMERIC_VALUE_PATTERN = "\\d+(\\.\\d+)?(e[+-]?\\d+)?";
+    private static final String SINGLE_NUMERIC_VALUE_PATTERN = "\\d+(\\.\\d+)?([eE][+-]?\\d+)?";
 
     private static final String OPTIONAL_MIN_NUMERIC_PATTERN =
             "(" + NEGATIVE_INFINTY + ")|(" + SINGLE_NUMERIC_VALUE_PATTERN + ")";

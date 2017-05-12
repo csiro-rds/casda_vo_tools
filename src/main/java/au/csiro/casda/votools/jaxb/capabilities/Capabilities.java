@@ -27,11 +27,8 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
-import au.csiro.casda.votools.jaxb.tapregext.TableAccess;
-import au.csiro.casda.votools.jaxb.conesearch.ConeSearch;
 import au.csiro.casda.votools.jaxb.voresource.Capability;
 
 
@@ -61,7 +58,6 @@ import au.csiro.casda.votools.jaxb.voresource.Capability;
 @XmlRootElement(name = "capabilities")
 //Start inserted code : Updated generated code with SeeAlso to TableAccess class otherwise failed to marshall 
 //attributes of subclass TableAccess (or ConeSearch)
-@XmlSeeAlso({TableAccess.class, ConeSearch.class})
 //End inserted code
 public class Capabilities {
 

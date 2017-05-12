@@ -66,6 +66,7 @@ import adql.translator.ADQLTranslator;
 import adql.translator.PgSphereTranslator;
 import adql.translator.TranslationException;
 import au.csiro.casda.logging.CasdaFormatter;
+import au.csiro.casda.votools.config.ConfigKeys;
 import au.csiro.casda.votools.config.ConfigValueKeys;
 import au.csiro.casda.votools.config.Configurable;
 import au.csiro.casda.votools.config.Configuration;
@@ -193,6 +194,8 @@ public class TapService extends Configurable
     /** Map of field definitions for each table and column. */
     private Map<String, String> votableFieldMap;
 
+    private String votableXsl;
+
     /**
      * Constructor
      * 
@@ -289,6 +292,7 @@ public class TapService extends Configurable
             logTimezone = tapEndPoint.get("log.timezone");
             executionDurationDefault = tapEndPoint.getInt("tap.execution.duration.default");
             retentionPeriodDefault = tapEndPoint.getInt("tap.retention.period.default");
+            votableXsl = tapEndPoint.get(ConfigKeys.TAP_VOTABLE_XSL.getKey());
             ready = true;
             createDbChecker();
             createVotableFieldMap();
@@ -511,18 +515,25 @@ public class TapService extends Configurable
      *            The time the job processing was started.
      * @param singleTableName
      *            Name of the table if the query includes only one table.
+     * @param extraMetaDataMap
+     *            The map of metadata to be included in the query result. May be null
      * @throws InterruptedException
      *             If the query was interrupted.
      * @throws IOException
      *             If the result cannot be written to the writer.
      */
     void runTapQuery(String sqlQuery, OutputFormat format, Writer writer, int maxrecs, Map<String, String> params,
-            ZonedDateTime started, String singleTableName) throws InterruptedException, IOException
+            ZonedDateTime started, String singleTableName, Map<String, String[]> extraMetaDataMap)
+            throws InterruptedException, IOException
     {
         int recsLimit = Math.min(maxrecs, maxRecords);
 
         // create map of metadata properties
-        Map<String, String[]> metaDataMap = new LinkedHashMap<String, String[]>();
+        LinkedHashMap<String, String[]> metaDataMap = new LinkedHashMap<String, String[]>();
+        if (extraMetaDataMap != null)
+        {
+            metaDataMap.putAll(extraMetaDataMap);
+        }
         String[] metaDataKeys = new String[] { "instrument", "server", "serviceShortName", "serviceTitle", "identifier",
                 "servicePublisher", "furtherInformation", "contactPerson", "copyright" };
         for (String key : metaDataKeys)
@@ -543,6 +554,12 @@ public class TapService extends Configurable
             metaDataMap.put("SIAP query",
                     new String[] { StringEscapeUtils.escapeXml10(params.get(VoKeys.STR_KEY_SIAP_QUERY)),
                             "SIAP Query submitted by the user" });
+        }
+        else if (params.get(VoKeys.STR_KEY_SSAP_QUERY) != null)
+        {
+            metaDataMap.put("SSAPQuery",
+                    new String[] { StringEscapeUtils.escapeXml10(params.get(VoKeys.STR_KEY_SSAP_QUERY)),
+                            "SSAP Query submitted by the user" });
         }
         else
         {
@@ -598,7 +615,7 @@ public class TapService extends Configurable
             boolean proxiedOutput = StringUtils.isNotBlank(params.get(VoKeys.USER_ID))
                     && !VoKeys.ANONYMOUS_USER.equalsIgnoreCase(params.get(VoKeys.USER_ID));
             extractor = new VoTableResultsExtractor(writer, maxrecs, votableFieldMap, voTableHeading, metaDataMap,
-                    baseUrl, proxyUrl, proxiedOutput);
+                    baseUrl, proxyUrl, proxiedOutput, votableXsl);
             break;
 
         case CSV:
@@ -944,6 +961,7 @@ public class TapService extends Configurable
         return validateQuery(isAdmin, query, params, writer, started, projectIds);
     }
 
+    
     /**
      * Validate and process TAP query and write the result to the supplied writer. If an error is encountered the error
      * will be written in VOTABLE format to the writer.
@@ -957,6 +975,26 @@ public class TapService extends Configurable
      *             if there were configuration problems
      */
     public boolean processQuery(Writer writer, Map<String, String> paramsMap) throws ConfigurationException
+    {
+        return processQuery(writer, paramsMap, null);
+    }
+    
+    /**
+     * Validate and process TAP query and write the result to the supplied writer. If an error is encountered the error
+     * will be written in VOTABLE format to the writer.
+     *
+     * @param writer
+     *            The destination for the query output.
+     * @param paramsMap
+     *            The parameters for this job.
+     * @param metaDataMap
+     *            The map of metadata to be included in the query result. May be null
+     * @return true if the query was successful, false if an error occurred
+     * @throws ConfigurationException
+     *             if there were configuration problems
+     */
+    public boolean processQuery(Writer writer, Map<String, String> paramsMap, Map<String, String[]> metaDataMap)
+            throws ConfigurationException
     {
         ZonedDateTime started = now();
         String query = paramsMap.get(VoKeys.STR_KEY_ADQL_QUERY);
@@ -996,7 +1034,8 @@ public class TapService extends Configurable
                 String singleTableName = getSingleTableName(query);
 
                 logger.debug("Updated query for isCasdaAdmin={}: {}", isCasdaAdmin, sqlForQuery);
-                runTapQuery(sqlForQuery, outputFormat, writer, maxRec, paramsMap, started, singleTableName);
+                runTapQuery(sqlForQuery, outputFormat, writer, maxRec, paramsMap, started, singleTableName,
+                        metaDataMap);
                 result = true;
             }
         }

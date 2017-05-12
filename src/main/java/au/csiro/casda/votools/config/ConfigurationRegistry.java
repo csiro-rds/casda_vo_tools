@@ -20,7 +20,9 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Component;
 
@@ -206,12 +208,6 @@ public class ConfigurationRegistry
     @Value("${datalink.cutout.service.name}")
     private String datalinkCutoutServiceName;
     
-    @Value("${datalink.cutout.ui.url:}")
-    private String datalinkCutoutUiUrl;
-
-    @Value("${datalink.cutout.ui.service.name:}")
-    private String datalinkCutoutUiServiceName;
-    
     @Value("${datalink.sync.service.name}")
     private String datalinkSyncServiceNameWeb;
     
@@ -256,6 +252,8 @@ public class ConfigurationRegistry
     
     private Set<String> verifiedDbs;
 
+    @Autowired
+    private Environment springEnv;
     /**
      * 
      */
@@ -940,38 +938,6 @@ public class ConfigurationRegistry
     {
         this.datalinkCutoutServiceName = datalinkCutoutServiceName;
     }
-    
-    /**
-     * @return the datalinkCutoutUiUrl
-     */
-    public String getDatalinkCutoutUiUrl()
-    {
-        return datalinkCutoutUiUrl;
-    }
-
-    /**
-     * @param datalinkCutoutUiUrl the datalinkCutoutUiUrl to set
-     */
-    public void setDatalinkCutoutUiUrl(String datalinkCutoutUiUrl)
-    {
-        this.datalinkCutoutUiUrl = datalinkCutoutUiUrl;
-    }
-
-    /**
-     * @return the datalinkCutoutUiServiceName
-     */
-    public String getDatalinkCutoutUiServiceName()
-    {
-        return datalinkCutoutUiServiceName;
-    }
-
-    /**
-     * @param datalinkCutoutUiServiceName the datalinkCutoutUiServiceName to set
-     */
-    public void setDatalinkCutoutUiServiceName(String datalinkCutoutUiServiceName)
-    {
-        this.datalinkCutoutUiServiceName = datalinkCutoutUiServiceName;
-    }
 
     public String getDatalinkSyncServiceNameWeb()
     {
@@ -1121,6 +1087,23 @@ public class ConfigurationRegistry
     public void setLogoUrl(String logoUrl)
     {
         this.logoUrl = logoUrl;
+    }
+
+    /**
+     * Retrieve the application property value for the provided key. This does a dynamic lookup of the Spring
+     * environment.
+     * 
+     * @param key The key of the config itemto be retrieved.
+     * @return The value, or null if the key is not present.
+     */
+    public String getConfigValue(String key)
+    {
+        String value = null;
+        if (springEnv != null)
+        {
+            value = springEnv.getProperty(key);
+        }
+        return value;
     }
     
 }
