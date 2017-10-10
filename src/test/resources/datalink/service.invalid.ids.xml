@@ -59,6 +59,17 @@
                         <VOT:TD/>
                     </VOT:TR>
                     <VOT:TR>
+                        <VOT:TD>cubelet-1</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD>NotFoundFault: cubelet-1 cannot be found</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>#error</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                        <VOT:TD/>
+                    </VOT:TR>
+                    <VOT:TR>
                         <VOT:TD></VOT:TD>
                         <VOT:TD/>
                         <VOT:TD/>

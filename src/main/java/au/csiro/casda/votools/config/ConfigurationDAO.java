@@ -89,7 +89,7 @@ public interface ConfigurationDAO
      *            full database name of table that the columns belong to
      * @param constraintType
      *            ConfigurationDAOImpl.FOREIGN_KEYS for foreign keys, ConfigurationDAOImpl.PRIMARY_KEYS for primary keys
-     * @return Map constraint name -> encoded constraint string
+     * @return Map constraint name -$gt; encoded constraint string
      */
     public Map<String, String> exportConstraints(String fullDbTableName, String constraintType);
 
@@ -257,7 +257,6 @@ public interface ConfigurationDAO
      *            schema configuration
      * @throws ConfigurationException
      *             if change is not allowed
-     * @return
      */
     public void createTapSchema(SchemaConfig schemaConfig) throws ConfigurationException;
 

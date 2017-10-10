@@ -23,7 +23,7 @@ import au.csiro.casda.votools.utils.Utils;
  * 
  * Symbols from the {I Q U V RR LL RL LR XX YY XY YX POLI POLA} set.
  * 
- * eg: POL=I&POL=Q&POL=YY
+ * eg: POL=I&amp;POL=Q&amp;POL=YY
  * 
  * <p>
  * Copyright 2015, CSIRO Australia All rights reserved.

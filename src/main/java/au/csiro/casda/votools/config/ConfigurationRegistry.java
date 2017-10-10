@@ -208,6 +208,12 @@ public class ConfigurationRegistry
     @Value("${datalink.cutout.service.name}")
     private String datalinkCutoutServiceName;
     
+    @Value("${datalink.generate.spectrum.url}")
+    private String datalinkGenerateSpectrumUrl;
+
+    @Value("${datalink.generate.spectrum.service.name}")
+    private String datalinkGenerateSpectrumServiceName;
+    
     @Value("${datalink.sync.service.name}")
     private String datalinkSyncServiceNameWeb;
     
@@ -774,6 +780,21 @@ public class ConfigurationRegistry
         return new File(configFileName);
     }
 
+    /**
+     * Get TAP examples config file location.
+     * 
+     * @return Tap Examples config location.
+     */
+    public File getConfigurationTapExamplesFile()
+    {
+        String configFileName = System.getProperty("tap.examples.config.file");
+        if (configFileName == null)
+        {
+            configFileName = Configuration.DEFAULT_TAP_EXAMPLES_CONFIG;
+        }
+        return new File(configFileName);
+    }
+    
     public static void setStaticRegistry(ConfigurationRegistry staticRegistry)
     {
         ConfigurationRegistry.staticRegistry = staticRegistry;
@@ -929,7 +950,27 @@ public class ConfigurationRegistry
         this.datalinkCutoutUrl = datalinkCutoutUrl;
     }
 
-    public String getDatalinkCutoutServiceName()
+    public String getDatalinkGenerateSpectrumUrl() 
+    {
+		return datalinkGenerateSpectrumUrl;
+	}
+
+	public void setDatalinkGenerateSpectrumUrl(String datalinkGenerateSpectrumUrl)
+	{
+		this.datalinkGenerateSpectrumUrl = datalinkGenerateSpectrumUrl;
+	}
+
+	public String getDatalinkGenerateSpectrumServiceName() 
+	{
+		return datalinkGenerateSpectrumServiceName;
+	}
+
+	public void setDatalinkGenerateSpectrumServiceName(String datalinkGenerateSpectrumServiceName)
+	{
+		this.datalinkGenerateSpectrumServiceName = datalinkGenerateSpectrumServiceName;
+	}
+
+	public String getDatalinkCutoutServiceName()
     {
         return datalinkCutoutServiceName;
     }

@@ -35,7 +35,7 @@ project.description = """CSIRO CASDA Project - CASDA VO Tools web application"""
 
 ext {
     majorVersion = 1
-    minorVersion = 5
+    minorVersion = 8
     springBootVer = '1.3.6.RELEASE'
     tomcatVer = '8.0.14'
 }
@@ -93,6 +93,8 @@ dependencies {
     compile("com.google.guava:guava:18.0")
     compile("com.esotericsoftware.yamlbeans:yamlbeans:1.06")
     
+    compile(group: 'commons-lang', name: 'commons-lang', version:'2.6')
+    
     // jstl needed for the jsp rendering to work
     compile("jstl:jstl:1.2")
     
@@ -141,6 +143,13 @@ dependencies {
     jaxb 'com.sun.xml.bind:jaxb-impl:2.2.7-b41'
     jaxb 'javax.xml.bind:jaxb-api:2.2.7'
     jaxb 'org.jvnet.jaxb2_commons:jaxb2-basics:0.8.1'
+}
+
+task javadoc(type: Javadoc, overwrite: true) {
+  source = sourceSets.main.allJava
+  classpath = configurations.compile
+  
+  exclude '**/jaxb/**'
 }
 
 class JaxbTask extends DefaultTask {

@@ -27,10 +27,13 @@ import javax.sql.DataSource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,6 +57,8 @@ import adql.query.ADQLQuery;
 import adql.query.ClauseADQL;
 import adql.query.ClauseConstraints;
 import adql.query.constraint.ADQLConstraint;
+import adql.query.constraint.Comparison;
+import adql.query.constraint.ComparisonOperator;
 import adql.query.constraint.ConstraintsGroup;
 import adql.query.constraint.Exists;
 import adql.query.constraint.In;
@@ -62,6 +67,7 @@ import adql.query.from.ADQLTable;
 import adql.query.operand.ADQLColumn;
 import adql.query.operand.ADQLOperand;
 import adql.query.operand.NumericConstant;
+import adql.query.operand.StringConstant;
 import adql.translator.ADQLTranslator;
 import adql.translator.PgSphereTranslator;
 import adql.translator.TranslationException;
@@ -84,6 +90,7 @@ import au.csiro.casda.votools.result.ResultsExtractor;
 import au.csiro.casda.votools.result.VoTableResultsExtractor;
 import au.csiro.casda.votools.result.VotableError;
 import au.csiro.casda.votools.utils.VoKeys;
+import au.csiro.casda.votools.utils.SystemTime;
 
 /*
  * #%L
@@ -103,8 +110,8 @@ import au.csiro.casda.votools.utils.VoKeys;
  * Copyright 2014, CSIRO Australia All rights reserved.
  */
 @Service
-@Scope("singleton")
-public class TapService extends Configurable
+@Scope(value = "singleton", proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class TapService extends Configurable implements SystemTime
 {
     private static Logger logger = LoggerFactory.getLogger(TapService.class);
 
@@ -402,8 +409,8 @@ public class TapService extends Configurable
     {
         // update the query to only include released data or data
         List<ADQLTable> mainTables = query.getFrom().getTables();
-        List<ADQLConstraint> releasedDateConstraints =
-                generateAuthorisationConstraintsForTables(mainTables, projectIds);
+        List<ADQLConstraint> releasedDateConstraints = generateAuthorisationConstraintsForTables(mainTables,
+                projectIds);
         for (ADQLConstraint releasedDateConstraint : releasedDateConstraints)
         {
             query.getWhere().add(ClauseConstraints.AND, releasedDateConstraint);
@@ -468,8 +475,18 @@ public class TapService extends Configurable
                         String tableref = (StringUtils.isNotBlank(table.getAlias())) ? table.getAlias()
                                 : table.getFullTableName();
 
-                        ADQLConstraint includeReleasedData =
-                                new IsNull(new ADQLColumn(tableref, STR_RELEASED_DATE_COLUMN), true);
+                        ADQLColumn releaseDateColumn = new ADQLColumn(tableref, STR_RELEASED_DATE_COLUMN);
+
+                        ADQLConstraint includeReleasedData = new IsNull(releaseDateColumn, true);
+
+                        // for embargo'd ASKAP Level 7 collections we want records 
+                        // that have a released date and are less than or equal to today's date
+                        ADQLConstraint embargoReleasedData = new Comparison(releaseDateColumn,
+                                ComparisonOperator.LESS_OR_EQUAL, new StringConstant(getCurrentUTCDateTime().toString()));
+
+                        ConstraintsGroup embargoReleaseDateAndIncludeReleasedDataConstraint = new ConstraintsGroup();
+                        embargoReleaseDateAndIncludeReleasedDataConstraint.add(includeReleasedData);
+                        embargoReleaseDateAndIncludeReleasedDataConstraint.add(ConstraintsGroup.AND, embargoReleasedData);
 
                         if (CollectionUtils.isNotEmpty(projectIds))
                         {
@@ -488,9 +505,8 @@ public class TapService extends Configurable
                         }
                         else
                         {
-                            constraints.add(includeReleasedData);
+                            constraints.add(embargoReleaseDateAndIncludeReleasedDataConstraint);
                         }
-
                     }
                 }
             }
@@ -538,7 +554,7 @@ public class TapService extends Configurable
                 "servicePublisher", "furtherInformation", "contactPerson", "copyright" };
         for (String key : metaDataKeys)
         {
-            String entry =  config.get(Configuration.METADATA_PREFIX + key);
+            String entry = config.get(Configuration.METADATA_PREFIX + key);
             if (StringUtils.isNotBlank(entry))
             {
                 String[] values = entry.split("\\|");
@@ -586,8 +602,9 @@ public class TapService extends Configurable
             metaDataMap.put("tableDescription",
                     new String[] { tapTable.getDescription(), "Description of the table queried" });
             metaDataMap.put("tableLongDescription",
-                    new String[] { StringUtils.isNotBlank(tapTable.getDescriptionLong())? 
-                            tapTable.getDescriptionLong() : " ", "Long description of the table queried" });            
+                    new String[] {
+                            StringUtils.isNotBlank(tapTable.getDescriptionLong()) ? tapTable.getDescriptionLong() : " ",
+                            "Long description of the table queried" });
             // @formatter:on
 
             if (StringUtils.isNotBlank(tapTable.getParams()))
@@ -601,7 +618,7 @@ public class TapService extends Configurable
         }
 
         String baseUrl = config.get(ConfigValueKeys.APP_BASE_URL);
-        String proxyUrl  = config.get(ConfigValueKeys.DATALINK_BASE_URL);        
+        String proxyUrl = config.get(ConfigValueKeys.DATALINK_BASE_URL);
 
         ResultSetExtractor<Boolean> extractor;
         switch (format)
@@ -739,7 +756,7 @@ public class TapService extends Configurable
                     String columnName = tapColumn.getId().getColumnName();
                     if (columnName.matches("^\".+\"$"))
                     {
-                        columnName = columnName.substring(1, columnName.length()-1);
+                        columnName = columnName.substring(1, columnName.length() - 1);
                     }
                     dbTable.addColumn(new DefaultDBColumn(tapColumn.getDbColumnName(), columnName, dbTable));
                 }
@@ -772,7 +789,9 @@ public class TapService extends Configurable
             List<TapColumn> tapColumns = voTableRepositoryService.getColumns();
             for (TapColumn tapColumn : tapColumns)
             {
-                fieldMap.put(tapColumn.getTable().getDbTableName() + "|" + tapColumn.getId().getColumnName(),
+                fieldMap.put(
+                        tapColumn.getTable().getDbSchemaName() + "|" + tapColumn.getTable().getDbTableName() + "|"
+                                + tapColumn.getDbColumnName(),
                         VoTableResultsExtractor.buildVoTableFieldHeader(tapColumn));
             }
         }
@@ -961,7 +980,6 @@ public class TapService extends Configurable
         return validateQuery(isAdmin, query, params, writer, started, projectIds);
     }
 
-    
     /**
      * Validate and process TAP query and write the result to the supplied writer. If an error is encountered the error
      * will be written in VOTABLE format to the writer.
@@ -978,7 +996,7 @@ public class TapService extends Configurable
     {
         return processQuery(writer, paramsMap, null);
     }
-    
+
     /**
      * Validate and process TAP query and write the result to the supplied writer. If an error is encountered the error
      * will be written in VOTABLE format to the writer.
@@ -1091,8 +1109,8 @@ public class TapService extends Configurable
         String submittedStr = paramsMap.get(VoKeys.SUBMITTED_TIME);
         submittedStr = CasdaFormatter.formatDateTimeForLog(Date.from(ZonedDateTime.parse(submittedStr).toInstant()));
         String startedStr = CasdaFormatter.formatDateTimeForLog(Date.from(started.toInstant()));
-        String query =
-                paramsMap.containsKey(VoKeys.STR_KEY_ADQL_QUERY) ? paramsMap.get(VoKeys.STR_KEY_ADQL_QUERY) : "null";
+        String query = paramsMap.containsKey(VoKeys.STR_KEY_ADQL_QUERY) ? paramsMap.get(VoKeys.STR_KEY_ADQL_QUERY)
+                : "null";
         String userId = paramsMap.get(VoKeys.USER_ID);
         return eventType.messageBuilder().addCustomMessage(customMsg)
                 .addAll(Arrays.asList(query, submittedStr, startedStr, mode, userId)).toString().trim();
@@ -1166,7 +1184,7 @@ public class TapService extends Configurable
     {
         this.jdbcTemplateAsync = jdbcTemplateAsync;
     }
-    
+
     /**
      * A prepared statement creator configured to allow streaming of results. Each instance is responsible for creating
      * the statement for a specific query. They should not be reused.
@@ -1177,7 +1195,9 @@ public class TapService extends Configurable
 
         /**
          * Create a new TapStatementCreator instance for a specific query.
-         * @param query The query to be run.
+         * 
+         * @param query
+         *            The query to be run.
          */
         public TapStatementCreator(String query)
         {
@@ -1195,5 +1215,11 @@ public class TapService extends Configurable
             preparedStatement.setFetchSize(resultFetchSizeRows);
             return preparedStatement;
         }
+    }
+
+    @Override
+    public DateTime getCurrentUTCDateTime()
+    {
+        return new DateTime(DateTimeZone.UTC);
     }
 }

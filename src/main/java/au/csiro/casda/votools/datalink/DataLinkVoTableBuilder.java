@@ -137,12 +137,12 @@ public class DataLinkVoTableBuilder
      *            the 'standardID' of the service (eg: ivo://ivoa.net/std/SODA#async-1.0)
      * @param accessUrl
      *            the URL to access the service
-     * @param isCutout
-     *            is a cutout service
+     * @param isGeneratedFile
+     *            is a isGeneratedFile service (cutout or generated spectrum)
      * @return this builder instance
      */
     public DataLinkVoTableBuilder withServiceDefinition(String xmlId, String standardId, String accessUrl,
-            boolean isCutout)
+            boolean isGeneratedFile)
     {
         Resource serviceResource = new Resource();
 
@@ -170,7 +170,7 @@ public class DataLinkVoTableBuilder
 
         inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.ID));
 
-        if (isCutout)
+        if (isGeneratedFile)
         {
             inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.POS));
             inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.BAND));

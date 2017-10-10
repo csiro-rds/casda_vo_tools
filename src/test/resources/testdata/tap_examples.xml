@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Examples>
+	<Example>
+		<Name>Full Table Example</Name>
+		<Tables>TAP_SCHEMA.columns</Tables>
+		<Query>SELECT TOP 1000 * FROM TAP_SCHEMA.columns</Query>
+	</Example>
+	<Example>
+		<Name>Full Table Example 2</Name>
+		<Query>SELECT TOP 10 * FROM TAP_SCHEMA.columns</Query>
+		<Description>Sample Tap Example Description.</Description>
+	</Example>
+</Examples>

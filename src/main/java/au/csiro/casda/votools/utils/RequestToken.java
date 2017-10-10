@@ -29,6 +29,8 @@ public class RequestToken
 {
     /** Constant for a cutout request*/
     public static final String CUTOUT = "CUTOUT";
+    /** Constant for a cutout request*/
+    public static final String GENERATED_SPECTRUM = "GENERATED_SPECTRUM";
     /** Constant for a web download request*/
     public static final String WEB_DOWNLOAD = "WEB";
     /** Constant for a download to internal account request*/

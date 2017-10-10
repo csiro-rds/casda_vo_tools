@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.postgresql.jdbc2.AbstractJdbc2ResultSetMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -248,13 +249,18 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
         {
             String name = metaData.getColumnName(i).toLowerCase();
             int type = metaData.getColumnType(i);
+            String schema = metaData.getSchemaName(i).toLowerCase();
+            if (StringUtils.isBlank(schema) && metaData instanceof AbstractJdbc2ResultSetMetaData)
+            {
+                schema = ((AbstractJdbc2ResultSetMetaData) metaData).getBaseSchemaName(i).toLowerCase();
+            }
             String table = metaData.getTableName(i).toLowerCase();
             String fieldDef = votableFieldMap.get("scs|" + name);
             // using scs| because we are hard coding UCD1 values for scs (prefer UCD1.1 in the tables)
             // If we get a table from postgres, lookup the field info.
             if (StringUtils.isNotBlank(table))
             {
-                fieldDef = votableFieldMap.get(table + "|" + name);
+                fieldDef = votableFieldMap.get(schema + "|" + table + "|" + name);
             }
             // Provided in case no field definition can be found.
             if (fieldDef == null)

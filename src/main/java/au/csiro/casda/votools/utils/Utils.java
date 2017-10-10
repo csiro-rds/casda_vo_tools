@@ -104,7 +104,7 @@ public class Utils
      *            the first password
      * @param password2
      *            the confirmation password
-     * @return true if they match and contain 1 uppercase char, one lowercase char, one number & one punctuation
+     * @return true if they match and contain 1 uppercase char, one lowercase char, one number &amp; one punctuation
      */
     public static boolean validatePassword(String password1, String password2)
     {

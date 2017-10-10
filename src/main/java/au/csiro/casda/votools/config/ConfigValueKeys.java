@@ -29,9 +29,15 @@ public abstract class ConfigValueKeys
     /** Constant for the data link cut-out URL */
     public static final String DATALINK_CUTOUT_URL = "datalink.cutout.url";
     
+    /** Constant for the data link cut-out URL */
+    public static final String DATALINK_GENERATE_SPECTRUM_URL = "datalink.generate.spectrum.url";
+    
     /** Constant for the cut-out service name */
     public static final String DATALINK_CUTOUT_SERVICE_NAME = "datalink.cutout.service.name";
-
+    
+    /** Constant for the cut-out service name */
+    public static final String DATALINK_GENERATE_SPECTRUM_SERVICE_NAME = "datalink.generate.spectrum.service.name";
+    
     /** Constant for the sync service name */
     public static final String DATALINK_SYNC_SERVICE_NAME_WEB = "datalink.sync.service.name";
     

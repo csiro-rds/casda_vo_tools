@@ -1,10 +1,5 @@
 package au.csiro.casda.votools.tap;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -20,6 +15,13 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -162,6 +164,7 @@ public class TapServiceTest
         tableList.add(table);
 
         TapTable tableCopy = new TapTable();
+        tableCopy.setDbSchemaName(table.getDbSchemaName());
         tableCopy.setTableName(table.getTableName());
         tableCopy.setDbTableName(table.getDbTableName());
         tableCopy.setDescriptionLong("This is very very very long description");
@@ -173,6 +176,7 @@ public class TapServiceTest
         tapColumn.setId(new TapColumnPK(table.getTableName(), "dataproduct_type"));
         tapColumn.setDatatype("VARCHAR");
         tapColumn.setSize(255);
+        tapColumn.setDbColumnName("dataproduct_type_db");
         columnList.add(tapColumn);
 
         when(voTableRepositoryService.getTables()).thenReturn(tableList);
@@ -238,7 +242,8 @@ public class TapServiceTest
     {
         Map<String, String> votableFieldMap = tapService.createVotableFieldMap();
         assertThat(votableFieldMap.get(""), nullValue());
-        assertThat(votableFieldMap.get("obs_core|dataproduct_type"),
+        assertThat(votableFieldMap.keySet(), containsInAnyOrder("casda|obs_core|dataproduct_type_db"));
+        assertThat(votableFieldMap.get("casda|obs_core|dataproduct_type_db"),
                 is("<FIELD name=\"dataproduct_type\" ID=\"dataproduct_type\" "
                         + "datatype=\"char\" arraysize=\"255\" />\r\n"));
 

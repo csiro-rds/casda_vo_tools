@@ -64,6 +64,20 @@ public class DataLinkService extends Configurable
      */
     private static final String CASDA_DATALINK_RESULT_NAME = "CASDA Data Link";
     
+    private static final String IMAGE_CUBE_REGEX = "^cube-[0-9]+$";
+    
+    private static final String SPECTRUM_REGEX = "^spectrum-[0-9]+$";
+    
+    private static final String MOMENT_MAP_REGEX = "^moment_map-[0-9]+$";
+    
+    private static final String CUBELET_REGEX = "^cubelet-[0-9]+$";
+    
+    private static final String EVALUATION_REGEX = "^evaluation-[0-9]+$";
+    
+    private static final String FITS_REGEX = "^(cube|spectrum|moment_map|cubelet)-[0-9]+$";
+    
+    private static final String VISIBILITY_REGEX = "^visibility-[0-9]+$";
+    
     private static final int KB_IN_GB= 1024 * 1024;
 
     private static Logger logger = LoggerFactory.getLogger(DataLinkService.class);
@@ -84,12 +98,13 @@ public class DataLinkService extends Configurable
     private String asyncServiceNameInternal;
     private String asyncServiceUrl;
     private String cutoutServiceName;
+    private String generateSpectrumServiceName;
     private String cutoutServiceUrl;
+    private String generateSpectrumServiceUrl;
     private String baseUrl;
     private String dataLinkBaseUrl;
     private String dataLinkAccessEncriptionSecretKey;
     private String cutoutUiServiceUrl;
-    private String cutoutUiServiceName;
     private long datalinkDownloadLimitHttp;
 
     /**
@@ -120,6 +135,8 @@ public class DataLinkService extends Configurable
         dataLinkAccessEncriptionSecretKey = config.get(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY);
         cutoutServiceUrl = config.get(ConfigValueKeys.DATALINK_CUTOUT_URL);
         cutoutServiceName = config.get(ConfigValueKeys.DATALINK_CUTOUT_SERVICE_NAME);
+        generateSpectrumServiceUrl = config.get(ConfigValueKeys.DATALINK_GENERATE_SPECTRUM_URL);
+        generateSpectrumServiceName = config.get(ConfigValueKeys.DATALINK_GENERATE_SPECTRUM_SERVICE_NAME);
         
         datalinkDownloadLimitHttp = convertLimit(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP);
 
@@ -296,21 +313,29 @@ public class DataLinkService extends Configurable
                     "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(id));
             return;
         }
-        else if(id.toLowerCase().matches("^cube-[0-9]+$"))
+        else if(id.toLowerCase().matches(IMAGE_CUBE_REGEX))
         {
         	table = "casda.image_cube";
         }
-        else if(id.toLowerCase().matches("^visibility-[0-9]+$"))
+        else if(id.toLowerCase().matches(VISIBILITY_REGEX))
         {
         	table = "casda.measurement_set";
         }
-        else if(id.toLowerCase().matches("^spectrum-[0-9]+$"))
+        else if(id.toLowerCase().matches(SPECTRUM_REGEX))
         {
         	table = "casda.spectrum";
         }
-        else if(id.toLowerCase().matches("^moment_map-[0-9]+$"))
+        else if(id.toLowerCase().matches(MOMENT_MAP_REGEX))
         {
         	table = "casda.moment_map";
+        }
+        else if(id.toLowerCase().matches(CUBELET_REGEX))
+        {
+        	table = "casda.cubelet";
+        }
+        else if (id.toLowerCase().matches(EVALUATION_REGEX))
+        {
+            table = "casda.evaluation_file";
         }
         else
         {
@@ -325,13 +350,13 @@ public class DataLinkService extends Configurable
         if (contentLengthKb > 0)
         {
             if (StringUtils.isNotBlank(syncServiceUrl) || StringUtils.isNotBlank(asyncServiceUrl)
-                    || StringUtils.isNotBlank(cutoutServiceUrl) || StringUtils.isNotBlank(cutoutUiServiceUrl))
+                    || StringUtils.isNotBlank(cutoutServiceUrl) || StringUtils.isNotBlank(generateSpectrumServiceUrl) 
+                    || StringUtils.isNotBlank(cutoutUiServiceUrl))
             {
                 // show access data link to casdaAdmins or project members
                 if (isAccessAllowed(casdaAdmin, userId, projectIds, table, dataProductId))
                 {
-                    if (id.toLowerCase().startsWith("cube") || id.toLowerCase().startsWith("spectrum") 
-                    		|| id.toLowerCase().startsWith("moment_map"))
+                    if (id.toLowerCase().matches(FITS_REGEX))
                     {
                         contentType = "application/fits";
                     }
@@ -401,15 +426,25 @@ public class DataLinkService extends Configurable
                     }
                     
                     /*
-                     *  Cutout services have no maximum limit as the size of the cutout is not known at this point.
+                     *  Cutout & spectrum generation services have 
+                     *  no maximum limit as the size of the cutout is not known at this point.
                      */
-                    if(id.toLowerCase().startsWith("cube") && StringUtils.isNotBlank(cutoutServiceUrl))
+                    if(id.toLowerCase().matches(IMAGE_CUBE_REGEX) && StringUtils.isNotBlank(cutoutServiceUrl))
                     {
                         requestToken.setDownloadMode(RequestToken.CUTOUT);
                         builder.withServiceDefResult(id, "cutout_service", cutoutServiceName, "#cutout", contentType,
                                 null, requestToken.toEncryptedString());
                         builder.withServiceDefinition("cutout_service", "ivo://ivoa.net/std/SODA#async-1.0",
                                 cutoutServiceUrl, true);
+                    }
+                    
+                    if(id.toLowerCase().matches(IMAGE_CUBE_REGEX) && StringUtils.isNotBlank(generateSpectrumServiceUrl))
+                    {
+                        requestToken.setDownloadMode(RequestToken.GENERATED_SPECTRUM);
+                        builder.withServiceDefResult(id, "spectrum_generation_service", generateSpectrumServiceName,
+                        		"#proc", contentType, null, requestToken.toEncryptedString());
+                        builder.withServiceDefinition("spectrum_generation_service", 
+                        		"ivo://ivoa.net/std/SODA#async-1.0", generateSpectrumServiceUrl, true);
                     }
                 }
                 else if(!VoKeys.ANONYMOUS_USER.equals(userId))
@@ -465,8 +500,7 @@ public class DataLinkService extends Configurable
 		DataLinkVoTableBuilder builder = new DataLinkVoTableBuilder(authenticated ? dataLinkBaseUrl : baseUrl);
 		builder.withResultsTable();
 
-        if (StringUtils.isEmpty(requestedId) || !(requestedId.matches("^spectrum-[0-9]+$") 
-        		|| requestedId.matches("^moment_map-[0-9]+$")))
+        if (StringUtils.isEmpty(requestedId) || !(requestedId.matches("^(spectrum|moment_map|cubelet)-[0-9]+$")))
         {
             builder.withErrorResult(requestedId,
                     "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(requestedId));

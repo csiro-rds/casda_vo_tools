@@ -97,6 +97,9 @@ public class Configuration extends Options
     /** default configuration file name */
     public static final String DEFAULT_CONFIG = "config/configuration.yaml";
 
+    /** default TAP Examples config xml file */
+    public static final String DEFAULT_TAP_EXAMPLES_CONFIG = "config/tap_examples.xml";
+    
     /** default TAP configuration file name */
     public static final String DEFAULT_TAP_CONFIG = "tap_configuration.yaml";
 
@@ -254,6 +257,9 @@ public class Configuration extends Options
         putDefault(ConfigValueKeys.DATALINK_WEB_SERVICE_URL, registry.getDatalinkWebUrl());
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_URL, registry.getDatalinkCutoutUrl());
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_SERVICE_NAME, registry.getDatalinkCutoutServiceName());
+        putDefault(ConfigValueKeys.DATALINK_GENERATE_SPECTRUM_URL, registry.getDatalinkGenerateSpectrumUrl());
+        putDefault(ConfigValueKeys.DATALINK_GENERATE_SPECTRUM_SERVICE_NAME, 
+        		registry.getDatalinkGenerateSpectrumServiceName());
         putDefault(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY, registry.getSiapSharedSecretKey());      
         putDefault(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP, registry.getDatalinkDownloadLimitHttp());     
         putDefault(ConfigValueKeys.ENVIRONMENT, registry.getEnvironment());
