@@ -1313,6 +1313,12 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         for (ConstraintConfig c : cfgTable.gtConstraintConfigs().values())
         {
             TableConfig dstConfig = cfgTable.gtConfig().getTableConfig(c.getDstTable());
+            if (dstConfig == null)
+            {
+                logger.warn("Constraint {} in table {} references undefined table {}, ignoring.", c.getName(),
+                        cfgTable.gtFullTapTableName(), c.getDstTable());
+                continue;
+            }
             String tapDstTableName = dstConfig.gtFullTapTableName();
             TableConfig srcConfig = cfgTable.gtConfig().getTableConfig(c.getSrcTable());
             String tapSrcTableName = srcConfig.gtFullTapTableName();

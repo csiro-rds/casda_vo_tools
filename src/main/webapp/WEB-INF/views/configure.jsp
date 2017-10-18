@@ -51,7 +51,7 @@ input.centreButton
            				<h4>Please choose a password at least 8 characters long which contains one upper case letter,<br/> one lower case letter, one number and a punctuation character</h4>
            			</c:if>
            			<c:if test="${ioError}">
-           				<h4 style="color: red">The password could not be saved to file, please check you the logs and the permissions of your server.</h4>
+           				<h4 style="color: red">The password could not be saved to file, please check the logs and the permissions of your server.</h4>
            			</c:if>
            			<br/>
            		</c:if>

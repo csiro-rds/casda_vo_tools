@@ -10,7 +10,7 @@ form .form-field label {
     font-weight: bold;
 }
         </style>
-        <c:url value="/tap" var="tapBaseUrl" />`
+        <c:url value="/tap" var="tapBaseUrl" />
     </head>
     <body>
         <jsp:include page="../includes/header.jsp" />
@@ -29,6 +29,12 @@ form .form-field label {
                 <h2>Capabilities</h2>
                 <a href="${tapBaseUrl}/capabilities">VO Tools Capabilities</a>
             </div>
+            <br/>
+            <div id="tapexamples">
+                <h2>Tap Examples</h2>
+                <a href="${tapBaseUrl}/examples">VO TAP Examples</a>
+            </div>
+            <br/>
             <br/>
             <div id="synchronous_query">
                 <h2>Synchronous Query</h2>

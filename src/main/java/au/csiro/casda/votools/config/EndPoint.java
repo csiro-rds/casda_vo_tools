@@ -1,6 +1,7 @@
 package au.csiro.casda.votools.config;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.SetUtils;
@@ -53,6 +54,8 @@ public class EndPoint extends Options
 
     /** Schemas and names of tables used by the endpoint in format schema_name.table_name */
     private Set<String> tables;
+    
+    private Set<Map<String, String>> examples;
 
     private static EndPoint helpPoint = helpEndPoint();
 
@@ -240,6 +243,16 @@ public class EndPoint extends Options
     public void setTables(Set<String> tables)
     {
         this.tables = tables;
+    }
+    
+    public Set<Map<String, String>> getExamples()
+    {
+        return examples;
+    }
+
+    public void setExamples(Set<Map<String, String>> examples)
+    {
+        this.examples = examples;
     }
 
     /**

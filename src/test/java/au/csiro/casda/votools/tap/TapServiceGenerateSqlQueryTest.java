@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -53,6 +55,9 @@ public class TapServiceGenerateSqlQueryTest
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private TapService tapService;
+
+    /* Todays date */ 
+    DateTime date = new DateTime(DateTimeZone.UTC);
 
     @Before
     public void setUp() throws Exception
@@ -120,6 +125,8 @@ public class TapServiceGenerateSqlQueryTest
         tapService.init();
         when(tapService.isReady()).thenReturn(true);
         tapService.createDbChecker();
+        
+        when(tapService.getCurrentUTCDateTime()).thenReturn(date);
     }
     
     private void setup2() throws ConfigurationException
@@ -194,6 +201,7 @@ public class TapServiceGenerateSqlQueryTest
         tapService.init();
         when(tapService.isReady()).thenReturn(true);
         tapService.createDbChecker();
+        when(tapService.getCurrentUTCDateTime()).thenReturn(date);
     }
 
     @Test
@@ -248,25 +256,23 @@ public class TapServiceGenerateSqlQueryTest
     public void testGenerateSqlForQueryReleaseRequiredSelectAll() throws Exception
     {
         assertThat(tapService.generateSqlForQuery("select * from casda.continuum_component", true, null),
-                is("SELECT casda.continuum_component.id AS \"id\","
-                        + "casda.continuum_component.released_date AS \"released_date\","
-                        + "casda.continuum_component.catalogue_id AS \"catalogue_id\"\n"
+                is("SELECT casda.continuum_component.id AS \"id\",casda.continuum_component.released_date "
+                        + "AS \"released_date\",casda.continuum_component.catalogue_id AS \"catalogue_id\"\n"
                         + "FROM casda.continuum_component"));
         assertThat(tapService.generateSqlForQuery("select * from casda.continuum_component", false, null),
-                is("SELECT casda.continuum_component.id AS \"id\","
-                        + "casda.continuum_component.released_date AS \"released_date\","
-                        + "casda.continuum_component.catalogue_id AS \"catalogue_id\"\n"
-                        + "FROM casda.continuum_component\n"
-                        + "WHERE casda.continuum_component.released_date IS NOT NULL"));
+                is("SELECT casda.continuum_component.id AS \"id\",casda.continuum_component.released_date "
+                        + "AS \"released_date\",casda.continuum_component.catalogue_id AS \"catalogue_id\"\n"
+                        + "FROM casda.continuum_component\nWHERE (casda.continuum_component.released_date "
+                        + "IS NOT NULL AND casda.continuum_component.released_date <= '"+date+"')"));
     }
 
     @Test
     public void testGenerateSqlForQueryReleaseRequiredSelectAllWithTableAlias() throws Exception
     {
         assertThat(tapService.generateSqlForQuery("select * from casda.continuum_component as cc", false, null),
-                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\","
-                        + "cc.catalogue_id AS \"catalogue_id\"\nFROM casda.continuum_component AS cc\n"
-                        + "WHERE cc.released_date IS NOT NULL"));
+                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\",cc.catalogue_id AS"
+                        + " \"catalogue_id\"\nFROM casda.continuum_component AS cc\nWHERE "
+                        + "(cc.released_date IS NOT NULL AND cc.released_date <= '"+date+"')"));
 
         assertThat(tapService.generateSqlForQuery("select * from casda.continuum_component as cc", true, null),
                 is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\","
@@ -279,9 +285,9 @@ public class TapServiceGenerateSqlQueryTest
     {
         assertThat(tapService.generateSqlForQuery(
                 "select * from casda.continuum_component as cc where released_date is null", false, null),
-                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\","
-                        + "cc.catalogue_id AS \"catalogue_id\"\nFROM casda.continuum_component AS cc\n"
-                        + "WHERE cc.released_date IS NULL AND cc.released_date IS NOT NULL"));
+                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\",cc.catalogue_id AS \"catalogue_id\"\n"
+                        + "FROM casda.continuum_component AS cc\nWHERE cc.released_date IS NULL AND"
+                        + " (cc.released_date IS NOT NULL AND cc.released_date <= '"+date+"')"));
 
         assertThat(tapService.generateSqlForQuery(
                 "select * from casda.continuum_component as cc where released_date is null", true, null),
@@ -296,11 +302,11 @@ public class TapServiceGenerateSqlQueryTest
         assertThat(tapService.generateSqlForQuery(
                 "select cc.* from casda.continuum_component as cc, casda.catalogue as ca where "
                         + "cc.catalogue_id = ca.id", false, null),
-                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\","
-                        + "cc.catalogue_id AS \"catalogue_id\"\n"
-                        + "FROM casda.continuum_component AS cc CROSS JOIN casda.catalogue AS ca \n"
-                        + "WHERE cc.catalogue_id = ca.id AND cc.released_date IS NOT NULL "
-                        + "AND ca.released_date IS NOT NULL"));
+                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\",cc.catalogue_id AS "
+                        + "\"catalogue_id\"\nFROM casda.continuum_component AS cc CROSS JOIN "
+                        + "casda.catalogue AS ca \nWHERE cc.catalogue_id = ca.id AND "
+                        + "(cc.released_date IS NOT NULL AND cc.released_date <= '"+date+"')"
+                        + " AND (ca.released_date IS NOT NULL AND ca.released_date <= '"+date+"')"));
 
         assertThat(tapService.generateSqlForQuery(
                 "select cc.* from casda.continuum_component as cc, casda.catalogue as ca where "
@@ -317,10 +323,10 @@ public class TapServiceGenerateSqlQueryTest
         assertThat(tapService.generateSqlForQuery(
                 "select cc.* from casda.continuum_component as cc, ivoa.ObsCore as ob where "
                         + "cc.id = ob.obs_publisher_did", false, null),
-                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\","
-                        + "cc.catalogue_id AS \"catalogue_id\"\n"
-                        + "FROM casda.continuum_component AS cc CROSS JOIN casda.obs_core AS ob \n"
-                        + "WHERE cc.id = ob.obs_publisher_did AND cc.released_date IS NOT NULL"));
+                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\",cc.catalogue_id AS"
+                        + " \"catalogue_id\"\nFROM casda.continuum_component AS cc"
+                        + " CROSS JOIN casda.obs_core AS ob \nWHERE cc.id = ob.obs_publisher_did"
+                        + " AND (cc.released_date IS NOT NULL AND cc.released_date <= '"+date+"')"));
 
         assertThat(tapService.generateSqlForQuery(
                 "select cc.* from casda.continuum_component as cc, ivoa.ObsCore as ob where "
@@ -337,12 +343,12 @@ public class TapServiceGenerateSqlQueryTest
         assertThat(tapService.generateSqlForQuery(
                 "select * from casda.continuum_component as cc, casda.catalogue as ca where "
                         + "cc.catalogue_id = ca.id", false, null),
-                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\","
-                        + "cc.catalogue_id AS \"catalogue_id\",ca.id AS \"id\","
-                        + "ca.released_date AS \"released_date\",ca.image_id AS \"image_id\"\n"
-                        + "FROM casda.continuum_component AS cc CROSS JOIN casda.catalogue AS ca \n"
-                        + "WHERE cc.catalogue_id = ca.id AND cc.released_date IS NOT NULL "
-                        + "AND ca.released_date IS NOT NULL"));
+                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\",cc.catalogue_id AS "
+                        + "\"catalogue_id\",ca.id AS \"id\",ca.released_date AS \"released_date\",ca.image_id "
+                        + "AS \"image_id\"\nFROM casda.continuum_component AS cc CROSS JOIN casda.catalogue "
+                        + "AS ca \nWHERE cc.catalogue_id = ca.id AND (cc.released_date IS NOT NULL "
+                        + "AND cc.released_date <= '"+date+"') AND (ca.released_date "
+                        + "IS NOT NULL AND ca.released_date <= '"+date+"')"));
 
         assertThat(tapService.generateSqlForQuery(
                 "select * from casda.continuum_component as cc, casda.catalogue as ca where "
@@ -360,12 +366,11 @@ public class TapServiceGenerateSqlQueryTest
         assertThat(tapService.generateSqlForQuery(
                 "select * from casda.continuum_component as cc WHERE cc.catalogue_id IN "
                         + "(select ca.id from casda.catalogue as ca WHERE ca.image_id < 100)", false, null),
-                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\","
-                        + "cc.catalogue_id AS \"catalogue_id\"\n"
-                        + "FROM casda.continuum_component AS cc\nWHERE cc.catalogue_id "
-                        + "IN (SELECT ca.id AS \"id\"\nFROM casda.catalogue AS ca\n"
-                        + "WHERE ca.image_id < 100 AND ca.released_date IS NOT NULL) "
-                        + "AND cc.released_date IS NOT NULL"));
+                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\",cc.catalogue_id AS "
+                        + "\"catalogue_id\"\nFROM casda.continuum_component AS cc\nWHERE cc.catalogue_id"
+                        + " IN (SELECT ca.id AS \"id\"\nFROM casda.catalogue AS ca\nWHERE ca.image_id < 100"
+                        + " AND (ca.released_date IS NOT NULL AND ca.released_date <= '"+date+"'))"
+                        + " AND (cc.released_date IS NOT NULL AND cc.released_date <= '"+date+"')"));
 
         assertThat(tapService.generateSqlForQuery(
                 "select * from casda.continuum_component as cc WHERE cc.catalogue_id IN "
@@ -382,13 +387,14 @@ public class TapServiceGenerateSqlQueryTest
         assertThat(tapService.generateSqlForQuery("select * from casda.continuum_component WHERE EXISTS "
                 + "(select ca.id from casda.catalogue as ca WHERE ca.image_id < 100 "
                 + "AND casda.continuum_component.catalogue_id=ca.id)", false, null),
-                is("SELECT casda.continuum_component.id AS \"id\","
-                        + "casda.continuum_component.released_date AS \"released_date\","
-                        + "casda.continuum_component.catalogue_id AS \"catalogue_id\"\n"
-                        + "FROM casda.continuum_component\n"
-                        + "WHERE EXISTS(SELECT ca.id AS \"id\"\nFROM casda.catalogue AS ca\n"
-                        + "WHERE ca.image_id < 100 AND casda.continuum_component.catalogue_id = ca.id AND "
-                        + "ca.released_date IS NOT NULL) " + "AND casda.continuum_component.released_date IS NOT NULL"));
+                is("SELECT casda.continuum_component.id AS \"id\",casda.continuum_component.released_date"
+                        + " AS \"released_date\",casda.continuum_component.catalogue_id AS \"catalogue_id\""
+                        + "\nFROM casda.continuum_component\nWHERE EXISTS(SELECT ca.id AS \"id\"\nFROM "
+                        + "casda.catalogue AS ca\nWHERE ca.image_id < 100 AND casda.continuum_component.catalogue_id "
+                        + "= ca.id AND (ca.released_date IS NOT NULL AND ca.released_date <= '"+date+"')) "
+                        + "AND (casda.continuum_component.released_date IS NOT NULL "
+                        + "AND casda.continuum_component.released_date"
+                        + " <= '"+date+"')"));
 
         assertThat(tapService.generateSqlForQuery("select * from casda.continuum_component WHERE EXISTS "
                 + "(select ca.id from casda.catalogue as ca WHERE ca.image_id < 100 "
@@ -408,14 +414,13 @@ public class TapServiceGenerateSqlQueryTest
                 "select ALL * from casda.continuum_component WHERE NOT catalogue_id IN "
                         + "(select ca.id from casda.catalogue as ca WHERE ca.image_id < 100 "
                         + "AND casda.continuum_component.catalogue_id=ca.id)", false, null),
-                is("SELECT casda.continuum_component.id AS \"id\","
-                        + "casda.continuum_component.released_date AS \"released_date\","
-                        + "casda.continuum_component.catalogue_id AS \"catalogue_id\"\n"
-                        + "FROM casda.continuum_component\n" + "WHERE NOT casda.continuum_component.catalogue_id "
-                        + "IN (SELECT ca.id AS \"id\"\nFROM casda.catalogue AS ca\n"
-                        + "WHERE ca.image_id < 100 AND casda.continuum_component.catalogue_id = ca.id "
-                        + "AND ca.released_date IS NOT NULL) AND "
-                        + "casda.continuum_component.released_date IS NOT NULL"));
+                is("SELECT casda.continuum_component.id AS \"id\",casda.continuum_component.released_date "
+                        + "AS \"released_date\",casda.continuum_component.catalogue_id AS \"catalogue_id\"\n"
+                        + "FROM casda.continuum_component\nWHERE NOT casda.continuum_component.catalogue_id"
+                        + " IN (SELECT ca.id AS \"id\"\nFROM casda.catalogue AS ca\nWHERE ca.image_id < 100 "
+                        + "AND casda.continuum_component.catalogue_id = ca.id AND (ca.released_date IS NOT NULL"
+                        + " AND ca.released_date <= '"+date+"')) AND (casda.continuum_component.released_date"
+                        + " IS NOT NULL AND casda.continuum_component.released_date <= '"+date+"')"));
 
         assertThat(tapService.generateSqlForQuery(
                 "select ALL * from casda.continuum_component WHERE NOT catalogue_id IN "
@@ -437,15 +442,14 @@ public class TapServiceGenerateSqlQueryTest
                 tapService.generateSqlForQuery("select * from casda.continuum_component as cc "
                         + "INNER JOIN (SELECT * from casda.catalogue where id < 1000) as c ON "
                         + "cc.catalogue_id=c.id", false, null),
-                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\","
-                        + "cc.catalogue_id AS \"catalogue_id\",c.id AS \"id\","
-                        + "c.released_date AS \"released_date\",c.image_id AS \"image_id\"\n"
-                        + "FROM casda.continuum_component AS cc INNER JOIN (SELECT casda.catalogue.id AS \"id\","
-                        + "casda.catalogue.released_date AS \"released_date\","
-                        + "casda.catalogue.image_id AS \"image_id\"\n"
-                        + "FROM casda.catalogue\nWHERE casda.catalogue.id < 1000 "
-                        + "AND casda.catalogue.released_date IS NOT NULL) "
-                        + "AS c ON cc.catalogue_id = c.id\nWHERE cc.released_date IS NOT NULL"));
+                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\",cc.catalogue_id AS "
+                        + "\"catalogue_id\",c.id AS \"id\",c.released_date AS \"released_date\",c.image_id AS "
+                        + "\"image_id\"\nFROM casda.continuum_component AS cc INNER JOIN (SELECT casda.catalogue.id"
+                        + " AS \"id\",casda.catalogue.released_date AS \"released_date\",casda.catalogue.image_id AS"
+                        + " \"image_id\"\nFROM casda.catalogue\nWHERE casda.catalogue.id < 1000 AND "
+                        + "(casda.catalogue.released_date IS NOT NULL AND casda.catalogue.released_date <= '"+date+"')) "
+                        + "AS c ON cc.catalogue_id = c.id\nWHERE (cc.released_date IS NOT NULL AND cc.released_date <="
+                        + " '"+date+"')"));
 
         assertThat(
                 tapService.generateSqlForQuery("select * from casda.continuum_component as cc "
@@ -467,12 +471,13 @@ public class TapServiceGenerateSqlQueryTest
                 + "WHERE ((cc.catalogue_id IN (select ca.id from casda.catalogue as ca "
                 + "WHERE ca.image_id > 1)) AND (cc.catalogue_id IN (select ca.id from "
                 + "casda.catalogue as ca WHERE ca.image_id < 3)))", false, null),
-                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\","
-                        + "cc.catalogue_id AS \"catalogue_id\"\nFROM casda.continuum_component AS cc\n"
-                        + "WHERE ((cc.catalogue_id IN " + "(SELECT ca.id AS \"id\"\nFROM casda.catalogue AS ca\n"
-                        + "WHERE ca.image_id > 1 AND ca.released_date IS NOT NULL)) AND (cc.catalogue_id IN "
-                        + "(SELECT ca.id AS \"id\"\nFROM casda.catalogue AS ca\nWHERE ca.image_id < 3 "
-                        + "AND ca.released_date IS NOT NULL))) " + "AND cc.released_date IS NOT NULL"));
+                is("SELECT cc.id AS \"id\",cc.released_date AS \"released_date\",cc.catalogue_id AS "
+                        + "\"catalogue_id\"\nFROM casda.continuum_component AS cc\nWHERE ((cc.catalogue_id "
+                        + "IN (SELECT ca.id AS \"id\"\nFROM casda.catalogue AS ca\nWHERE ca.image_id > 1 AND"
+                        + " (ca.released_date IS NOT NULL AND ca.released_date <= '"+date+"')))"
+                        + " AND (cc.catalogue_id IN (SELECT ca.id AS \"id\"\nFROM casda.catalogue AS ca\nWHERE "
+                        + "ca.image_id < 3 AND (ca.released_date IS NOT NULL AND ca.released_date <= '"+date+"')))) "
+                        + "AND (cc.released_date IS NOT NULL AND cc.released_date <= '"+date+"')"));
 
         assertThat(tapService.generateSqlForQuery("select * from casda.continuum_component as cc "
                 + "WHERE ((cc.catalogue_id IN (select ca.id from casda.catalogue as ca "
@@ -524,10 +529,11 @@ public class TapServiceGenerateSqlQueryTest
                                 + "cc.catalogue_id = ca.id",
                         false, null),
                 is("SELECT cc.dbid AS \"id\",cc.dbreleased_date AS \"released_date\",cc.dbcatalogue_id AS "
-                        + "\"catalogue_id\",ca.dbid AS \"id\",ca.dbreleased_date AS \"released_date\","
-                        + "ca.dbimage_id AS \"image_id\"\nFROM casda.continuum_component AS cc CROSS JOIN "
-                        + "casda.catalogue AS ca \nWHERE cc.dbcatalogue_id = ca.dbid AND cc.released_date "
-                        + "IS NOT NULL AND ca.released_date IS NOT NULL"));
+                        + "\"catalogue_id\",ca.dbid AS \"id\",ca.dbreleased_date AS \"released_date\",ca.dbimage_id "
+                        + "AS \"image_id\"\nFROM casda.continuum_component AS cc CROSS JOIN casda.catalogue AS ca"
+                        + " \nWHERE cc.dbcatalogue_id = ca.dbid AND (cc.released_date IS NOT NULL AND cc.released_date"
+                        + " <= '"+date+"') AND (ca.released_date IS NOT NULL AND ca.released_date <= "
+                        + "'"+date+"')"));
 
         assertThat(
                 tapService.generateSqlForQuery(

@@ -226,7 +226,7 @@ public class TapController
     }
 
     /**
-     * Async endpoint as per the TAP standard. For GET & DELETE method with jobID
+     * Async endpoint as per the TAP standard. For GET &amp; DELETE method with jobID
      * 
      * 
      * @param request

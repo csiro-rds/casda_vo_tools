@@ -214,7 +214,19 @@ public abstract class ResultsExtractor
                 }
                 else if ("spoly".equals(columnTypeName))
                 {
-                    value = rawValue;
+                    // Raw value format {(ra, dec),(ra, dec)...} with values in radians
+                    String coords[] = rawValue.split("[{}(), ]+");
+                    StringBuilder polyCoords = new StringBuilder("POLYGON ICRS");
+                    for (String coord : coords) 
+                    {
+                        if (StringUtils.isNotBlank(coord))
+                        {
+                            polyCoords.append(" ");
+                            double degrees = Math.toDegrees(Double.parseDouble(coord));
+                            polyCoords.append(degrees);
+                        }
+                    }
+                    value = polyCoords.toString();
                 }
             } 
         }

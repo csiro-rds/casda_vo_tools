@@ -93,7 +93,7 @@ public class BasicUiController extends Configurable
     }
     
     /**
-     * Implementation of GET /tap -> text/html
+     * Implementation of GET /tap -$gt; text/html
      * 
      * @return the model-and-view
      * @throws ConfigurationException 
@@ -114,7 +114,7 @@ public class BasicUiController extends Configurable
     }
     
     /**
-     * Implementation of GET /datalink -> text/html
+     * Implementation of GET /datalink -$gt; text/html
      * 
      * @return the model-and-view
      * @throws ConfigurationException 

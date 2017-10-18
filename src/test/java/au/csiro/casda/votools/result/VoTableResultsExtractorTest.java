@@ -1,10 +1,12 @@
 package au.csiro.casda.votools.result;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyInt;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 
 import java.io.StringWriter;
@@ -121,6 +123,10 @@ public class VoTableResultsExtractorTest
             "<FIELD name=\"dataproduct_type\" " + "ID=\"dataproduct_type\" ucd=\"\" ref=\"\" datatype=\"char\" />\r\n";
     private static final String FIELD_DEF_CALIB_LEVEL =
             "<FIELD name=\"calib_level\" ID=\"calib_level\" " + "ucd=\"\" ref=\"\" datatype=\"int\" />\r\n";
+    private static final String FIELD_DEF_SCHEMA_A_IMAGE_ID =
+            "<FIELD name=\"image_id\" ID=\"image_id\" " + "ucd=\"meta.id;meta.main\" ref=\"\" datatype=\"int\" />\r\n";
+    private static final String FIELD_DEF_SCHEMA_B_IMAGE_ID =
+            "<FIELD name=\"image_id\" ID=\"image_id\" " + "ucd=\"meta.id;meta.main\" ref=\"\" datatype=\"double\" />\r\n";
     private static final String FIELD_DEF_FLAGS = "  <FIELD ID=\"flags\" name=\"flags\" datatype=\"short\"> </FIELD>\n";
     private static final String FIELD_DEF_Y_AVE = "  <FIELD ID=\"y_ave\" name=\"y_ave\" datatype=\"float\"> </FIELD>\n";
     private static final String EMPTY_HEADER = BASE_HEADER_PART1 + BASE_HEADER_PART2;
@@ -145,8 +151,10 @@ public class VoTableResultsExtractorTest
     public void setup()
     {
         votableFieldMap = new HashMap<String, String>();
-        votableFieldMap.put("obscore|dataproduct_type", FIELD_DEF_DATA_PRODUCT_TYPE);
-        votableFieldMap.put("obscore|calib_level", FIELD_DEF_CALIB_LEVEL);
+        votableFieldMap.put("casda|obscore|dataproduct_type", FIELD_DEF_DATA_PRODUCT_TYPE);
+        votableFieldMap.put("casda|obscore|calib_level", FIELD_DEF_CALIB_LEVEL);
+        votableFieldMap.put("schema_a|images|image_id", FIELD_DEF_SCHEMA_A_IMAGE_ID);
+        votableFieldMap.put("schema_b|images|image_id", FIELD_DEF_SCHEMA_B_IMAGE_ID);
 
         format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss zzz");
         metadataMap = new LinkedHashMap<String, String[]>();
@@ -443,6 +451,24 @@ public class VoTableResultsExtractorTest
                 + EMPTY_FOOTER + "$"));
     }
 
+    @Test
+    public void testGetFieldValueSPoly() throws Exception 
+    {
+        StringWriter writer = new StringWriter();
+        VoTableResultsExtractor extractor = new VoTableResultsExtractor(writer, 1, votableFieldMap,
+                TapService.CASDA_TAP_RESULT_NAME, metadataMap, APP_BASE_URL);
+        ResultSetMetaData mockMetaData = createSPolyColMetadata();
+        String spolyData = "{(5.82519082723 , -0.817478538612734),(5.82513767348594 , -0.817477875770509),"
+                + "(5.82513866175402 , -0.817441513956625),(5.8251918134379 , -0.817442176772671)}";
+        ResultSet mockResults = createSPolyColResultSet(mockMetaData, spolyData);
+        Mockito.when(mockResults.isAfterLast()).thenReturn(true);
+
+        String fieldValue = extractor.getFieldValue(mockResults, Types.OTHER, 1);
+        assertThat(fieldValue,
+                is("POLYGON ICRS 333.75884925859975 -46.83807010503196 333.75580377339975 -46.83803212696999 "
+                        + "333.7558603969898 -46.83594874849899 333.7589057641501 -46.83598672506102"));
+    }
+
     /**
      * Tests outputting a single record result set.
      * 
@@ -576,6 +602,32 @@ public class VoTableResultsExtractorTest
         extractor.outputHeader(mockMetaData);
         assertThat(writer.toString(), matchesPattern(BASE_HEADER_PART1 + FIELD_DEFS + BASE_HEADER_PART2 + "$"));
     }
+
+    /**
+     * Tests outputting a result set with two fields having the same name apart from the schema.
+     * 
+     * @throws Exception
+     *             Not expected.
+     */
+    @Test
+    public void testExtractDataTableHeadersDifferentSchemaOnly() throws Exception
+    {
+        StringWriter writer = new StringWriter();
+        VoTableResultsExtractor extractor = new VoTableResultsExtractor(writer, 1, votableFieldMap,
+                TapService.CASDA_TAP_RESULT_NAME, metadataMap, APP_BASE_URL);
+
+        ResultSetMetaData mockMetaData = Mockito.mock(ResultSetMetaData.class);
+        Mockito.when(mockMetaData.getColumnCount()).thenReturn(2);
+        Mockito.when(mockMetaData.getSchemaName(1)).thenReturn("schema_a");
+        Mockito.when(mockMetaData.getSchemaName(2)).thenReturn("schema_b");
+        Mockito.when(mockMetaData.getTableName(anyInt())).thenReturn("images");
+        Mockito.when(mockMetaData.getColumnName(anyInt())).thenReturn("image_id");
+        Mockito.when(mockMetaData.getColumnType(anyInt())).thenReturn(Types.BIGINT);
+
+        extractor.outputHeader(mockMetaData);
+        assertThat(writer.toString(), containsString(FIELD_DEF_SCHEMA_A_IMAGE_ID));
+        assertThat(writer.toString(), containsString(FIELD_DEF_SCHEMA_B_IMAGE_ID));
+    }
     
     
     @Test
@@ -587,6 +639,11 @@ public class VoTableResultsExtractorTest
         assertEquals("char", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("CHARACTER(100)"));
         assertEquals("double", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("DOUBLE PRECISION"));
         assertEquals("double", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("double precision"));
+        assertEquals("long", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("bigint"));
+        assertEquals("long", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("BIGINT"));
+        assertEquals("int", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("integer"));
+        assertEquals("short", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("smallint"));
+        assertEquals("boolean", VoTableResultsExtractor.translateTapColumnTypeToVoTableType("BOOLEAN"));
     }
     
     @Test
@@ -609,6 +666,7 @@ public class VoTableResultsExtractorTest
     {
         ResultSetMetaData mockMetaData = Mockito.mock(ResultSetMetaData.class);
         Mockito.when(mockMetaData.getColumnCount()).thenReturn(4);
+        Mockito.when(mockMetaData.getSchemaName(anyInt())).thenReturn("casda");
         Mockito.when(mockMetaData.getTableName(anyInt())).thenReturn("obscore");
         Mockito.when(mockMetaData.getColumnName(1)).thenReturn("dataproduct_type");
         Mockito.when(mockMetaData.getColumnType(1)).thenReturn(Types.VARCHAR);
@@ -618,6 +676,17 @@ public class VoTableResultsExtractorTest
         Mockito.when(mockMetaData.getColumnType(3)).thenReturn(Types.OTHER);
         Mockito.when(mockMetaData.getColumnName(4)).thenReturn("y_ave");
         Mockito.when(mockMetaData.getColumnType(4)).thenReturn(Types.REAL);
+        return mockMetaData;
+    }
+    
+    private ResultSetMetaData createSPolyColMetadata() throws SQLException
+    {
+        ResultSetMetaData mockMetaData = Mockito.mock(ResultSetMetaData.class);
+        Mockito.when(mockMetaData.getColumnCount()).thenReturn(1);
+        Mockito.when(mockMetaData.getTableName(anyInt())).thenReturn("obscore");
+        Mockito.when(mockMetaData.getColumnName(1)).thenReturn("s_region");
+        Mockito.when(mockMetaData.getColumnType(1)).thenReturn(Types.OTHER);
+        Mockito.when(mockMetaData.getColumnTypeName(1)).thenReturn("spoly");
         return mockMetaData;
     }
 
@@ -660,6 +729,21 @@ public class VoTableResultsExtractorTest
         Mockito.when(mockResults.getObject(3)).thenReturn(pgo1).thenReturn(pgo2);
         Mockito.when(mockResults.getString(4)).thenReturn("BAD").thenReturn("BAD");
         Mockito.when(mockResults.getFloat(4)).thenReturn(211.1f).thenReturn(190.05f);
+        return mockResults;
+    }
+    
+    // PMD warning not applicable to setting up mocks
+    @SuppressWarnings("PMD.CheckResultSet")
+    private ResultSet createSPolyColResultSet(ResultSetMetaData mockMetaData, String spolyData) throws SQLException
+    {
+        ResultSet mockResults = Mockito.mock(ResultSet.class);
+        Mockito.when(mockResults.getMetaData()).thenReturn(mockMetaData);
+        Mockito.when(mockResults.next()).thenReturn(true).thenReturn(false);
+        Mockito.when(mockResults.getString(1)).thenReturn(spolyData);
+        PGobject pgo1 = new PGobject();
+        pgo1.setType("spoly");
+        pgo1.setValue(spolyData);
+        Mockito.when(mockResults.getObject(1)).thenReturn(pgo1);
         return mockResults;
     }
 

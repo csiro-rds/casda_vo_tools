@@ -1,5 +1,21 @@
 # CASDA VO Tools Release Notes
 
+## v1.8 - 2017-10-05
+
+* New Features
+    *   TAP - Support the /tap/examples endpoint with configurable examples or preprepared page
+
+* Bug fixes
+    *   Confg - Fixed error when adding a table that had a foreign key to table that was not also being added
+
+## v1.7 - 2017-06-29
+
+* New Features
+    *   Output s_region field in Aladin compatible format	
+
+* Bug fixes
+    *   TAP - Allow multiple tables to have the same column name
+
 ## v1.6 - 2016-10-28
 
 * New Features

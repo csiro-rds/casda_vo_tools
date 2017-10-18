@@ -118,8 +118,8 @@ public class DataLinkServiceTest
 
         StringWriter writer = new StringWriter();
         dataLinkService.processQuery(writer,
-                new String[] { "visibility-1", "cube-1", "spectrum-1", "moment_map-1", "", null, "invalid-123456",
-                        "cube-1;drop table casda.tablename" },
+                new String[] { "visibility-1", "cube-1", "spectrum-1", "moment_map-1", "cubelet-1", "", null, 
+                		"invalid-123456", "cube-1;drop table casda.tablename" },
                 "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST, true, ACCESS_DATE);
 
         System.out.println(writer.getBuffer().toString());

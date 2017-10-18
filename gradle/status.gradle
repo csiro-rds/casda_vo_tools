@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url "http://jenkins-cdc.it.csiro.au:8085/nexus/content/repositories/releases/"}
+        maven { url "http://jenkins-apps.it.csiro.au:8081/nexus/content/repositories/releases/"}
     }
     dependencies {
         classpath 'au.csiro:serverStatus:1.0.3'

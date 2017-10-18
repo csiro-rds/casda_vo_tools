@@ -33,7 +33,10 @@ public enum ConfigKeys
     SSAP_METADATA_RESPONSE("ssap.metadata.response"),
 
     /** Key for the full URL of the XSL stylesheet used to style VOTable responses. */ 
-    TAP_VOTABLE_XSL("tap.votable.xsl");
+    TAP_VOTABLE_XSL("tap.votable.xsl"), 
+
+    /** Key for the examples endpoint for TAP Queries. */ 
+    TAP_EXAMPLES_URL("tap.examples.url");
     
     private final String key;
 

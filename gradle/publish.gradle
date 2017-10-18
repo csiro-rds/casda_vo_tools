@@ -45,7 +45,7 @@ publishing {
 
     repositories {
         maven {
-            url "http://jenkins-cdc.it.csiro.au:8085/nexus/content/repositories/cd/" 
+            url "http://jenkins-apps.it.csiro.au:8081/nexus/content/repositories/cd/" 
             credentials {
                 username project.nexususer
                 password project.nexuspassword 

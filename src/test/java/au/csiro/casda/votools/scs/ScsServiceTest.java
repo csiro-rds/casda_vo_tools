@@ -235,11 +235,14 @@ public class ScsServiceTest
 
         // Verify the field map
         Map<String, String> fieldMap = cst.getVotableFieldMap();
-        assertThat(fieldMap.get("obs_core|obs_id").trim(),
+        assertThat(fieldMap.keySet(),
+                containsInAnyOrder("casda|obs_core|obs_id", "casda|obs_core|s_ra", "casda|obs_core|instrument_name",
+                        "casda|obs_core|access_url", "casda|obs_core|s_dec", "casda|obs_core|facility_name"));
+        assertThat(fieldMap.get("casda|obs_core|obs_id").trim(),
                 is("<FIELD name=\"obs_id\" ID=\"obs_id\" datatype=\"char\" arraysize=\"255\" ucd=\"ID_MAIN\" />"));
-        assertThat(fieldMap.get("obs_core|s_ra").trim(),
+        assertThat(fieldMap.get("casda|obs_core|s_ra").trim(),
                 is("<FIELD name=\"s_ra\" ID=\"s_ra\" datatype=\"double\" ucd=\"POS_EQ_RA_MAIN\" />"));
-        assertThat(fieldMap.get("obs_core|instrument_name").trim(),
+        assertThat(fieldMap.get("casda|obs_core|instrument_name").trim(),
                 is("<FIELD name=\"instrument_name\" ID=\"instrument_name\" datatype=\"char\" "
                         + "arraysize=\"255\" ucd=\"meta.id;instr\" />"));
     }
@@ -267,11 +270,14 @@ public class ScsServiceTest
 
         // Verify the field map
         Map<String, String> fieldMap = cst.getVotableFieldMap();
-        assertThat(fieldMap.get("obs_core|obs_id").trim(),
+        assertThat(fieldMap.keySet(),
+                containsInAnyOrder("casda|obs_core|obs_id", "casda|obs_core|s_ra", "casda|obs_core|instrument_name",
+                        "casda|obs_core|access_url", "casda|obs_core|s_dec", "casda|obs_core|facility_name"));
+        assertThat(fieldMap.get("casda|obs_core|obs_id").trim(),
                 is("<FIELD name=\"obs_id\" ID=\"obs_id\" datatype=\"char\" arraysize=\"255\" ucd=\"ID_MAIN\" />"));
-        assertThat(fieldMap.get("obs_core|s_ra").trim(),
+        assertThat(fieldMap.get("casda|obs_core|s_ra").trim(),
                 is("<FIELD name=\"s_ra\" ID=\"s_ra\" datatype=\"double\" ucd=\"POS_EQ_RA_MAIN\" />"));
-        assertThat(fieldMap.get("obs_core|instrument_name").trim(),
+        assertThat(fieldMap.get("casda|obs_core|instrument_name").trim(),
                 is("<FIELD name=\"instrument_name\" ID=\"instrument_name\" datatype=\"char\" "
                         + "arraysize=\"255\" ucd=\"meta.id;instr\" />"));
     }

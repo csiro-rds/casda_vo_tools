@@ -5,13 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
-
 import au.csiro.casda.votools.VoServiceType;
 import au.csiro.casda.votools.config.ConfigKeys;
 import au.csiro.casda.votools.config.ConfigValueKeys;
@@ -20,6 +19,7 @@ import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
 import au.csiro.casda.votools.config.EndPoint;
+import au.csiro.casda.votools.examples.TapExamplesService;
 import au.csiro.casda.votools.scs.ConeSearchTable;
 import au.csiro.casda.votools.scs.ScsService;
 
@@ -39,6 +39,7 @@ import au.csiro.casda.votools.scs.ScsService;
  * 
  */
 @Service
+@ComponentScan(basePackages="au.csiro.casda.votools.examples")
 public class CapabilitiesService extends Configurable
 {
 
@@ -81,13 +82,18 @@ public class CapabilitiesService extends Configurable
     private String scsTestExtras;
 
     @Autowired
+    private TapExamplesService tapExamplesService;
+    
+    @Autowired
     private ScsService scsService;
-
+    
     private boolean ready;
 
     private Configuration config;
     private String ssapOutputLimit;
     private String ssapDefaultMaxrec;
+    
+    private boolean hasTapExamples;
 
     /**
      * A constructor
@@ -153,6 +159,7 @@ public class CapabilitiesService extends Configurable
                 executionDurationDefault = tap.get("tap.execution.duration.default", executionDurationDefault);
                 executionDurationHard = tap.get("tap.execution.duration.hard", executionDurationHard);
                 outputLimitHard = tap.get("tap.output.limit.hard", outputLimitHard);
+                hasTapExamples = tapExamplesService.isReady() && tapExamplesService.configurationExists();
                 if (scs != null)
                 {
                     scsMaxRadius = scs.getFloat("scs.max.radius", scsMaxRadius);
@@ -249,6 +256,8 @@ public class CapabilitiesService extends Configurable
         configParams.put("execDurationDefault", executionDurationDefault);
         configParams.put("execDurationHard", executionDurationHard);
         configParams.put("outputLimitHard", outputLimitHard);
+        configParams.put("tapExamplesUrl", tapExamplesService.getExamplesUrl() == null && hasTapExamples 
+                ? serviceBaseUrl + "/examples" : tapExamplesService.getExamplesUrl());
         
         return configParams;
     }

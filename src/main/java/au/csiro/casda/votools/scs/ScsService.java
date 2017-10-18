@@ -292,7 +292,8 @@ public class ScsService extends Configurable
             }
         }
 
-        String fieldKey = tapColumn.getTable().getDbTableName() + "|" + tapColumn.getId().getColumnName();
+        String fieldKey = tapColumn.getTable().getDbSchemaName() + "|" + tapColumn.getTable().getDbTableName() + "|"
+                + tapColumn.getDbColumnName();
 
         // The SCS standard requires UCD1 values be used for the id, ra and dec fields. Others will use UCD1+ as normal.
         if (ID_UCD.equalsIgnoreCase(tapColumn.getUcd())

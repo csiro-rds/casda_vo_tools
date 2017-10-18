@@ -69,6 +69,17 @@
                         <VOT:TD/>
                         <VOT:TD>-SDgmfVcIqFb486Xg_h4CZLlRHc9zY4GWIJVnvr8p_JHr2hTMYzDVpOvORCT4fAp</VOT:TD>
                     </VOT:TR>
+                    <VOT:TR>
+                        <VOT:TD>cube-123456</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>spectrum_generation_service</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>Scripted spectrum generation service</VOT:TD>
+                        <VOT:TD>#proc</VOT:TD>
+                        <VOT:TD>application/fits</VOT:TD>
+                        <VOT:TD/>
+                        <VOT:TD>-SDgmfVcIqFb486Xg_h4CRm7e218qX-4ZAaLjViv75YE2Oi62cSS66DxH6vQyWQ9_dkqT9JEn2g5YhTHDavG1Q</VOT:TD>
+                    </VOT:TR>
                 </VOT:TABLEDATA>
             </VOT:DATA>
         </VOT:TABLE>
@@ -81,6 +92,19 @@
         </VOT:GROUP>
     </VOT:RESOURCE>
     <VOT:RESOURCE ID="cutout_service" utype="adhoc:service" type="meta">
+        <VOT:PARAM value="ivo://ivoa.net/std/SODA#async-1.0" datatype="char" name="standardID" arraysize="*"/>
+        <VOT:PARAM value="http://localhost:8080/casda_data_access/data/async" datatype="char" name="accessURL" arraysize="*"/>
+        <VOT:GROUP name="inputParams">
+            <VOT:PARAM value="" datatype="char" ref="authenticatedIdToken" name="ID" arraysize="*"/>
+            <VOT:PARAM datatype="char" xtype="circle" name="POS" arraysize="*"/>
+            <VOT:PARAM datatype="char" xtype="range" name="POS" arraysize="*"/>
+            <VOT:PARAM datatype="char" xtype="polygon" name="POS" arraysize="*"/>
+            <VOT:PARAM unit="m" datatype="double" xtype="interval" name="BAND" arraysize="*"/>
+            <VOT:PARAM datatype="char" name="POL" arraysize="*"/>
+            <VOT:PARAM datatype="char" name="COORD" arraysize="*"/>
+        </VOT:GROUP>
+    </VOT:RESOURCE>
+    <VOT:RESOURCE ID="spectrum_generation_service" utype="adhoc:service" type="meta">
         <VOT:PARAM value="ivo://ivoa.net/std/SODA#async-1.0" datatype="char" name="standardID" arraysize="*"/>
         <VOT:PARAM value="http://localhost:8080/casda_data_access/data/async" datatype="char" name="accessURL" arraysize="*"/>
         <VOT:GROUP name="inputParams">
