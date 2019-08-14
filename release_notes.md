@@ -1,5 +1,33 @@
 # CASDA VO Tools Release Notes
 
+## v1.11 - 2019-07-30
+
+* New Features
+    * Add support for ObsCore v1.1
+    * Add support for embargoing table contents using a released_date in the TAP table metadata
+    * Allow config location to be specified
+    * Update default postgres driver to v42.2.5
+    * Improve logging of connection health
+
+
+## v1.10 - 2018-03-08
+
+* New Features
+    *  Added new logging when SSAP and SIA2 queries were invalid or could not be processed 
+    * Add a large web download limit for DataLink
+
+* Bug fixes
+    * Configure actions failed if a trailing slash was used on configure/home
+
+
+## v1.9 - 2018-01-24
+
+* Bug fixes
+    * Add a specific error message is RA and Dec fields not specified via UCD for tables with cone search enabled
+    * Tidied up datalink XML to improve standards compliance
+    * Correct the type in /tables and query column metadata for timestamp columns
+
+
 ## v1.8 - 2017-10-05
 
 * New Features

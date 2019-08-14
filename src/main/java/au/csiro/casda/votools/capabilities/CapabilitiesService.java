@@ -22,6 +22,7 @@ import au.csiro.casda.votools.config.EndPoint;
 import au.csiro.casda.votools.examples.TapExamplesService;
 import au.csiro.casda.votools.scs.ConeSearchTable;
 import au.csiro.casda.votools.scs.ScsService;
+import au.csiro.casda.votools.tap.TapService;
 
 /*
  * CSIRO VO Tools
@@ -67,6 +68,10 @@ public class CapabilitiesService extends Configurable
 
     private String outputLimitHard;
 
+    private String uploadEnabled;
+    
+    private String uploadLimit;
+
     private float scsMaxRadius;
 
     private int scsMaxRecords;
@@ -87,6 +92,9 @@ public class CapabilitiesService extends Configurable
     @Autowired
     private ScsService scsService;
     
+    @Autowired
+    private TapService tapService;
+    
     private boolean ready;
 
     private Configuration config;
@@ -94,6 +102,7 @@ public class CapabilitiesService extends Configurable
     private String ssapDefaultMaxrec;
     
     private boolean hasTapExamples;
+
 
     /**
      * A constructor
@@ -159,6 +168,8 @@ public class CapabilitiesService extends Configurable
                 executionDurationDefault = tap.get("tap.execution.duration.default", executionDurationDefault);
                 executionDurationHard = tap.get("tap.execution.duration.hard", executionDurationHard);
                 outputLimitHard = tap.get("tap.output.limit.hard", outputLimitHard);
+                uploadEnabled = tap.get(ConfigKeys.TAP_UPLOAD_ENABLED.getKey(), uploadEnabled);
+                uploadLimit = tap.get(ConfigKeys.TAP_UPLOAD_LIMIT.getKey(), uploadLimit);
                 hasTapExamples = tapExamplesService.isReady() && tapExamplesService.configurationExists();
                 if (scs != null)
                 {
@@ -256,10 +267,24 @@ public class CapabilitiesService extends Configurable
         configParams.put("execDurationDefault", executionDurationDefault);
         configParams.put("execDurationHard", executionDurationHard);
         configParams.put("outputLimitHard", outputLimitHard);
+        configParams.put("uploadEnabled", isUploadEnabled().toString());
+        configParams.put("uploadLimit", uploadLimit);
         configParams.put("tapExamplesUrl", tapExamplesService.getExamplesUrl() == null && hasTapExamples 
                 ? serviceBaseUrl + "/examples" : tapExamplesService.getExamplesUrl());
+        configParams.put("obscoreVersion", tapService.getObsCoreVersion());
         
         return configParams;
+    }
+
+    /**
+     * Check if TAP upload has been enabled via config.
+     * 
+     * @return True if tap upload is enabled, otherwise, returns false.
+     */
+    private Boolean isUploadEnabled()
+    {
+        return "1".equalsIgnoreCase(uploadEnabled) || "true".equalsIgnoreCase(uploadEnabled)
+                || "Y".equalsIgnoreCase(uploadEnabled);
     }
 
     /**

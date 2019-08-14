@@ -17,6 +17,8 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.joda.time.DateTime;
+
 import au.csiro.casda.votools.config.TableConfig;
 
 /**
@@ -66,6 +68,12 @@ public class TapTable implements Serializable
      * the table should restrict access to unreleased data by unauthorised users.
      */
     public static final String RELEASE_REQUIRED = "release_required";
+    
+    /**
+     * Name of the released_date column in the TAP metadata table. This is the date on which the table contents will 
+     * become public.
+     */
+    public static final String RELEASED_DATE = "released_date";
 
     // @Id
     // @Column(name = "table_name")
@@ -109,6 +117,9 @@ public class TapTable implements Serializable
 
     /** Should access to this table be restricted so that only authorised users can view released data? */
     private Boolean releaseRequired;
+
+    /** The date on which the contents of the table become public. */
+    private DateTime releaseDate;
     
     private String params;
 
@@ -375,6 +386,16 @@ public class TapTable implements Serializable
     public void setReleaseRequired(Boolean releaseRequired)
     {
         this.releaseRequired = releaseRequired;
+    }
+
+    public DateTime getReleaseDate()
+    {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(DateTime releaseDate)
+    {
+        this.releaseDate = releaseDate;
     }
 
     public String getParams()

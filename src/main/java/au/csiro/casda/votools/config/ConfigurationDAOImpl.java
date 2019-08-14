@@ -153,6 +153,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         template = new JdbcTemplate(dataSource);
         namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         tapCache.setConfiguration(config);
+        logger.info("Initialised connection to " + dataSource.getUrl());
     }
 
     @Override
@@ -1274,6 +1275,10 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
 
         case "text":
             return "VARCHAR";
+
+        case "timestamp with time zone":
+        case "timestamp without time zone":
+            return "TIMESTAMP";
             
         default:
             if (dbType.toLowerCase().startsWith("character varying"))

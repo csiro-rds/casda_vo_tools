@@ -106,6 +106,7 @@ public class DataLinkService extends Configurable
     private String dataLinkAccessEncriptionSecretKey;
     private String cutoutUiServiceUrl;
     private long datalinkDownloadLimitHttp;
+    private long datalinkLargeWebDownloadLimitHttp;
 
     /**
      * Constructor
@@ -139,6 +140,7 @@ public class DataLinkService extends Configurable
         generateSpectrumServiceName = config.get(ConfigValueKeys.DATALINK_GENERATE_SPECTRUM_SERVICE_NAME);
         
         datalinkDownloadLimitHttp = convertLimit(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP);
+        datalinkLargeWebDownloadLimitHttp = convertLimit(ConfigValueKeys.DATALINK_LARGE_WEB_DOWNLOAD_LIMIT_HTTP);
 
         this.voTableRepositoryService = voTableRepositoryService;
     }
@@ -241,6 +243,8 @@ public class DataLinkService extends Configurable
      *            Project codes list
      * @param casdaAdmin
      *            Boolean whether is casda admin
+     * @param casdaLargeWebDownload
+     *            Indicates whether the user is eligable to download more than the standard limit for web downloads.
      * @param accessTime
      *            The date and time when access was requested.
      * @return true if the query was successful, false if an error occurred
@@ -250,7 +254,8 @@ public class DataLinkService extends Configurable
      *             if an error occurs using writer
      */
     public boolean processQuery(Writer writer, String[] requestedIds, String userId, String loginSystem,
-            List<String> projectCodes, boolean casdaAdmin, Date accessTime) throws InterruptedException, IOException
+            List<String> projectCodes, boolean casdaAdmin, boolean casdaLargeWebDownload, Date accessTime)
+            throws InterruptedException, IOException
     {
         ZonedDateTime start = ZonedDateTime.now();
         List<Long> projectIds = null;
@@ -276,7 +281,8 @@ public class DataLinkService extends Configurable
                 // For each id, add row with pointer to data access
                 for (String id : requestedIds)
                 {
-                    buildDataAccessForId(builder, id, userId, loginSystem, projectIds, casdaAdmin, accessTime);
+                    buildDataAccessForId(builder, id, userId, loginSystem, projectIds, casdaAdmin,
+                            casdaLargeWebDownload, accessTime);
                 }
             }
 
@@ -302,11 +308,11 @@ public class DataLinkService extends Configurable
     }
 
     private void buildDataAccessForId(DataLinkVoTableBuilder builder, String id, String userId, String loginSystem,
-            List<Long> projectIds, boolean casdaAdmin, Date accessTime) throws Exception
+            List<Long> projectIds, boolean casdaAdmin, boolean casdaLargeWebDownload, Date accessTime) throws Exception
     {
         String contentType;
-        String table= "";
-        
+        String table = "";
+
         if(StringUtils.isBlank(id))
         {
             builder.withErrorResult(id,
@@ -367,21 +373,26 @@ public class DataLinkService extends Configurable
 
                     RequestToken requestToken =
                             new RequestToken(id, userId, loginSystem, accessTime, dataLinkAccessEncriptionSecretKey);
-                    
+
                     if (StringUtils.isNotBlank(syncServiceUrl))
                     {
-                        //web download
+                        // web download
                         requestToken.setDownloadMode(RequestToken.WEB_DOWNLOAD);
-                        //if less than limit or there is not limit
-                        if(contentLengthKb <= datalinkDownloadLimitHttp || datalinkDownloadLimitHttp == 0)
+                        // if less than limit or there is not limit.
+                        // or if the user has the 'casdaLargeWebDownload' role and is elligible to download larger than
+                        // the standard limit.
+                        if ((contentLengthKb <= datalinkDownloadLimitHttp || datalinkDownloadLimitHttp == 0)
+                                || (casdaLargeWebDownload && contentLengthKb <= datalinkLargeWebDownloadLimitHttp))
                         {
                             builder.withAccessUrlResult(id, syncServiceUrl + requestToken.toEncryptedString(),
-                                    syncServiceNameWeb, contentType, (long) contentLengthKb * Utils.ONE_KB_IN_BYTES); 
+                                    syncServiceNameWeb, contentType, (long) contentLengthKb * Utils.ONE_KB_IN_BYTES);
                         }
                         else
                         {
-                            String message = "DefaultFault: This option is unavailable due to the file size exceeding " 
-                                    + datalinkDownloadLimitHttp / KB_IN_GB + " GB in size";
+                            String message = "DefaultFault: This option is unavailable due to the file size exceeding "
+                                    + (casdaLargeWebDownload ? datalinkLargeWebDownloadLimitHttp
+                                            : datalinkDownloadLimitHttp) / KB_IN_GB
+                                    + " GB in size";
                             builder.withErrorResult(id, syncServiceNameWeb, message);
                         }
                         
@@ -400,7 +411,8 @@ public class DataLinkService extends Configurable
                         //web download
                         requestToken.setDownloadMode(RequestToken.WEB_DOWNLOAD);
                         //if lesss than limit or there is not limit
-                        if(contentLengthKb <= datalinkDownloadLimitHttp || datalinkDownloadLimitHttp == 0)
+                        if((contentLengthKb <= datalinkDownloadLimitHttp || datalinkDownloadLimitHttp == 0)
+                                || (casdaLargeWebDownload && contentLengthKb <= datalinkLargeWebDownloadLimitHttp))
                         {
                             builder.withServiceDefResult(id, "async_service", asyncServiceNameWeb, contentType,
                                     (long) contentLengthKb * Utils.ONE_KB_IN_BYTES, requestToken.toEncryptedString());
@@ -408,7 +420,8 @@ public class DataLinkService extends Configurable
                         else
                         {
                             String message = "DefaultFault: This option is unavailable due to the file size exceeding " 
-                                    + datalinkDownloadLimitHttp / KB_IN_GB + " GB in size";
+                                    + (casdaLargeWebDownload ? datalinkLargeWebDownloadLimitHttp
+                                            : datalinkDownloadLimitHttp) / KB_IN_GB + " GB in size";
                             builder.withErrorResult(id, asyncServiceNameWeb, message);
                             
                         }

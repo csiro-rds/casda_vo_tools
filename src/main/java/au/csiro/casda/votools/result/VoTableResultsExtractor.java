@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.postgresql.jdbc2.AbstractJdbc2ResultSetMetaData;
+import org.postgresql.jdbc.PgResultSetMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -250,9 +250,9 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
             String name = metaData.getColumnName(i).toLowerCase();
             int type = metaData.getColumnType(i);
             String schema = metaData.getSchemaName(i).toLowerCase();
-            if (StringUtils.isBlank(schema) && metaData instanceof AbstractJdbc2ResultSetMetaData)
+            if (StringUtils.isBlank(schema) && metaData instanceof PgResultSetMetaData)
             {
-                schema = ((AbstractJdbc2ResultSetMetaData) metaData).getBaseSchemaName(i).toLowerCase();
+                schema = ((PgResultSetMetaData) metaData).getBaseSchemaName(i).toLowerCase();
             }
             String table = metaData.getTableName(i).toLowerCase();
             String fieldDef = votableFieldMap.get("scs|" + name);

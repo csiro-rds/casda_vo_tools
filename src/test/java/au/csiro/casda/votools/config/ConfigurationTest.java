@@ -12,6 +12,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import javax.sql.DataSource;
 
 import org.junit.Before;
@@ -32,6 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.csiro.casda.votools.VoToolsApplication;
+import au.csiro.casda.votools.VoToolsApplication.ConfigLocation;
 import au.csiro.casda.votools.config.Configuration.Action;
 import au.csiro.casda.votools.config.Configuration.Change;
 import au.csiro.casda.votools.jpa.TapTable;
@@ -676,6 +680,15 @@ public class ConfigurationTest
         public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer()
         {
             return new PropertySourcesPlaceholderConfigurer();
+        }
+        
+        /**
+         * @return A bean to hold the configuration locations.
+         */
+        @Bean
+        public ConfigLocation getConfigLocation()
+        {
+            return new ConfigLocation(new HashSet<>(Arrays.asList(new String[] {"config"})));
         }
 
     }

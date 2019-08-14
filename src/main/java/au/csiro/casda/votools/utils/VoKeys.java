@@ -49,6 +49,11 @@ public class VoKeys
      * The list of project codes a user has access to, from the header 
      */
     public static final String USER_PROJECTS = "project_codes";
+
+    /**
+     * Field indicates whether the user is eligable to download more than the standard limit for web downloads.
+     */
+    public static final String LARGE_WEB_DOWNLOAD = "large_web_download";
     /**
      * The original user's request query string
      */
@@ -85,6 +90,12 @@ public class VoKeys
      * Key for capability url, if capabilities details proxied from another url
      */
     public static final String VO_HEADER_CAPABILITIES_URL = "X-VOTools-capabilities-url";
+    
+    /**
+     * Header that indicates whether the user is eligable to download more than the standard limit for web 
+     * downloads.
+     */
+    public static final String VO_HEADER_LARGE_WEB_DOWNLOAD = "X-VOTools-large-web-download";
 
     /**
      * TAP request parameter map's key for the original ADQL submitted query

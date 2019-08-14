@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import au.csiro.casda.votools.VoToolsApplication.ConfigLocation;
 import au.csiro.casda.votools.utils.Utils;
 
 /**
@@ -33,6 +34,9 @@ import au.csiro.casda.votools.utils.Utils;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter
 {
+    @Autowired
+    private ConfigLocation configLocation;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception
     {
@@ -56,6 +60,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception
     {
-        auth.authenticationProvider(new VoToolsAuthenticationProvider());
+        auth.authenticationProvider(new VoToolsAuthenticationProvider(configLocation));
     }
 }

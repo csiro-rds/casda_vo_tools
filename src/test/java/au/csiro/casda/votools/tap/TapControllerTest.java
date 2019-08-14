@@ -69,6 +69,9 @@ public class TapControllerTest
     @Mock
     private TapService mockService;
 
+    @Mock
+    private UploadParamProcessor uploadParamProcessor;
+
     @Spy
     private DummyUWService uwService;
 
@@ -90,6 +93,7 @@ public class TapControllerTest
     {
         MockitoAnnotations.initMocks(this);
         doReturn(true).when(mockService).isReady();
+        doReturn(true).when(uploadParamProcessor).isReady();
         this.mockMvc = MockMvcBuilders.standaloneSetup(tapController).build();
     }
 
@@ -112,7 +116,8 @@ public class TapControllerTest
         when(mockService.getFormat("CSV")).thenReturn(OutputFormat.CSV);
         when(mockService.getFormat("TSV")).thenReturn(OutputFormat.TSV);
         when(mockService.getFormat(null)).thenReturn(OutputFormat.VOTABLE);
-        when(mockService.processQuery((Writer) anyObject(), mapCaptor.capture())).thenReturn(true);
+        when(mockService.processQuery((Writer) anyObject(), mapCaptor.capture(), anyObject(), anyObject()))
+                .thenReturn(true);
 
         this.mockMvc.perform(get("/tap/sync?" + queryString + "VOTABLE")).andExpect(status().isOk()).andDo(print())
                 .andExpect(content().contentType("application/x-votable+xml"))
@@ -157,7 +162,7 @@ public class TapControllerTest
         when(mockService.getFormat("CSV")).thenReturn(OutputFormat.CSV);
         when(mockService.getFormat("TSV")).thenReturn(OutputFormat.TSV);
         when(mockService.getFormat(null)).thenReturn(OutputFormat.VOTABLE);
-        when(mockService.processQuery((Writer) anyObject(), mapCaptor.capture())).thenReturn(true);
+        when(mockService.processQuery((Writer) anyObject(), mapCaptor.capture(), anyObject(), anyObject())).thenReturn(true);
         when(mockService.trustAuthHeader(any(HttpServletRequest.class))).thenReturn(true);
 
         this.mockMvc
@@ -197,7 +202,8 @@ public class TapControllerTest
         when(mockService.getFormat("CSV")).thenReturn(OutputFormat.CSV);
         when(mockService.getFormat("TSV")).thenReturn(OutputFormat.TSV);
         when(mockService.getFormat(null)).thenReturn(OutputFormat.VOTABLE);
-        when(mockService.processQuery((Writer) anyObject(), mapCaptor.capture())).thenReturn(true);
+        when(mockService.processQuery((Writer) anyObject(), mapCaptor.capture(), anyObject(), anyObject()))
+                .thenReturn(true);
         when(mockService.trustAuthHeader(any(HttpServletRequest.class))).thenReturn(false);
 
         this.mockMvc

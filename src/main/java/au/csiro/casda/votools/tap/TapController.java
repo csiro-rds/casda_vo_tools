@@ -9,6 +9,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import adql.parser.ParseException;
 import au.csiro.casda.services.dto.Message.MessageCode;
 import au.csiro.casda.services.dto.MessageDTO;
 import au.csiro.casda.votools.config.ConfigurationException;
@@ -70,6 +72,9 @@ public class TapController
     @Autowired
     private TapService tapService;
 
+    @Autowired
+    private UploadParamProcessor uploadParamProcessor;
+
     /**
      * Perform a TAP request immediately
      * 
@@ -92,6 +97,19 @@ public class TapController
             String requestParam = paramsMap.get("request");
             if ("doQuery".equals(requestParam))
             {
+                List<UploadedTable> uploadParams;
+                try
+                {
+                    uploadParams = uploadParamProcessor.processUploadParams(request);
+                }
+                catch (ParseException e)
+                {
+                    response.setContentType(OutputFormat.VOTABLE.getDefaultContentType());
+                    PrintWriter writer = response.getWriter();
+                    tapService.reportTapError(writer, e.getMessage());
+                    return;
+                }
+                
                 String formatParam = paramsMap.get("format");
                 OutputFormat outputFormat = tapService.getFormat(formatParam);
                 if (outputFormat != null)
@@ -111,7 +129,7 @@ public class TapController
                 }
 
                 PrintWriter writer = response.getWriter();
-                if (!tapService.processQuery(writer, paramsMap))
+                if (!tapService.processQuery(writer, paramsMap, null, uploadParams))
                 {
                     // job.processQuery returns false is error occured and writes error to the writer
                     // errors are returned in votable format. - May be too late to change the content type...
@@ -312,7 +330,8 @@ public class TapController
     {
         try
         {
-            if (tapService == null || !tapService.isReady() || uwService == null || !uwService.isReady())
+            if (tapService == null || !tapService.isReady() || uwService == null || !uwService.isReady()
+                    || uploadParamProcessor == null || !uploadParamProcessor.isReady())
             {
                 throw new ConfigurationException("TapController is not ready to process requests.");
             }

@@ -1,5 +1,6 @@
 package au.csiro.casda.votools.security;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,18 +14,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-/*
- * #%L
- * CSIRO ASKAP Science Data Archive
- * %%
- * Copyright (C) 2015 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230.
- * %%
- * Licensed under the CSIRO Open Source License Agreement (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License in the LICENSE file.
- * #L%
- */
 
+import au.csiro.casda.votools.VoToolsApplication.ConfigLocation;
 import au.csiro.casda.votools.utils.Utils;
 
 /**
@@ -38,8 +29,19 @@ public class VoToolsAuthenticationProvider extends AbstractUserDetailsAuthentica
 {
     private static final Logger logger = LoggerFactory.getLogger(VoToolsAuthenticationProvider.class);
     
+    private ConfigLocation configLocation;
+    
     /** Constant for teh vo tools admin role */
     public static final String ADMIN_ROLE = "VO_TOOLS_ADMIN";
+    
+    /**
+     * Create a new instance of VoToolsAuthenticationProvider
+     * @param configLocation The ConfigLocation container.
+     */
+    public VoToolsAuthenticationProvider(ConfigLocation configLocation) 
+    {
+		this.configLocation = configLocation;
+	}
     
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails,
@@ -61,8 +63,10 @@ public class VoToolsAuthenticationProvider extends AbstractUserDetailsAuthentica
         logger.info("Retrieving user {}", username);
         try 
         {
-            String[] details = Utils.retrieveFromFile();
-            if(username.equals(details[0]) && password.equals(details[1]))
+            File authzFile = configLocation.getConfigFile(Utils.AUTH_FILE_NAME, false);
+        	
+            String[] details = Utils.retrieveAdminCredentials(authzFile);
+            if(username.equals(details[0]) && Utils.authenticate(password, details[1]))
             {
                 ArrayList<VoAuthority> roles = new ArrayList<VoAuthority>();
                 roles.add(new VoAuthority());

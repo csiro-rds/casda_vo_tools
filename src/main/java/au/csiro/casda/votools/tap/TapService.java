@@ -12,6 +12,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -80,6 +81,7 @@ import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
 import au.csiro.casda.votools.config.EndPoint;
 import au.csiro.casda.votools.jpa.TapColumn;
+import au.csiro.casda.votools.jpa.TapColumnPK;
 import au.csiro.casda.votools.jpa.TapTable;
 import au.csiro.casda.votools.jpa.repository.VoTableRepositoryService;
 import au.csiro.casda.votools.logging.CasdaVoToolsEvents;
@@ -289,6 +291,7 @@ public class TapService extends Configurable implements SystemTime
             EndPoint tapEndPoint = config.getEndPoint("TAP");
             if (tapEndPoint == null)
             {
+            	logger.error("No TAP endpoint is defined.");
                 return false;
             }
             jdbcTemplateSync = new JdbcTemplate(dataSource);
@@ -476,36 +479,54 @@ public class TapService extends Configurable implements SystemTime
                                 : table.getFullTableName();
 
                         ADQLColumn releaseDateColumn = new ADQLColumn(tableref, STR_RELEASED_DATE_COLUMN);
-
-                        ADQLConstraint includeReleasedData = new IsNull(releaseDateColumn, true);
-
-                        // for embargo'd ASKAP Level 7 collections we want records 
-                        // that have a released date and are less than or equal to today's date
-                        ADQLConstraint embargoReleasedData = new Comparison(releaseDateColumn,
-                                ComparisonOperator.LESS_OR_EQUAL, new StringConstant(getCurrentUTCDateTime().toString()));
-
-                        ConstraintsGroup embargoReleaseDateAndIncludeReleasedDataConstraint = new ConstraintsGroup();
-                        embargoReleaseDateAndIncludeReleasedDataConstraint.add(includeReleasedData);
-                        embargoReleaseDateAndIncludeReleasedDataConstraint.add(ConstraintsGroup.AND, embargoReleasedData);
-
-                        if (CollectionUtils.isNotEmpty(projectIds))
+                        if (hasReleasedDateCol(tapTable))
                         {
-                            ADQLList<ADQLOperand> adqlList = new ClauseADQL<>();
-                            for (Long projectId : projectIds)
+                            // Table access is controlled at row level by a released_date column in the table.
+                            ADQLConstraint includeReleasedData = new IsNull(releaseDateColumn, true);
+    
+                            // for embargo'd ASKAP Level 7 collections we want records 
+                            // that have a released date and are less than or equal to today's date
+                            ADQLConstraint embargoReleasedData =
+                                    new Comparison(releaseDateColumn, ComparisonOperator.LESS_OR_EQUAL,
+                                            new StringConstant(getCurrentUTCDateTime().toString()));
+    
+                            ConstraintsGroup embargoReleaseDateAndIncludeReleasedDataConstraint = new ConstraintsGroup();
+                            embargoReleaseDateAndIncludeReleasedDataConstraint.add(includeReleasedData);
+                            embargoReleaseDateAndIncludeReleasedDataConstraint.add(ConstraintsGroup.AND,
+                                    embargoReleasedData);
+    
+                            if (CollectionUtils.isNotEmpty(projectIds))
                             {
-                                NumericConstant id = new NumericConstant(projectId);
-                                adqlList.add(id);
+                                ADQLList<ADQLOperand> adqlList = new ClauseADQL<>();
+                                for (Long projectId : projectIds)
+                                {
+                                    NumericConstant id = new NumericConstant(projectId);
+                                    adqlList.add(id);
+                                }
+                                ConstraintsGroup projectOrReleasedConstraint = new ConstraintsGroup();
+                                ADQLConstraint includeProjectData =
+                                        new In(new ADQLColumn(tableref, STR_PROJECT_ID_COLUMN), adqlList);
+                                projectOrReleasedConstraint.add(includeProjectData);
+                                projectOrReleasedConstraint.add(ConstraintsGroup.OR,
+                                        embargoReleaseDateAndIncludeReleasedDataConstraint);
+                                constraints.add(projectOrReleasedConstraint);
                             }
-                            ConstraintsGroup projectOrReleasedConstraint = new ConstraintsGroup();
-                            ADQLConstraint includeProjectData =
-                                    new In(new ADQLColumn(tableref, STR_PROJECT_ID_COLUMN), adqlList);
-                            projectOrReleasedConstraint.add(includeProjectData);
-                            projectOrReleasedConstraint.add(ConstraintsGroup.OR, includeReleasedData);
-                            constraints.add(projectOrReleasedConstraint);
+                            else
+                            {
+                                constraints.add(embargoReleaseDateAndIncludeReleasedDataConstraint);
+                            }
                         }
                         else
                         {
-                            constraints.add(embargoReleaseDateAndIncludeReleasedDataConstraint);
+                            // Table access is controlled by the released_date in the table metadata
+                            if (isWholeTableEmbargoedForUser(tapTable, projectIds))
+                            {
+                                // Add a 'false' constraint (2 < 1) to block any data from being returned
+                                ADQLConstraint emptyResultConstraint = new Comparison(new NumericConstant(2),
+                                        ComparisonOperator.LESS_THAN, new NumericConstant(1));
+                                constraints.add(emptyResultConstraint);
+                            }
+
                         }
                     }
                 }
@@ -513,6 +534,41 @@ public class TapService extends Configurable implements SystemTime
         }
         return constraints;
     }
+
+    private boolean isWholeTableEmbargoedForUser(TapTable tapTable, List<Long> userProjectIds)
+    {
+        // Check if the embargo has expired
+        if (tapTable.getReleaseDate() != null && getCurrentUTCDateTime().isAfter(tapTable.getReleaseDate()))
+        {
+            return false;
+        }
+        
+        // For level 7 tables we can get project code from schema name - but need to translate to numeric proj id
+        List<String> projectCodes = Collections.singletonList(tapTable.getSchema().getSchemaName());
+        List<Long> idsFromCodes =
+                voTableRepositoryService.fetchProjectIdsFromCodes(projectCodes, config.gtDao().getSchema());
+        
+        if (!idsFromCodes.isEmpty() && userProjectIds != null && userProjectIds.contains(idsFromCodes.get(0)))
+        {
+            // The user has access to this project's data
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean hasReleasedDateCol(TapTable tapTable)
+    {
+        for (TapColumn column : tapTable.getColumns())
+        {
+            if (column.getId().getColumnName().equals(STR_RELEASED_DATE_COLUMN))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Runs a query against our database.
@@ -994,7 +1050,7 @@ public class TapService extends Configurable implements SystemTime
      */
     public boolean processQuery(Writer writer, Map<String, String> paramsMap) throws ConfigurationException
     {
-        return processQuery(writer, paramsMap, null);
+        return processQuery(writer, paramsMap, null, new ArrayList<>());
     }
 
     /**
@@ -1007,12 +1063,14 @@ public class TapService extends Configurable implements SystemTime
      *            The parameters for this job.
      * @param metaDataMap
      *            The map of metadata to be included in the query result. May be null
+     * @param uploadedTables
+     *            The list of tables the user has supplied for querying.
      * @return true if the query was successful, false if an error occurred
      * @throws ConfigurationException
      *             if there were configuration problems
      */
-    public boolean processQuery(Writer writer, Map<String, String> paramsMap, Map<String, String[]> metaDataMap)
-            throws ConfigurationException
+    public boolean processQuery(Writer writer, Map<String, String> paramsMap, Map<String, String[]> metaDataMap,
+            List<UploadedTable> uploadedTables) throws ConfigurationException
     {
         ZonedDateTime started = now();
         String query = paramsMap.get(VoKeys.STR_KEY_ADQL_QUERY);
@@ -1089,6 +1147,46 @@ public class TapService extends Configurable implements SystemTime
         return result;
     }
 
+    /**
+     * Identify which, if any, version of the IVOA ObsCore spec that this database exports. 
+     * @return The version string (1.1 or 1.0) if obscore is implemented, or null if it isn't implemented.
+     */
+    public String getObsCoreVersion()
+    {
+        List<TapTable> tapTables = voTableRepositoryService.getTables();
+        List<TapColumn> tapColumns = voTableRepositoryService.getColumns();
+        
+        TapTable obscore = getObsCoreTable(tapTables);
+        if (obscore == null)
+        {
+            return null;
+        }
+                
+        for (TapColumn tapColumn : tapColumns)
+        {
+            if (tapColumn.getTable().getTableName().equals(obscore.getTableName()))
+            {
+                TapColumnPK colId = tapColumn.getId();
+                if ("s_xel1".equalsIgnoreCase(colId.getColumnName()))
+                {
+                    return "1.1";
+                }
+            }
+        }
+        return "1.0";
+    }
+    
+    private TapTable getObsCoreTable(List<TapTable> tapTables)
+    {
+        for (TapTable table : tapTables)
+        {
+            if ("ivoa.obscore".equalsIgnoreCase(table.getTableName()))
+            {
+                return table;
+            }
+        }
+        return null;
+    }
     /**
      * Forms a log message reporting a failure
      * 

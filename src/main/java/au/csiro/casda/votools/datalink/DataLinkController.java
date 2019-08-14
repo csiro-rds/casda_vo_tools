@@ -110,6 +110,7 @@ public class DataLinkController
                 response.setContentType("text/xml");
             }
 
+            
             PrintWriter writer = response.getWriter();
             if (StringUtils.isNotBlank(errorMsg))
             {
@@ -117,8 +118,10 @@ public class DataLinkController
                 return;
             }
 
+            boolean casdaLargeWebDownload = Boolean.parseBoolean(paramsMap.get(VoKeys.LARGE_WEB_DOWNLOAD)[0]);
+
             dataLinkService.processQuery(writer, paramsMap.get("id"), paramsMap.get(VoKeys.USER_ID)[0],
-                    paramsMap.get(VoKeys.LOGIN_SYSTEM)[0], projectCodes, casdaAdmin, new Date());
+                    paramsMap.get(VoKeys.LOGIN_SYSTEM)[0], projectCodes, casdaAdmin, casdaLargeWebDownload, new Date());
         }
         catch (IOException e)
         {

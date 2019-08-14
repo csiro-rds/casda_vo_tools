@@ -1,5 +1,6 @@
 package au.csiro.casda.votools.config;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import au.csiro.casda.votools.VoToolsApplication.ConfigLocation;
 import au.csiro.casda.votools.utils.Utils;
 import uws.UWSToolBox;
 
@@ -54,6 +56,9 @@ public class ConfigurationController extends Configurable
     private String css;
     
     private String logoUrl;
+    
+    @Autowired
+    private ConfigLocation configLocation;
     
     /**
      * Constructor
@@ -110,7 +115,8 @@ public class ConfigurationController extends Configurable
 
         ModelAndView result = new ModelAndView("configure");
         result.getModel().put("config", "");
-        String password = Utils.retrieveFromFile()[1];
+        File authzFile = configLocation.getConfigFile(Utils.AUTH_FILE_NAME, false);
+        String password = Utils.retrieveAdminCredentials(authzFile)[1];
         result.getModel().put("passwordSetup", Utils.DEFAULT_PASSWORD.equals(password));
 
         result.addObject("serverName", environment);
@@ -155,13 +161,16 @@ public class ConfigurationController extends Configurable
         result.addObject("css", css);
         result.addObject("logo", logoUrl);
 
+        File authzFile = configLocation.getConfigFile(Utils.AUTH_FILE_NAME, false);
         try
         {
-            if (Utils.DEFAULT_PASSWORD.equals(Utils.retrieveFromFile()[1]))
+            if (Utils.DEFAULT_PASSWORD.equals(Utils.retrieveAdminCredentials(authzFile)[1]))
             {
                 if (Utils.validatePassword(paramsMap.get("password1"), paramsMap.get("password2")))
                 {
-                    Utils.writeToFile(new String[] { Utils.USERNAME, paramsMap.get("password1") });
+                	logger.info("Saving credentials to " + authzFile.getCanonicalPath());
+                    Utils.writeAdminCredentialsToFile(authzFile, new String[] { Utils.USERNAME,
+                            Utils.hashPassword(paramsMap.get("password1"), Utils.generateSalt()) });
                 }
                 else
                 {

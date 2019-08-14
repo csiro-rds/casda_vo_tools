@@ -7,6 +7,8 @@ import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.csiro.casda.votools.TestUtils;
 import au.csiro.casda.votools.VoToolsApplication;
+import au.csiro.casda.votools.VoToolsApplication.ConfigLocation;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
@@ -34,6 +37,7 @@ import au.csiro.casda.votools.jpa.TapSchema;
 import au.csiro.casda.votools.jpa.TapTable;
 import au.csiro.casda.votools.jpa.repository.VoTableRepositoryService;
 import au.csiro.casda.votools.scs.ScsService;
+import au.csiro.casda.votools.tap.TapService;
 
 /**
  * Unit tests for capability service layer
@@ -128,6 +132,20 @@ public class CapabilitiesServiceTest
                 hasEntry("capabilitiesURL", "http://localhost:8040/casda_vo_tools/tap/capabilities"));
         assertThat(tapConfigParams, hasEntry("outputLimitHard", "20000000"));
     }
+    
+    @Test
+    public void testGetTapConfigHasUploadParams() throws ConfigurationException
+    {
+        configRegistry.register(capabilityService);
+        capabilityService.isReady();
+        
+        Map<String, String> tapConfigParams = capabilityService.getTapConfigParams("");
+        assertThat(tapConfigParams,
+                hasEntry("capabilitiesURL", "http://localhost:8040/casda_vo_tools/tap/capabilities"));
+        assertThat(tapConfigParams, hasEntry("outputLimitHard", "20000000"));
+        assertThat(tapConfigParams, hasEntry("uploadEnabled", "false"));
+        assertThat(tapConfigParams, hasEntry("uploadLimit", "100000"));
+    }
 
     @Test
     public void testGetTapConfigParamsWithUrl() throws ConfigurationException
@@ -152,27 +170,17 @@ public class CapabilitiesServiceTest
             @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = ConfigurationRegistry.class) })
     public static class Config
     {
-        /**
-         * Required to configure the PropertySource(s) (see https://jira.spring.io/browse/SPR-8539)
-         * 
-         * @return a PropertySourcesPlaceholderConfigurer
-         */
-        @Bean
-        public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer()
-        {
-            return new PropertySourcesPlaceholderConfigurer();
-        }
+        private static VoTableRepositoryService voTableRepositoryService;
+
+        private ConfigLocation configLocation;
 
         /**
-         * Create a ScsService instance driven by mock objects populated with our test catalogue definitions.
-         * 
-         * @return The ScsService instance.
-         * @throws ConfigurationException
+         * Constructor
+         * @throws ConfigurationException 
          */
-        @Bean
-        public static ScsService getScsService() throws ConfigurationException
+        public Config() throws ConfigurationException
         {
-            VoTableRepositoryService voTableRepositoryService = Mockito.mock(VoTableRepositoryService.class);
+            voTableRepositoryService = Mockito.mock(VoTableRepositoryService.class);
             TapSchema ivoaSchema = new TapSchema();
             ivoaSchema.setSchemaName("ivoa");
             ivoaSchema.setTables(new ArrayList<>());
@@ -199,13 +207,60 @@ public class CapabilitiesServiceTest
             Mockito.when(voTableRepositoryService.getTables()).thenReturn(tableList);
             Mockito.when(voTableRepositoryService.getColumns()).thenReturn(columnList);
             Mockito.when(voTableRepositoryService.isReady()).thenReturn(true);
+            configLocation = new ConfigLocation(new HashSet<>(Arrays.asList(new String[] {"config"})));
+        }
+        
+        /**
+         * Required to configure the PropertySource(s) (see https://jira.spring.io/browse/SPR-8539)
+         * 
+         * @return a PropertySourcesPlaceholderConfigurer
+         */
+        @Bean
+        public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer()
+        {
+            return new PropertySourcesPlaceholderConfigurer();
+        }
 
+        /**
+         * Create a ScsService instance driven by mock objects populated with our test catalogue definitions.
+         * 
+         * @return The ScsService instance.
+         * @throws ConfigurationException
+         */
+        @Bean
+        public static ScsService getScsService() throws ConfigurationException
+        {
             Configuration config = ConfigurationTest.getTestConfiguration();
             ScsService scsService =
                     new ScsService(voTableRepositoryService, ConfigurationRegistry.getStaticRegistry());
             scsService.setConfiguration(config);
             scsService.isReady();
             return scsService;
+        }
+        
+        /**
+         * Create a TapService instance driven by mock objects populated with our test catalogue definitions.
+         * 
+         * @return The TapService instance.
+         * @throws ConfigurationException
+         */
+        @Bean
+        public static TapService getTapService() throws ConfigurationException
+        {
+            Configuration config = ConfigurationTest.getTestConfiguration();
+            TapService tapService = new TapService(ConfigurationRegistry.getStaticRegistry(), voTableRepositoryService);
+            tapService.setConfiguration(config);
+            tapService.isReady();
+            return tapService;
+        }
+        
+        /**
+         * @return A bean to hold the configuration locations.
+         */
+        @Bean
+        public ConfigLocation getConfigLocation()
+        {
+            return configLocation;
         }
 
     }

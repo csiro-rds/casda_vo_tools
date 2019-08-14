@@ -155,16 +155,35 @@ public class ScsServiceTest
         Map<String, String> params = new HashMap<>();
 
         List<TapTable> tableList = new ArrayList<>();
-        TapTable scsTable =
+        List<TapColumn> columnList = new ArrayList<>();
+        TapTable obscoreTable =
                 TestUtils.createTapTable("casda", "obs_core", tapSchema, tapSchema.getSchemaName() + ".ObsCore", true,
                         false);
-        tableList.add(scsTable);
+        tableList.add(obscoreTable);
+        TapColumn idColumn =
+                TestUtils.createTapColumn(obscoreTable, "obs_id", "VARCHAR", 255, "meta.id;meta.main", 1, 0);
+        obscoreTable.addColumn(idColumn);
+        columnList.add(idColumn);
+        TapColumn raColumn =
+                TestUtils.createTapColumn(obscoreTable, "s_ra", "DOUBLE", 15, "pos.eq.ra;meta.main", 1, 1);
+        obscoreTable.addColumn(raColumn);
+        columnList.add(raColumn);
+        TapColumn decColumn =
+                TestUtils.createTapColumn(obscoreTable, "s_dec", "DOUBLE", 15, "pos.eq.dec;meta.main", 1, 2);
+        obscoreTable.addColumn(decColumn);
+        columnList.add(decColumn);
+
+        TapTable scsTable2 =
+                TestUtils.createTapTable("casda", "nocoords", tapSchema, tapSchema.getSchemaName() + ".NoCoords", true,
+                        false);
+        tableList.add(scsTable2);
         when(voTableRepositoryService.getTables()).thenReturn(tableList);
+        when(voTableRepositoryService.getColumns()).thenReturn(columnList);
 
         ScsService service = new ScsService(voTableRepositoryService, configRegistry);
         service.isReady();
 
-        assertThat(service.validateScsJob(params), containsString("Missing radius parameter"));
+        assertThat(service.validateScsJob(params), containsString("Missing radius (sr) parameter"));
 
         params.put("sr", "lots");
         assertThat(service.validateScsJob(params), containsString("Invalid radius parameter value: lots"));
@@ -199,6 +218,9 @@ public class ScsServiceTest
         params.put("catalog", "XXX");
         assertThat(service.validateScsJob(params), containsString("Invalid catalog: XXX"));
 
+        params.put("catalog", "nocoords");
+        assertThat(service.validateScsJob(params), containsString("Catalog nocoords is not completely configured"));
+        
         params.put("catalog", "obscore");
         assertNull(service.validateScsJob(params));
         params.put("catalog", "obSCOre");

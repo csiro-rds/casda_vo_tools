@@ -1,5 +1,7 @@
 package au.csiro.casda.votools.health;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -33,6 +35,8 @@ import au.csiro.casda.votools.config.ConfigurationRegistry;
 @Component
 public class PGSphereHealth extends Configurable implements HealthIndicator
 {
+    private static Logger logger = LoggerFactory.getLogger(PGSphereHealth.class);
+
     private JdbcTemplate jdbcTemplate;
 
     private Configuration config;
@@ -74,6 +78,7 @@ public class PGSphereHealth extends Configurable implements HealthIndicator
         }
         catch (Exception e)
         {
+            logger.error("Database does not support pgshere: " + e.getMessage());
             return new Health.Builder().down(e).build();
         }
 

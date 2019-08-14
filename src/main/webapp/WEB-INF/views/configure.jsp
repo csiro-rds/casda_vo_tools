@@ -58,7 +58,7 @@ input.centreButton
            		<c:if test="${success}">
                 	<div id="successMessage" class="success">${successMessage }</div>
                 </c:if>
-                <form action="./act" method="post">
+                <form action="${pageContext.request.contextPath}/configure/act" method="post">
                     <div class="form-field" style="width:800">
 	                    <c:if test="${!passwordSetup}">
 	                      <table>

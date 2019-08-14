@@ -50,7 +50,7 @@ public enum CasdaVoToolsEvents implements CasdaEvent
      */
     E098,
     /** 
-     * Couldn't execute VO SCS query 
+     * Couldn't execute SCS query 
      */
     E142,
     /**
@@ -70,8 +70,22 @@ public enum CasdaVoToolsEvents implements CasdaEvent
     /**
      * Failed to build DataLink links
      */
-    E150;
+    E150,
 
+    /**
+     * Could not execute SIA2 query
+     */
+    E176,
+    
+    /**
+     * Could not execute SSAP query
+     */
+    E177,
+    
+    /**
+     * Invalid SSAP query
+     */
+    E178;
 
     private static Properties eventProperties = new Properties();
 

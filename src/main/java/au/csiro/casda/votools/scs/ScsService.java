@@ -196,6 +196,7 @@ public class ScsService extends Configurable
             }
             catch(Exception e)
             {
+            	logger.error("SCS service is unavailable due to: " + e.getMessage());
                 ready = false ;
             }
         }
@@ -368,6 +369,10 @@ public class ScsService extends Configurable
 
         String tableName =
                 coneSearchTable.getTable().getDbSchemaName() + "." + coneSearchTable.getTable().getDbTableName();
+        if (coneSearchTable.getRaColumn() == null || coneSearchTable.getDecColumn() == null)
+        {
+            throw new IllegalArgumentException("Catalog " + catalog + " does not have ra and dec fields defined."); 
+        }
         String raName = coneSearchTable.getRaColumn().getDbColumnName();
         String decName = coneSearchTable.getDecColumn().getDbColumnName();
 
@@ -468,7 +473,7 @@ public class ScsService extends Configurable
 
         if (StringUtils.isBlank(radiusStr))
         {
-            return "Missing radius parameter";
+            return "Missing radius (sr) parameter";
         }
         else
         {
@@ -515,6 +520,14 @@ public class ScsService extends Configurable
             {
                 return "Invalid catalog: " + catalog;
             }
+            // Check that the table is ready for a cone search query
+            ConeSearchTable coneSearchTable = coneSearchTables.get(catalog.toLowerCase());
+            if (coneSearchTable.getRaColumn() == null || coneSearchTable.getDecColumn() == null)
+            {
+                return "Catalog " + catalog + " is not completely configured and connot be queried at this time. "
+                        + "It does not have right ascension and declination fields specified.";
+            }
+
         }
 
         return null;
