@@ -120,7 +120,7 @@ public class DataLinkServiceTest
         dataLinkService.processQuery(writer,
                 new String[] { "visibility-1", "cube-1", "spectrum-1", "moment_map-1", "cubelet-1", "", null, 
                 		"invalid-123456", "cube-1;drop table casda.tablename" },
-                "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST, true, ACCESS_DATE);
+                "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST, true, false, ACCESS_DATE);
 
         System.out.println(writer.getBuffer().toString());
         checkXmlAgainstTestCaseFile("service.invalid.ids", writer.getBuffer().toString());
@@ -138,7 +138,7 @@ public class DataLinkServiceTest
 
         StringWriter writer = new StringWriter();
         dataLinkService.processQuery(writer, new String[] { "cube-123456" }, "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST,
-                true, ACCESS_DATE);
+                true, false, ACCESS_DATE);
 
         checkXmlAgainstTestCaseFile("service.authenticated.released", writer.getBuffer().toString());
     }
@@ -149,13 +149,13 @@ public class DataLinkServiceTest
         when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
                 .thenReturn(Arrays.asList(123l, 456l, 789l));
         Map<String, Object> result = new HashMap<>();
-        result.put("filesize", 209717200L);
+        result.put("filesize", 534288000L);
         result.put("released_date", "13-01-2016:16:29:39:00");
         when(jdbcTemplate.queryForMap(any(), eq(123456L))).thenReturn(result);
 
         StringWriter writer = new StringWriter();
         dataLinkService.processQuery(writer, new String[] { "cube-123456" }, "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST,
-                true, ACCESS_DATE);
+                true, false, ACCESS_DATE);
 
         checkXmlAgainstTestCaseFile("service.authenticated.released.size.limit", writer.getBuffer().toString());
     }
@@ -172,7 +172,7 @@ public class DataLinkServiceTest
 
         StringWriter writer = new StringWriter();
         dataLinkService.processQuery(writer, new String[] { "cube-123456" }, "anonymous", "", PROJECT_CODE_SAMPLE_LIST,
-                false, ACCESS_DATE);
+                false, false, ACCESS_DATE);
         checkXmlAgainstTestCaseFile("service.unauthenticated.released", writer.getBuffer().toString());
     }
 
@@ -188,7 +188,7 @@ public class DataLinkServiceTest
 
         StringWriter writer = new StringWriter();
         dataLinkService.processQuery(writer, new String[] { "visibility-123456" }, "anonymous", "",
-                PROJECT_CODE_SAMPLE_LIST, false, ACCESS_DATE);
+                PROJECT_CODE_SAMPLE_LIST, false, false, ACCESS_DATE);
         checkXmlAgainstTestCaseFile("service.unauthenticated.unreleased", writer.getBuffer().toString());
     }
 
@@ -205,7 +205,7 @@ public class DataLinkServiceTest
 
         StringWriter writer = new StringWriter();
         dataLinkService.processQuery(writer, new String[] { "cube-123456" }, "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST,
-                false, ACCESS_DATE);
+                false, false, ACCESS_DATE);
         checkXmlAgainstTestCaseFile("service.authenticated.unreleased", writer.getBuffer().toString());
     }
 
@@ -221,13 +221,14 @@ public class DataLinkServiceTest
 
         StringWriter writer = spy(new StringWriter());
         RuntimeException runtimeException = new RuntimeException("Invalid ids");
-        doThrow(runtimeException).when(writer).append(Mockito.contains("<VOT:TD>http://"));
+        doThrow(runtimeException).when(writer).append(Mockito.contains("<TD>http://"));
 
         dataLinkService.processQuery(writer, new String[] { "cube-123456" }, "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST,
-                false, ACCESS_DATE);
+                false, false, ACCESS_DATE);
 
         checkXmlAgainstTestCaseFile("service.error", writer.getBuffer().toString());
 
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         testAppender.verifyLogMessage(Level.ERROR,
                 allOf(containsString("E150]"), containsString("requestIds: \"[cube-123456]\""),
                         containsString("userMessage: failed to build AccessData URI's"),
@@ -355,5 +356,40 @@ public class DataLinkServiceTest
 
         List<?> allDifferences = diff.getAllDifferences();
         assertEquals("Differences found: " + diff.toString(), 0, allDifferences.size());
+    }
+    
+    @Test
+    public void processQueryAsCASDALargeDownloadRoleUserLessThanLimit() throws Exception
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+                .thenReturn(Arrays.asList(123l, 456l, 789l));
+        Map<String, Object> result = new HashMap<>();
+        result.put("filesize", 209717200L);
+        result.put("released_date", null);
+        when(jdbcTemplate.queryForMap(any(), eq(123456L))).thenReturn(result);
+        when(jdbcTemplate.queryForObject(any(), eq(new Object[] { 123456L }), eq(String.class))).thenReturn("12345");
+
+        StringWriter writer = new StringWriter();
+        dataLinkService.processQuery(writer, new String[] { "cube-123456" }, "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST,
+                false, true, ACCESS_DATE);
+        checkXmlAgainstTestCaseFile("service.authenticated.large.download.role", writer.getBuffer().toString());
+    }
+    
+    @Test
+    public void processQueryAsCASDALargeDownloadRoleUserGreaterThanLimit() throws Exception
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+                .thenReturn(Arrays.asList(123l, 456l, 789l));
+        Map<String, Object> result = new HashMap<>();
+        result.put("filesize", 21474836485L);
+        result.put("released_date", null);
+        when(jdbcTemplate.queryForMap(any(), eq(123456L))).thenReturn(result);
+        when(jdbcTemplate.queryForObject(any(), eq(new Object[] { 123456L }), eq(String.class))).thenReturn("12345");
+
+        StringWriter writer = new StringWriter();
+        dataLinkService.processQuery(writer, new String[] { "cube-123456" }, "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST,
+                false, true, ACCESS_DATE);
+        checkXmlAgainstTestCaseFile("service.authenticated.large.download.role.exceed.limit",
+                writer.getBuffer().toString());
     }
 }

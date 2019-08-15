@@ -240,6 +240,15 @@ tables:
                std: 0
                column_order: 7
             type: character varying(255)
+         release_date: !Column
+            options: !Map
+               description: The date and time on which the data in this table becomes public.
+               size: 8
+               principal: 0
+               indexed: 0
+               std: 0
+               column_order: 11
+            type: timestamp with time zone
          release_required: !Column
             defaultvalue: false
             options: !Map

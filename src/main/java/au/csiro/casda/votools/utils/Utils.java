@@ -13,15 +13,20 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 
@@ -52,13 +57,22 @@ import org.slf4j.Logger;
  */
 public class Utils
 {
+    /**
+     * Salt length in bits.
+     */
+    private static final int SALT_LENGTH = 32;
+
+    private static final int HASH_KEY_LENGTH = 256;
+    
+    private static final int HASH_ITERATION_COUNT = 80932*6;
+    
     private static final int PASSWORD_MIN_LENGTH = 8;
     /** Constant for the default password */
     public static final String DEFAULT_PASSWORD = "password";
     /** Constant for the vo tools admin user name */
     public static final String USERNAME = "voadmin";
     /** Constant for the file containing the encrypted password */
-    public static final String AUTH_FILE_NAME = "config/authz";
+    public static final String AUTH_FILE_NAME = "authz";
     /** Constant for the vo tools admin role */
     public static final String ADMIN_ROLE = "VO_TOOLS_ADMIN";
     
@@ -119,45 +133,129 @@ public class Utils
     }
 
     /**
+     * Write User name / password to authz file. 
      * 
+     * @param authzFile
+     *            The authz file to be updated.
      * @param details
-     *            the details to write to a file
+     *            the details to write to a file.  Details are User name and password. 
      * @throws IOException
      *             thrown when an I/O exception of some sort has occurred
      */
-    public static void writeToFile(String[] details) throws IOException
+    public static void writeAdminCredentialsToFile(File authzFile, String[] details) throws IOException
     {
-        File file = new File(AUTH_FILE_NAME);
-
-        OutputStreamWriter output = new OutputStreamWriter(new FileOutputStream(file, false),
+        OutputStreamWriter output = new OutputStreamWriter(new FileOutputStream(authzFile, false),
                 Charset.forName(CharEncoding.UTF_8).newEncoder());
-        output.write(details[0] + " " + details[1]);
+        String userName = details[0];
+        String password = details[1];
+        output.write(userName + " " + password);
         output.close();
     }
 
     /**
+     * Generate a salt value used for password hashing.
+     * 
+     * @return A randomly generate salt.
+     */
+    public static byte[] generateSalt()
+    {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[SALT_LENGTH];
+        random.nextBytes(salt);
+        return salt;
+    }
+    
+    /**
+     * Hash plain text password using the specified salt. Salt value is stored with the password.
+     * 
+     * @param password
+     *            The plain text password
+     * @param salt
+     *            Salt
+     * @return Hashed password and salt.
+     */
+    public static String hashPassword(String password, byte[] salt)
+    {
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 
+                HASH_ITERATION_COUNT, HASH_KEY_LENGTH);
+        SecretKeyFactory factory;
+        byte[] hash;
+        
+        try
+        {
+            factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            hash = factory.generateSecret(spec).getEncoded();
+        }
+        catch (NoSuchAlgorithmException | InvalidKeySpecException e)
+        {
+            return password;
+        }
+        
+        return Base64.encodeBase64String(salt) + '$' + Base64.encodeBase64String(hash);
+    }
+
+    /**
+     * Authenticate a raw password against the stored hashed version.
+     * 
+     * @param rawPassword
+     *            The raw password
+     * @param storedPassword
+     *            The hashed password
+     * @return True if passwords match, false otherwise.
+     */
+    public static boolean authenticate(String rawPassword, String storedPassword)
+    {
+        String[] saltAndPassword = storedPassword.split("\\$");
+
+        if (saltAndPassword.length != 2)
+        {
+            // default password still being used. ignore.
+            if(rawPassword.equals(storedPassword) && DEFAULT_PASSWORD.equals(storedPassword)) 
+            {
+                return true;
+            }
+            return false;
+        }
+
+        if (StringUtils.isEmpty(saltAndPassword[0]) || StringUtils.isEmpty(saltAndPassword[1]))
+        {
+            return false;
+        }
+
+        byte[] salt = Base64.decodeBase64(saltAndPassword[0]);
+
+        String hashedPassword = hashPassword(rawPassword, salt);
+        if (hashedPassword.equals(storedPassword))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param authzFile
+     *             The authz file holding the current credentials. 
      * @throws IOException
      *             thrown when an I/O exception of some sort has occurred
      * @return details
      */
-    public static String[] retrieveFromFile() throws IOException
+    public static String[] retrieveAdminCredentials(File authzFile) throws IOException
     {
         String[] details = new String[] { USERNAME, DEFAULT_PASSWORD };
-        File file = new File(AUTH_FILE_NAME);
 
         // creates file if it does not exist, this will be for initial deploy + the admin can reset the password simply
         // by deleting the file (as password will be encrypted)
-        FileUtils.mkDir(file.getParentFile());
-        if (file.createNewFile())
+        FileUtils.mkDir(authzFile.getParentFile());
+        if (authzFile.createNewFile())
         {
-            writeToFile(details);
+            writeAdminCredentialsToFile(authzFile, details);
         }
 
         // if still no file falls back to default details
-        if (file != null)
+        if (authzFile != null)
         {
             BufferedReader fileContent = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(file), Charset.forName(CharEncoding.UTF_8)));
+                    new InputStreamReader(new FileInputStream(authzFile), Charset.forName(CharEncoding.UTF_8)));
 
             String firstLine = fileContent.readLine();
             if (firstLine != null)
@@ -235,6 +333,7 @@ public class Utils
         String userName = VoKeys.ANONYMOUS_USER;
         String loginSystem = StringUtils.EMPTY;
         String userProjects = StringUtils.EMPTY;
+        String casdaLargeWebDownload = "false";
         if (trustAuthHeader && StringUtils.isNotBlank(request.getHeader(VoKeys.VO_AUTH_HEADER_USER_ID)))
         {
             userId = request.getHeader(VoKeys.VO_AUTH_HEADER_USER_ID);
@@ -242,11 +341,13 @@ public class Utils
             loginSystem = request.getHeader(VoKeys.VO_AUTH_HEADER_LOGIN_SYSTEM);
             userProjects = StringUtils.defaultString(request.getHeader(VoKeys.VO_AUTH_HEADER_USER_PROJECTS),
                     StringUtils.EMPTY);
+            casdaLargeWebDownload = request.getHeader(VoKeys.VO_HEADER_LARGE_WEB_DOWNLOAD);
         }
         paramsMap.put(VoKeys.USER_NAME, userName);
         paramsMap.put(VoKeys.USER_ID, userId);
         paramsMap.put(VoKeys.LOGIN_SYSTEM, loginSystem);
         paramsMap.put(VoKeys.USER_PROJECTS, userProjects);
+        paramsMap.put(VoKeys.LARGE_WEB_DOWNLOAD, casdaLargeWebDownload);
         return paramsMap;
     }
 

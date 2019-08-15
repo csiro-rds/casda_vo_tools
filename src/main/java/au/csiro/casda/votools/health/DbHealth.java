@@ -1,5 +1,7 @@
 package au.csiro.casda.votools.health;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
@@ -33,6 +35,7 @@ import au.csiro.casda.votools.config.ConfigurationRegistry;
 @Component
 public class DbHealth extends Configurable implements HealthIndicator
 {
+    private static Logger logger = LoggerFactory.getLogger(DbHealth.class);
     
     private JdbcTemplate jdbcTemplate;
 
@@ -76,6 +79,8 @@ public class DbHealth extends Configurable implements HealthIndicator
         }
         catch (Exception e)
         {
+            logger.error("Unable to query database with " + ConfigValueKeys.CONNECTION_URL + ":"
+                    + config.get(ConfigValueKeys.CONNECTION_URL));
             return new Health.Builder().down(e)
                     .withDetail(ConfigValueKeys.CONNECTION_URL, config.get(ConfigValueKeys.CONNECTION_URL)).build();
         }

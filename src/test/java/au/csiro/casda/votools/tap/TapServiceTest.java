@@ -139,6 +139,10 @@ public class TapServiceTest
     private TapService tapService;
 
     private Log4JTestAppender testAppender;
+    
+    private List<TapTable> tableList;
+    private List<TapColumn> columnList;
+    private TapTable tableCopy;
 
     /**
      * Set up the ui controller before each test.
@@ -155,22 +159,22 @@ public class TapServiceTest
         TapSchema tapSchema = new TapSchema();
         tapSchema.setSchemaName("ivoa");
 
-        List<TapTable> tableList = new ArrayList<>();
+        tableList = new ArrayList<>();
         TapTable table = new TapTable();
         table.setDbSchemaName("casda");
         table.setDbTableName("obs_core");
         table.setSchema(tapSchema);
-        table.setTableName("ObsCore");
+        table.setTableName("ivoa.ObsCore");
         tableList.add(table);
 
-        TapTable tableCopy = new TapTable();
+        tableCopy = new TapTable();
         tableCopy.setDbSchemaName(table.getDbSchemaName());
         tableCopy.setTableName(table.getTableName());
         tableCopy.setDbTableName(table.getDbTableName());
         tableCopy.setDescriptionLong("This is very very very long description");
         tableCopy.setParams("Table Name : asdasd | Indexed Fields : blabl, bla and bla");
 
-        List<TapColumn> columnList = new ArrayList<>();
+        columnList = new ArrayList<>();
         TapColumn tapColumn = new TapColumn();
         tapColumn.setTable(tableCopy);
         tapColumn.setId(new TapColumnPK(table.getTableName(), "dataproduct_type"));
@@ -281,6 +285,7 @@ public class TapServiceTest
 
         assertThat(tapService.processQuery(writer, params), is(false));
         assertThat(writer.toString(), containsString(STR_MSG_UNKNOWN_QUERY_LANGUAGE));
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         testAppender.verifyLogMessage(
                 Level.INFO,
                 allOf(containsString("E061]"), containsString("adqlQuery: \"" + STR_QUERY_SELECT_STAR_FROM_DSFDFDASF
@@ -299,6 +304,7 @@ public class TapServiceTest
 
         assertThat(tapService.processQuery(writer, params), is(false));
         assertThat(writer.toString(), containsString(STR_MSG_UNKNOWN_QUERY_LANGUAGE));
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         testAppender.verifyLogMessage(
                 Level.INFO,
                 allOf(containsString("E061]"), containsString("adqlQuery: \"" + STR_QUERY_SELECT_STAR_FROM_DSFDFDASF
@@ -317,6 +323,7 @@ public class TapServiceTest
 
         writer = new StringWriter();
         assertThat(tapService.processQuery(writer, params), is(false));
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         assertThat(writer.toString(), containsString(STR_UNSUPPORTED_FORMAT_REQUESTED_XXX));
         testAppender.verifyLogMessage(
                 Level.INFO,
@@ -336,6 +343,7 @@ public class TapServiceTest
 
         assertThat(tapService.processQuery(writer, params), is(false));
         assertThat(writer.toString(), containsString(STR_MSG_MISSING_QUERY_PARAMETER));
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         testAppender.verifyLogMessage(
                 Level.INFO,
                 allOf(containsString("E061]"), containsString("adqlQuery: \"null\""), containsString("submittedTime: "
@@ -355,6 +363,7 @@ public class TapServiceTest
         // no results due to mock JdbcTemplate
         assertThat(writer.toString(), containsString(StringUtils.EMPTY));
 
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         testAppender.verifyLogMessage(
                 Level.INFO,
                 allOf(containsString("E061]"), containsString("adqlQuery: \"" + STR_BAD_QUERY_SELECTSELECT + "\""),
@@ -377,6 +386,7 @@ public class TapServiceTest
         // calls generate sql for query once to validate, and once to run
         verify(tapService, times(2)).generateSqlForQuery(eq(STR_QUERY_SELECT_STAR_FROM_DSFDFDASF), eq(false), eq(null));
         // no results due to mock JdbcTemplate
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         assertThat(writer.toString(), containsString(""));
         testAppender.verifyLogMessage(
                 Level.INFO,
@@ -397,6 +407,7 @@ public class TapServiceTest
         Map<String, String> params = createValidParamsForUser(mode, STR_QUERY_SELECT_STAR_FROM_DSFDFDASF, true);
 
         assertThat(tapService.processQuery(writer, params), is(true));
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         verify(tapService, times(2)).generateSqlForQuery(eq(STR_QUERY_SELECT_STAR_FROM_DSFDFDASF), eq(false),
                 eq(PROJECT_IDS_SAMPLE));
         testAppender.verifyLogMessage(
@@ -418,6 +429,7 @@ public class TapServiceTest
         params.put(VoKeys.USER_PROJECTS, VoKeys.STR_PROJECT_CODES_ALL);
 
         assertThat(tapService.processQuery(writer, params), is(true));
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         verify(tapService, times(2)).generateSqlForQuery(eq(STR_QUERY_SELECT_STAR_FROM_DSFDFDASF), eq(true), eq(null));
         testAppender.verifyLogMessage(
                 Level.INFO,
@@ -444,6 +456,7 @@ public class TapServiceTest
         assertThat(writer.toString(), containsString(StringUtils.EMPTY));
         verify(tapService, times(2)).generateSqlForQuery(eq(STR_QUERY_SELECT_STAR_FROM_DSFDFDASF), eq(false),
                 eq(PROJECT_IDS_SAMPLE));
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         testAppender
                 .verifyLogMessage(
                         Level.ERROR,
@@ -468,6 +481,7 @@ public class TapServiceTest
                 any(ZonedDateTime.class), any(String.class), anyMapOf(String.class, String[].class));
         assertThat(tapService.processQuery(writer, params), is(false));
         assertThat(writer.toString(), containsString("Could not finish query due to timeout."));
+        testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         testAppender.verifyLogMessage(Level.ERROR, "Could not finish query due to timeout.",
                 dataAccessResourceFailureException);
 
@@ -691,5 +705,26 @@ public class TapServiceTest
         when(requestFromEmptyUser.getRemoteAddr()).thenReturn(TEST_IP_ADDRESS_TRUSTED_2);
         when(requestFromEmptyUser.getHeader(VoKeys.VO_AUTH_HEADER_USER_ID)).thenReturn("");
         assertFalse(tapService.isTrustedUserId(requestFromEmptyUser));
+    }
+    
+    @Test
+    public void testGetObsCoreVersion()
+    {
+        // With the default config of a single ivoa.obscore table we expect obscore 1.0 
+        assertThat(tapService.getObsCoreVersion(), is("1.0"));
+        
+        // Add an obscore 1.1 column
+        TapColumn tapColumn = new TapColumn();
+        tapColumn.setTable(tableCopy);
+        tapColumn.setId(new TapColumnPK(tableCopy.getTableName(), "s_xel1"));
+        tapColumn.setDatatype("INTEGER");
+        tapColumn.setSize(8);
+        tapColumn.setDbColumnName("s_xel1");
+        columnList.add(tapColumn);
+        assertThat(tapService.getObsCoreVersion(), is("1.1"));
+
+        // Hide all the tables 
+        when(voTableRepositoryService.getTables()).thenReturn(new ArrayList<>());
+        assertThat(tapService.getObsCoreVersion(), is(nullValue()));
     }
 }

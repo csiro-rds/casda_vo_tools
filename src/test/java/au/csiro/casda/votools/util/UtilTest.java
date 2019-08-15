@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -15,6 +16,7 @@ import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +48,7 @@ public class UtilTest
     @Before
     public void setUp() throws Exception
     {
-        File file = new File(Utils.AUTH_FILE_NAME);
+        File file = new File("config", Utils.AUTH_FILE_NAME);
         if (file.exists())
         {
             file.delete();
@@ -76,23 +78,113 @@ public class UtilTest
     }
 
     @Test
-    public void testPasswordWritingAndetrieving() throws Exception
+    public void testPasswordWritingAndRetrieving() throws Exception
     {
         String username = "username";
-        String password = "password";
+        String password = "saltedEncryptedPassword";
 
-        File file = new File(Utils.AUTH_FILE_NAME);
+        File file = new File("config", Utils.AUTH_FILE_NAME);
 
         assertFalse(file.exists());
 
-        Utils.writeToFile(new String[] { username, password });
+        Utils.writeAdminCredentialsToFile(file, new String[] { username, password });
 
         assertTrue(file.exists());
 
-        String[] returned = Utils.retrieveFromFile();
+        String[] returned = Utils.retrieveAdminCredentials(file);
 
         assertEquals(username, returned[0]);
         assertEquals(password, returned[1]);
+    }
+    
+    @Test
+    public void testGenerateSalt() throws Exception
+    {
+        byte[] salt = Utils.generateSalt();
+        assertNotNull(salt);
+        assertEquals(32, salt.length);
+    }
+    
+    @Test
+    public void testHashPassword() throws Exception
+    {
+        byte[] salt = Utils.generateSalt();
+        String hash = Utils.hashPassword("randomPassword!1", salt);
+        assertNotNull(hash);
+        String[] saltAndHash = hash.split("\\$");
+        assertEquals(Base64.encodeBase64String(salt), saltAndHash[0]);
+        assertEquals(2, saltAndHash.length);
+    }
+    
+    @Test
+    public void testHashWithEmptyPassword() throws Exception
+    {
+        byte[] salt = Utils.generateSalt();
+        String hash = Utils.hashPassword("", salt);
+        assertNotNull(hash);
+        String[] saltAndHash = hash.split("\\$");
+        assertEquals(Base64.encodeBase64String(salt), saltAndHash[0]);
+        assertEquals(2, saltAndHash.length);
+    }
+    
+    @Test
+    public void testHashWithSpecialCharacterInPassword() throws Exception
+    {
+        String rawPassword = "passwordWithSpecChar$!1";
+        byte[] salt = Utils.generateSalt();
+        String hash = Utils.hashPassword(rawPassword, salt);
+        
+        assertNotNull(hash);
+        String[] saltAndHash = hash.split("\\$");
+        assertEquals(Base64.encodeBase64String(salt), saltAndHash[0]);
+        assertEquals(2, saltAndHash.length);
+        
+        assertTrue(Utils.authenticate(rawPassword, hash));
+    }
+    
+
+    @Test
+    public void testAuthenticate() throws Exception
+    {
+        String rawPassword = "randomPassword!1";
+        byte[] salt = Utils.generateSalt();
+        String hash = Utils.hashPassword(rawPassword, salt);
+        
+        assertNotNull(hash);
+        String[] saltAndHash = hash.split("\\$");
+        assertEquals(Base64.encodeBase64String(salt), saltAndHash[0]);
+        assertEquals(2, saltAndHash.length);
+        
+        assertTrue(Utils.authenticate(rawPassword, hash));
+    }
+    
+    @Test
+    public void testAuthenticateWithDefaultAdminPassword() throws Exception
+    {
+        String rawPassword = "password";
+        
+        assertTrue(Utils.authenticate(rawPassword, Utils.DEFAULT_PASSWORD));
+    }
+    
+    @Test
+    public void testAuthenticateWithBadHash() throws Exception
+    {
+        assertFalse(Utils.authenticate("dsada%%$", "dsada%%$"));
+    }
+
+    @Test
+    public void testAuthenticateWithBadPassword() throws Exception
+    {
+        String rawPassword = "wrongPassword";
+        byte[] salt = Utils.generateSalt();
+        String hash = Utils.hashPassword("rightPassword", salt);
+        
+        assertNotNull(hash);
+        String[] saltAndHash = hash.split("\\$");
+        assertEquals(Base64.encodeBase64String(salt), saltAndHash[0]);
+        assertEquals(2, saltAndHash.length);
+        
+        assertFalse(Utils.authenticate(rawPassword, hash));
     }
 
     @Test
@@ -143,7 +235,7 @@ public class UtilTest
     @After
     public void doAfter()
     {
-        File file = new File(Utils.AUTH_FILE_NAME);
+        File file = new File("config", Utils.AUTH_FILE_NAME);
         if (file.exists())
         {
             file.delete();

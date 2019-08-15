@@ -83,6 +83,7 @@ public class TestUtils
         tapColumn.setUcd(ucd);
         tapColumn.setScsVerbosity(scsVerbosity);
         tapColumn.setColumnOrder(columnOrder);
+        table.addColumn(tapColumn);
         return tapColumn;
     }
     

@@ -18,7 +18,7 @@
                         <TD>cube-123456</TD>
                         <TD/>
                         <TD/>
-                        <TD>DefaultFault: This option is unavailable due to the file size exceeding 500 GB in size</TD>
+                        <TD>DefaultFault: This option is unavailable due to the file size exceeding 20480 GB in size</TD>
                         <TD>Download data product via web</TD>
                         <TD>#error</TD>
                         <TD/>
@@ -33,14 +33,14 @@
                         <TD>Download data at Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</TD>
                         <TD>#this</TD>
                         <TD>application/fits</TD>
-                        <TD>547110912000</TD>
+                        <TD>21990232560640</TD>
                         <TD/>
                     </TR>
                     <TR>
                         <TD>cube-123456</TD>
                         <TD/>
                         <TD/>
-                        <TD>DefaultFault: This option is unavailable due to the file size exceeding 500 GB in size</TD>
+                        <TD>DefaultFault: This option is unavailable due to the file size exceeding 20480 GB in size</TD>
                         <TD>Scripted file access via Web</TD>
                         <TD>#error</TD>
                         <TD/>
@@ -55,7 +55,7 @@
                         <TD>Scripted file access via Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</TD>
                         <TD>#this</TD>
                         <TD>application/fits</TD>
-                        <TD>547110912000</TD>
+                        <TD>21990232560640</TD>
                         <TD>-SDgmfVcIqFb486Xg_h4CVerwQFQLiZuG43RZWVzaFfmg77Yoc36IDpv94w0JOo3</TD>
                     </TR>
                     <TR>

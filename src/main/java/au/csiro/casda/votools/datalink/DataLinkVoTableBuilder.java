@@ -70,6 +70,7 @@ public class DataLinkVoTableBuilder
     {
         this.baseUrl = baseUrl;
         votable = new VoTable();
+        votable.setVersion("1.3");
         objectFactory = new ObjectFactory();
     }
 
@@ -466,7 +467,7 @@ public class DataLinkVoTableBuilder
             @Override
             public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix)
             {
-                return "VOT";
+                return "";
             }
         });
 

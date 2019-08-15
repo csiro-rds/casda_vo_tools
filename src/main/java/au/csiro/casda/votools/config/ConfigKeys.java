@@ -36,7 +36,13 @@ public enum ConfigKeys
     TAP_VOTABLE_XSL("tap.votable.xsl"), 
 
     /** Key for the examples endpoint for TAP Queries. */ 
-    TAP_EXAMPLES_URL("tap.examples.url");
+    TAP_EXAMPLES_URL("tap.examples.url"), 
+
+    /** Flag to indicate whether TAP upload is allowed in this service. */ 
+    TAP_UPLOAD_ENABLED("tap.upload.enabled"),
+    
+    /** Flag that specifies the maximum upload limit for TAP Uploads. */
+    TAP_UPLOAD_LIMIT("tap.upload.limit.bytes");
     
     private final String key;
 

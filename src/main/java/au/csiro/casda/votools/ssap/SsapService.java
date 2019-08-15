@@ -55,7 +55,7 @@ import au.csiro.casda.votools.utils.VoKeys;
  */
 
 /**
- * A service to run Simple Image Access (SIAv2) queries against the database.
+ * A service to run Simple Spectral Access Protocol (SSAP) queries against the database.
  * <p>
  * Copyright 2015, CSIRO Australia All rights reserved.
  */
@@ -330,7 +330,7 @@ public class SsapService extends Configurable
             }
             String errorMsg = builder.toString();
             this.reportSsapError(writer, errorMsg);
-            logger.info(CasdaVoToolsEvents.E148.messageBuilder()
+            logger.info(CasdaVoToolsEvents.E178.messageBuilder()
                     .addAll(Arrays.asList(buildSsapQueryText(paramsMap),
                             CasdaFormatter.formatDateTimeForLog(Date.from(start.toInstant())), errorMsg, userId))
                     .toString());
@@ -362,12 +362,12 @@ public class SsapService extends Configurable
             tapParams.put(VoKeys.USER_PROJECTS,
                     paramsMap.get(VoKeys.USER_PROJECTS) == null ? null : paramsMap.get(VoKeys.USER_PROJECTS)[0]);
             tapParams.put(VoKeys.STR_KEY_MAXREC, calcMaxRec(paramsMap));
-            tapService.processQuery(writer, tapParams, metaDataMap);
+            tapService.processQuery(writer, tapParams, metaDataMap, new ArrayList<>());
         }
         catch (Exception e)
         {
-            logger.info(CasdaVoToolsEvents.E142.messageBuilder()
-                    .addAll(Arrays.asList(paramsMap.get(VoKeys.CATALOG), paramsMap.get(VoKeys.PARAM_QUERY_STRING),
+            logger.info(CasdaVoToolsEvents.E177.messageBuilder()
+                    .addAll(Arrays.asList(buildSsapQueryText(paramsMap),
                             CasdaFormatter.formatDateTimeForLog(Date.from(start.toInstant())),
                             "Unable to run query: " + e.getMessage(), paramsMap.get(VoKeys.USER_ID)))
                     .toString(), e);

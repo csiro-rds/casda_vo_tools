@@ -47,8 +47,10 @@ allprojects {
     
 }
 
-task echoVer() << {
-    println "${project.name} Version: ${project.version}"
+task echoVer() {
+	doLast{
+	    println "${project.name} Version: ${project.version}"
+	}
 }
 
 task makeVersionProps (type: Copy) {

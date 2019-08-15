@@ -17,7 +17,7 @@ Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 		}
 		</style>
 	</head>
-	<body vocab="ivo://ivoa.net/std/DALI-examples">
+	<body vocab="http://www.ivoa.net/rdf/examples#">
 		<jsp:include page="../includes/header.jsp">
 			<jsp:param name="addressPrefix" value="../" />
 		</jsp:include>

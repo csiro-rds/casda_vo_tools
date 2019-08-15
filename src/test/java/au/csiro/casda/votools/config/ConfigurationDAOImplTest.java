@@ -50,7 +50,8 @@ public class ConfigurationDAOImplTest
             // Pairs of dbtype and taptype
             return Arrays.asList(new Object[][] { { "double precision", "DOUBLE" },
                     { "character varying(64)", "VARCHAR" }, { "character(10)", "CHAR" }, { "text", "VARCHAR" },
-                    { "integer", "INTEGER" }, { "bigint", "BIGINT" }, { "spoly", "REGION" }, { "geometry", "REGION" } });
+                    { "integer", "INTEGER" }, { "bigint", "BIGINT" }, { "spoly", "REGION" }, { "geometry", "REGION" },
+                    {"timestamp with time zone", "TIMESTAMP"}, {"TIMESTAMP WITHOUT TIME ZONE", "TIMESTAMP"}});
         }
 
         public ConvertToTapTypeTest(String dbType, String tapType) throws Exception

@@ -1,5 +1,4 @@
 apply plugin: 'pmd'
-apply plugin: 'findbugs'
 apply plugin: 'checkstyle'
 
 //exclude generated files from code quality tools
@@ -23,27 +22,10 @@ checkstyle {
     configProperties.putAt("projectDir", projectDir)
 }
 
-findbugs {
-    toolVersion = "3.0.0"
+spotbugs {
     ignoreFailures = true
     reportLevel = "high"
-    findbugsMain {
-        reports {
-            // We need xml on Jenkins but sometimes its useful to get an html report locally for working our what's wrong
-            // In that case. Change the xml.enabled to false and html.enabled to true
-            xml.enabled = true
-            html.enabled = false
-        }
-    }
-    findbugsTest {
-        reports {
-            // We need xml on Jenkins but sometimes its useful to get an html report locally for working our what's wrong
-            // In that case. Change the xml.enabled to false and html.enabled to true
-            xml.enabled = true
-            html.enabled = false
-        }
-    }
-  
+    sourceSets = [ sourceSets.main, sourceSets.test ]
 }
 
 pmd {

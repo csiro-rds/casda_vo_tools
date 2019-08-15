@@ -26,6 +26,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.stereotype.Component;
 
+import au.csiro.casda.votools.VoToolsApplication.ConfigLocation;
+
 /**
  * A registry for configurable objects
  * 
@@ -247,6 +249,9 @@ public class ConfigurationRegistry
     @Value("${datalink.download.limit.http:}")
     private String datalinkDownloadLimitHttp;
     
+    @Value("${datalink.large.web.download.limit.http}")
+    private String datalinkLargeWebDownloadLimitHttp;
+
     @Value("${build.environment}")
     private String environment;
     
@@ -260,6 +265,10 @@ public class ConfigurationRegistry
 
     @Autowired
     private Environment springEnv;
+    
+    @Autowired
+    private ConfigLocation configLocation;
+    
     /**
      * 
      */
@@ -777,7 +786,10 @@ public class ConfigurationRegistry
         {
             configFileName = Configuration.DEFAULT_CONFIG;
         }
-        return new File(configFileName);
+
+        File configFile = configLocation.getConfigFile(configFileName, true);
+
+        return configFile;
     }
 
     /**
@@ -1110,6 +1122,16 @@ public class ConfigurationRegistry
         this.datalinkDownloadLimitHttp = datalinkDownloadLimitHttp;
     }
 
+    public String getDatalinkLargeWebDownloadLimitHttp()
+    {
+        return datalinkLargeWebDownloadLimitHttp;
+    }
+
+    public void setDatalinkLargeWebDownloadLimitHttp(String datalinkLargeWebDownloadLimitHttp)
+    {
+        this.datalinkLargeWebDownloadLimitHttp = datalinkLargeWebDownloadLimitHttp;
+    }
+    
     public String getCss()
     {
         return css;

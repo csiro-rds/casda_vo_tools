@@ -76,7 +76,13 @@ public abstract class ConfigValueKeys
     
     /** Constant for the web download size limit */
     public static final String DATALINK_DOWNLOAD_LIMIT_HTTP = "datalink.download.limit.http";
-    
+
+    /**
+     * Constant for the web download size limit for larger downloads. This will only be enabled for users that have the
+     * 'casdaLargeWebDownload' role.
+     */
+    public static final String DATALINK_LARGE_WEB_DOWNLOAD_LIMIT_HTTP = "datalink.large.web.download.limit.http";
+
     /** Constant for the build number */
     public static final String BUILD_NUMBER = "build.number";
     

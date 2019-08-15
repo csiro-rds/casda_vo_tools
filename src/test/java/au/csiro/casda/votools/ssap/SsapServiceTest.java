@@ -465,7 +465,9 @@ public class SsapServiceTest
 
             ArgumentCaptor<Map> tapJobParamsCaptor = ArgumentCaptor.forClass(Map.class);
             ArgumentCaptor<Map> tapJobMetadataCaptor = ArgumentCaptor.forClass(Map.class);
-            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture(), tapJobMetadataCaptor.capture());
+            ArgumentCaptor<List> tapJobUploadedTablesCaptor = ArgumentCaptor.forClass(List.class);
+            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture(), tapJobMetadataCaptor.capture(),
+                    tapJobUploadedTablesCaptor.capture());
             Map<String, String> tapJobParams = (Map<String, String>) tapJobParamsCaptor.getValue();
             assertEquals(SsapService.CASDA_SSAP_RESULT_NAME, tapJobParams.get(VoKeys.VO_TABLE_HEADING));
             assertEquals(NUM_STANDARD_JOB_PARAMS, tapJobParams.size());
@@ -483,7 +485,9 @@ public class SsapServiceTest
 
             ArgumentCaptor<Map> tapJobParamsCaptor = ArgumentCaptor.forClass(Map.class);
             ArgumentCaptor<Map> tapJobMetadataCaptor = ArgumentCaptor.forClass(Map.class);
-            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture(), tapJobMetadataCaptor.capture());
+            ArgumentCaptor<List> tapJobUploadedTablesCaptor = ArgumentCaptor.forClass(List.class);
+            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture(), tapJobMetadataCaptor.capture(),
+                    tapJobUploadedTablesCaptor.capture());
             Map<String, String> tapJobParams = (Map<String, String>) tapJobParamsCaptor.getValue();
             assertEquals(SsapService.CASDA_SSAP_RESULT_NAME, tapJobParams.get(VoKeys.VO_TABLE_HEADING));
             assertEquals("7", tapJobParams.get(VoKeys.STR_KEY_MAXREC));
@@ -504,7 +508,9 @@ public class SsapServiceTest
 
             ArgumentCaptor<Map> tapJobParamsCaptor = ArgumentCaptor.forClass(Map.class);
             ArgumentCaptor<Map> tapJobMetadataCaptor = ArgumentCaptor.forClass(Map.class);
-            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture(), tapJobMetadataCaptor.capture());
+            ArgumentCaptor<List> tapJobUploadedTablesCaptor = ArgumentCaptor.forClass(List.class);
+            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture(), tapJobMetadataCaptor.capture(),
+                    tapJobUploadedTablesCaptor.capture());
             Map<String, String> tapJobParams = (Map<String, String>) tapJobParamsCaptor.getValue();
             assertEquals(SsapService.CASDA_SSAP_RESULT_NAME, tapJobParams.get(VoKeys.VO_TABLE_HEADING));
             assertEquals("200", tapJobParams.get(VoKeys.STR_KEY_MAXREC));

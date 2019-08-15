@@ -263,8 +263,8 @@ public class Siapv2Service extends Configurable
         }
         catch (Exception e)
         {
-            logger.info(CasdaVoToolsEvents.E142.messageBuilder()
-                    .addAll(Arrays.asList(paramsMap.get(VoKeys.CATALOG), paramsMap.get(VoKeys.PARAM_QUERY_STRING),
+            logger.info(CasdaVoToolsEvents.E176.messageBuilder()
+                    .addAll(Arrays.asList(buildSiapQueryText(paramsMap),
                             CasdaFormatter.formatDateTimeForLog(Date.from(start.toInstant())),
                             "Unable to run query: " + e.getMessage(), paramsMap.get(VoKeys.USER_ID)))
                     .toString(), e);

@@ -95,7 +95,7 @@ public class Configuration extends Options
     private Set<String> scsTables;
 
     /** default configuration file name */
-    public static final String DEFAULT_CONFIG = "config/configuration.yaml";
+    public static final String DEFAULT_CONFIG = "configuration.yaml";
 
     /** default TAP Examples config xml file */
     public static final String DEFAULT_TAP_EXAMPLES_CONFIG = "config/tap_examples.xml";
@@ -158,6 +158,10 @@ public class Configuration extends Options
         this();
         this.parser = parser;
         Configuration fromText = (Configuration) parser.parse(configurationText);
+        if (fromText == null)
+        {
+            throw new ConfigurationException("Please supply the configuration text");
+        }
         endPoints = fromText.endPoints == null ? endPoints : fromText.endPoints;
         schemas = fromText.schemas == null ? schemas : fromText.schemas;
         tables = fromText.tables == null ? tables : fromText.tables;
@@ -259,9 +263,11 @@ public class Configuration extends Options
         putDefault(ConfigValueKeys.DATALINK_CUTOUT_SERVICE_NAME, registry.getDatalinkCutoutServiceName());
         putDefault(ConfigValueKeys.DATALINK_GENERATE_SPECTRUM_URL, registry.getDatalinkGenerateSpectrumUrl());
         putDefault(ConfigValueKeys.DATALINK_GENERATE_SPECTRUM_SERVICE_NAME, 
-        		registry.getDatalinkGenerateSpectrumServiceName());
-        putDefault(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY, registry.getSiapSharedSecretKey());      
-        putDefault(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP, registry.getDatalinkDownloadLimitHttp());     
+                registry.getDatalinkGenerateSpectrumServiceName());
+        putDefault(ConfigValueKeys.DATA_LINK_ACCESS_SECRET_KEY, registry.getSiapSharedSecretKey());
+        putDefault(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP, registry.getDatalinkDownloadLimitHttp());
+        putDefault(ConfigValueKeys.DATALINK_LARGE_WEB_DOWNLOAD_LIMIT_HTTP,
+                registry.getDatalinkLargeWebDownloadLimitHttp());
         putDefault(ConfigValueKeys.ENVIRONMENT, registry.getEnvironment());
         putDefault(ConfigValueKeys.CSS, registry.getCss());
         putDefault(ConfigValueKeys.LOGO_URL, registry.getLogoUrl());
