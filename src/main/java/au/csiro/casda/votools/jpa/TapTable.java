@@ -70,7 +70,13 @@ public class TapTable implements Serializable
     public static final String RELEASE_REQUIRED = "release_required";
     
     /**
-     * Name of the released_date column in the TAP metadata table. This is the date on which the table contents will 
+     * Name of the release_date column in the TAP metadata table. This is the date on which the table contents will 
+     * become public.
+     */
+    public static final String TABLE_RELEASE_DATE = "release_date";
+
+    /**
+     * Name of the released_date column in the individual table rows. This is the date on which the table row will 
      * become public.
      */
     public static final String RELEASED_DATE = "released_date";

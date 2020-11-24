@@ -1,16 +1,25 @@
 package au.csiro.casda.votools.config;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
 
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 /*
  * #%L
@@ -68,4 +77,45 @@ public class ConfigurationDAOImplTest
         }
     }
 
+    /**
+     * 
+     * Verify the configuration methods
+     */
+    public static class ConfigTest
+    {
+        private ConfigurationDAOImpl configDaoImpl;
+        
+        @Mock
+        private TableConfig config;
+        
+        @Mock
+        private JdbcTemplate template;
+
+        @Before
+        public void setup()
+        {
+            MockitoAnnotations.initMocks(this);
+            configDaoImpl = new ConfigurationDAOImpl(template);
+        }
+        
+        @SuppressWarnings({ "unchecked" })
+        @Test
+        public void testUpdateTableFromTap()
+        {
+            boolean result = configDaoImpl.updateTableFromTap("test.the_table", config);
+            assertThat(result, is(true));
+            
+            ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+            ArgumentCaptor<Object[]> argsCaptor = ArgumentCaptor.forClass(Object[].class);
+            verify(template).query(sqlCaptor.capture(), argsCaptor.capture(), any(RowMapper.class));
+            
+            String actualSql = sqlCaptor.getAllValues().get(0);
+            assertThat(actualSql, containsString("SELECT description, description_long, "));
+            assertThat(actualSql, containsString("release_required, release_date"));
+            assertThat(actualSql, containsString("FROM"));
+            assertThat(actualSql, containsString("tap_tables"));
+            assertThat(actualSql, containsString("WHERE db_table_name = ? AND db_schema_name = ?"));
+            assertThat(argsCaptor.getAllValues().get(0), is(new Object[]{"the_table", "test"}));
+        }
+    }
 }

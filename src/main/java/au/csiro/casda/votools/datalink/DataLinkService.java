@@ -66,6 +66,8 @@ public class DataLinkService extends Configurable
     
     private static final String IMAGE_CUBE_REGEX = "^cube-[0-9]+$";
     
+    private static final String CATALOGUE_REGEX = "^catalogue-[0-9]+$";
+    
     private static final String SPECTRUM_REGEX = "^spectrum-[0-9]+$";
     
     private static final String MOMENT_MAP_REGEX = "^moment_map-[0-9]+$";
@@ -319,6 +321,10 @@ public class DataLinkService extends Configurable
                     "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(id));
             return;
         }
+        else if(id.toLowerCase().matches(CATALOGUE_REGEX))
+        {
+            table = "casda.catalogue";
+        }
         else if(id.toLowerCase().matches(IMAGE_CUBE_REGEX))
         {
         	table = "casda.image_cube";
@@ -365,6 +371,10 @@ public class DataLinkService extends Configurable
                     if (id.toLowerCase().matches(FITS_REGEX))
                     {
                         contentType = "application/fits";
+                    }
+                    else if(id.toLowerCase().matches(CATALOGUE_REGEX))
+                    {
+                        contentType = "application/xml";
                     }
                     else
                     {

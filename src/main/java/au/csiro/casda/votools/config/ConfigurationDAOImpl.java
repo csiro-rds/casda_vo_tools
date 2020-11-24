@@ -492,7 +492,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         String dbSchemaName = fullDbTableName.substring(0, fullDbTableName.indexOf('.'));
         String dbTableName = fullDbTableName.substring(fullDbTableName.indexOf('.') + 1);
         String getTableFromTapSql = "SELECT description, description_long, utype, scs_enabled, release_required, "
-                + "params, schema_name, table_name FROM " + getSchema() + "." + TABLES_TABLE_NAME
+                + "release_date, params, schema_name, table_name FROM " + getSchema() + "." + TABLES_TABLE_NAME
                 + " WHERE db_table_name = ? AND db_schema_name = ?";
 
         template.query(getTableFromTapSql, new Object[] { dbTableName, dbSchemaName }, new TapTableMapper(config));

@@ -100,6 +100,7 @@
             <PARAM datatype="char" xtype="range" name="POS" arraysize="*"/>
             <PARAM datatype="char" xtype="polygon" name="POS" arraysize="*"/>
             <PARAM unit="m" datatype="double" xtype="interval" name="BAND" arraysize="*"/>
+            <PARAM unit="pixel" datatype="int" xtype="interval" name="CHANNEL" arraysize="*"/>
             <PARAM datatype="char" name="POL" arraysize="*"/>
             <PARAM datatype="char" name="COORD" arraysize="*"/>
         </GROUP>
@@ -113,6 +114,7 @@
             <PARAM datatype="char" xtype="range" name="POS" arraysize="*"/>
             <PARAM datatype="char" xtype="polygon" name="POS" arraysize="*"/>
             <PARAM unit="m" datatype="double" xtype="interval" name="BAND" arraysize="*"/>
+            <PARAM unit="pixel" datatype="int" xtype="interval" name="CHANNEL" arraysize="*"/>
             <PARAM datatype="char" name="POL" arraysize="*"/>
             <PARAM datatype="char" name="COORD" arraysize="*"/>
         </GROUP>

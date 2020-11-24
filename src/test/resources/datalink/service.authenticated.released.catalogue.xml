@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><?xml-stylesheet href='http://localhost:8040/casda_vo_proxy/vo/votable.xsl' type='text/xsl' ?>
+
+<VOTABLE xmlns="http://www.ivoa.net/xml/VOTable/v1.3" version="1.3">
+    <RESOURCE name="CASDA Datalink Result" type="results">
+        <TABLE>
+            <FIELD datatype="char" name="ID" ucd="meta.id;meta.main" arraysize="*"/>
+            <FIELD datatype="char" name="access_url" ucd="meta.ref.url" arraysize="*"/>
+            <FIELD datatype="char" name="service_def" ucd="meta.ref" arraysize="*"/>
+            <FIELD datatype="char" name="error_message" ucd="meta.code.error" arraysize="*"/>
+            <FIELD datatype="char" name="description" ucd="meta.note" arraysize="*"/>
+            <FIELD datatype="char" name="semantics" ucd="meta.code" arraysize="*"/>
+            <FIELD datatype="char" name="content_type" ucd="meta.code.mime" arraysize="*"/>
+            <FIELD unit="byte" datatype="long" name="content_length" ucd="phys.size;meta.file"/>
+            <FIELD ID="authenticatedIdToken" datatype="char" name="authenticated_id_token" ucd="meta.id" arraysize="*"/>
+            <DATA>
+                <TABLEDATA>
+                    <TR>
+                        <TD>catalogue-123456</TD>
+                        <TD>http://localhost:8080/casda_data_access/data/sync?id=uVKfbiJhQarGHTtXMZXchmzDPgVL9temE9FdXZnZfbTmg77Yoc36IDpv94w0JOo3</TD>
+                        <TD/>
+                        <TD/>
+                        <TD>Download data product via web</TD>
+                        <TD>#this</TD>
+                        <TD>application/xml</TD>
+                        <TD>1024</TD>
+                        <TD/>
+                    </TR>
+                    <TR>
+                        <TD>catalogue-123456</TD>
+                        <TD>http://localhost:8080/casda_data_access/data/sync/pawsey?id=uVKfbiJhQarGHTtXMZXchrf-6sFAYDlw9-TWmDjeSn-o7H-ElTygfmKNZVkLXvN-au7HXPIixovpMq2TjJ1JtQ</TD>
+                        <TD/>
+                        <TD/>
+                        <TD>Download data at Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</TD>
+                        <TD>#this</TD>
+                        <TD>application/xml</TD>
+                        <TD>1024</TD>
+                        <TD/>
+                    </TR>
+                    <TR>
+                        <TD>catalogue-123456</TD>
+                        <TD/>
+                        <TD>async_service</TD>
+                        <TD/>
+                        <TD>Scripted file access via Web</TD>
+                        <TD>#this</TD>
+                        <TD>application/xml</TD>
+                        <TD>1024</TD>
+                        <TD>uVKfbiJhQarGHTtXMZXchmzDPgVL9temE9FdXZnZfbTmg77Yoc36IDpv94w0JOo3</TD>
+                    </TR>
+                    <TR>
+                        <TD>catalogue-123456</TD>
+                        <TD/>
+                        <TD>async_service</TD>
+                        <TD/>
+                        <TD>Scripted file access via Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</TD>
+                        <TD>#this</TD>
+                        <TD>application/xml</TD>
+                        <TD>1024</TD>
+                        <TD>uVKfbiJhQarGHTtXMZXchrf-6sFAYDlw9-TWmDjeSn-o7H-ElTygfmKNZVkLXvN-au7HXPIixovpMq2TjJ1JtQ</TD>
+                    </TR>
+                </TABLEDATA>
+            </DATA>
+        </TABLE>
+    </RESOURCE>
+    <RESOURCE ID="async_service" utype="adhoc:service" type="meta">
+        <PARAM value="ivo://ivoa.net/std/SODA#async-1.0" datatype="char" name="standardID" arraysize="*"/>
+        <PARAM value="http://localhost:8080/casda_data_access/data/async" datatype="char" name="accessURL" arraysize="*"/>
+        <GROUP name="inputParams">
+            <PARAM value="" datatype="char" ref="authenticatedIdToken" name="ID" arraysize="*"/>
+        </GROUP>
+    </RESOURCE>
+</VOTABLE>

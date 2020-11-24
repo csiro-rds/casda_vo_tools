@@ -662,6 +662,25 @@ public class VoTableResultsExtractorTest
                 + " <DESCRIPTION>Description</DESCRIPTION>\r\n" + "</FIELD>", header.trim());
     }
     
+    @Test
+    public void testGetFieldDefNumeric()
+    {
+        String fieldDef = VoTableResultsExtractor.getFieldDef("big number", Types.NUMERIC, null);
+        assertThat(fieldDef.trim(), is("<FIELD ID=\"big number\" name=\"big number\" datatype=\"object\"> </FIELD>"));
+
+        fieldDef = VoTableResultsExtractor.getFieldDef("exact_num", Types.DECIMAL, null);
+        assertThat(fieldDef.trim(), is("<FIELD ID=\"exact_num\" name=\"exact_num\" datatype=\"object\"> </FIELD>"));
+    }
+    
+    @Test
+    public void testGetFieldDefLong()
+    {
+        String fieldDef = VoTableResultsExtractor.getFieldDef("observation_id", Types.BIGINT, "meta.id;meta.main");
+        assertThat(fieldDef.trim(), is("<FIELD ID=\"observation_id\" name=\"observation_id\" datatype=\"long\" "
+                + "ucd=\"meta.id;meta.main\"> </FIELD>"));
+    }
+    
+    
     private ResultSetMetaData create4ColMetadata() throws SQLException
     {
         ResultSetMetaData mockMetaData = Mockito.mock(ResultSetMetaData.class);

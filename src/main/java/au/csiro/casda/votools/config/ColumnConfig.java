@@ -121,7 +121,9 @@ public class ColumnConfig extends Options
             return false;
         }
         ColumnConfig other = (ColumnConfig) object;
-        boolean nameEq = StringUtils.equals(name, other.name);
+        String nameNoQuote = stripQuotes(name);
+        String otherNameNoQuote = stripQuotes(other.name);
+        boolean nameEq = StringUtils.equals(nameNoQuote, otherNameNoQuote);
         boolean typeEq = StringUtils.equals(type, other.type);
         boolean defaultvalueEq = StringUtils.equals(defaultvalue, other.defaultvalue);
         boolean notnullEq = StringUtils.equals(notnull, other.notnull);
@@ -132,6 +134,21 @@ public class ColumnConfig extends Options
 
         return nameEq && typeEq && defaultvalueEq && notnullEq && uniqueEq && constraintsOutEq && constraintsInEq
                 && indicesEq;
+    }
+
+    private String stripQuotes(String nameIn)
+    {
+        if (StringUtils.isEmpty(nameIn))
+        {
+            return nameIn;
+        }
+        
+        if (nameIn.startsWith("\"") && nameIn.endsWith("\""))
+        {
+            return nameIn.substring(1, nameIn.length()-1);
+        }
+
+        return nameIn;
     }
 
     /*

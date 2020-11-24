@@ -175,6 +175,7 @@ public class DataLinkVoTableBuilder
         {
             inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.POS));
             inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.BAND));
+            inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.CHANNEL));
             inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.POL));
             inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.COORD));
         }
@@ -219,6 +220,10 @@ public class DataLinkVoTableBuilder
 
             case BAND:
                 inputParams.add(createParam(cutoutParam.name(), DataType.DOUBLE, "*", "interval", null, "m", null));
+                break;
+
+            case CHANNEL:
+                inputParams.add(createParam(cutoutParam.name(), DataType.INT, "*", "interval", null, "pixel", null));
                 break;
 
             case POL:

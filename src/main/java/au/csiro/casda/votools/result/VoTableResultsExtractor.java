@@ -319,9 +319,7 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
             datatype = "short";
             break;
 
-        case Types.DECIMAL:
         case Types.INTEGER:
-        case Types.NUMERIC:
         case Types.TINYINT:
             datatype = "int";
             break;
@@ -332,7 +330,6 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
 
         case Types.ROWID:
             datatype = "int";
-            // nullvalue = "-9223372036854775808";
             break;
 
         case Types.DOUBLE:
@@ -344,6 +341,11 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
             datatype = "float";
             break;
 
+        case Types.DECIMAL:
+        case Types.NUMERIC:
+            datatype = "object";
+            break;
+            
         default: // The rest is varchar
             datatype = "char";
             break;
