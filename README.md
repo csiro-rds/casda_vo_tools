@@ -24,7 +24,7 @@ configuration rather than via code.
 Release History
 ---------------
 
-Current Release: v1.11
+Current Release: v1.13
 
 Notes for each release are available at  [release_notes.md](./release_notes.md)
 
@@ -42,7 +42,7 @@ Installation
 
 CASDA VO Tools is distributed as a ready to install war file (web archive). This can be directly deployed in a Java web container such as Tomcat.
 
-The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.11 on CSIRO Data Access Portal](https://doi.org/10.25919/5d525ab6181ef)
+The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.13 on CSIRO Data Access Portal](https://doi.org/10.25919/zy6w-h884)
 or you can build it using the instructions below.
 
 ### Deployment
@@ -60,7 +60,7 @@ Configuration
 -------------
 
 A full guide to interactive configuration is provided at 
-[Deploying_CASDA_VO_Tools.pdf](https://data.csiro.au/dap/ws/v2/collections/41000/support/3103) however a short intro is provided here.
+[Deploying_CASDA_VO_Tools.pdf](https://data.csiro.au/dap/ws/v2/collections/47697/support/3735) however a short intro is provided here.
 
 ### Application config
 Two configuration systems are available for use in the CASDA VO Tools application.
@@ -98,7 +98,7 @@ For an initial installation, you should follow these basic steps:
 
 > `SELECT * FROM tap_schema.tables`
 
-###Logging
+### Logging
 
 The log4j configuration file is detected using default behaviour of log4j, by being named according to convention (log4j2.xml) and provided on the classpath. When running locally or in the application environments, the log4j configuration file is bundled with the application. When running under Eclipse, the log configuration file is copied into the local Eclipse-managed server's WEB-INF/classes directory, because it's in the src/test/resources folder, and loaded via the classpath. A custom logging config can be placed at config/CasdaVoTools-log4j2.xml under the Tomcat working directory. 
 

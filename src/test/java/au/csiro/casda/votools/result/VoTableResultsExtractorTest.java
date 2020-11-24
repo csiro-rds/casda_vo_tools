@@ -666,10 +666,12 @@ public class VoTableResultsExtractorTest
     public void testGetFieldDefNumeric()
     {
         String fieldDef = VoTableResultsExtractor.getFieldDef("big number", Types.NUMERIC, null);
-        assertThat(fieldDef.trim(), is("<FIELD ID=\"big number\" name=\"big number\" datatype=\"object\"> </FIELD>"));
+        assertThat(fieldDef.trim(),
+                is("<FIELD ID=\"big number\" name=\"big number\" datatype=\"char\" arraysize=\"*\"> </FIELD>"));
 
         fieldDef = VoTableResultsExtractor.getFieldDef("exact_num", Types.DECIMAL, null);
-        assertThat(fieldDef.trim(), is("<FIELD ID=\"exact_num\" name=\"exact_num\" datatype=\"object\"> </FIELD>"));
+        assertThat(fieldDef.trim(),
+                is("<FIELD ID=\"exact_num\" name=\"exact_num\" datatype=\"char\" arraysize=\"*\"> </FIELD>"));
     }
     
     @Test
