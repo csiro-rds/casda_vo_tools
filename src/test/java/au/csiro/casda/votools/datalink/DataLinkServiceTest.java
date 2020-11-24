@@ -142,6 +142,28 @@ public class DataLinkServiceTest
 
         checkXmlAgainstTestCaseFile("service.authenticated.released", writer.getBuffer().toString());
     }
+
+    /**
+     * Support for downloading catalogues via datalink by id added in 
+     * https://jira.csiro.au/browse/CASDA-6482
+     * @throws Exception err
+     */
+    @Test
+    public void processQueryCatalogueTest() throws Exception
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+                .thenReturn(Arrays.asList(123l, 456l, 789l));
+        Map<String, Object> result = new HashMap<>();
+        result.put("filesize", 1L);
+        result.put("released_date", "13-01-2016:16:29:39:00");
+        when(jdbcTemplate.queryForMap(any(), eq(123456L))).thenReturn(result);
+
+        StringWriter writer = new StringWriter();
+        dataLinkService.processQuery(writer, new String[] { "catalogue-123456" }, "pul052", "OPAL",
+                PROJECT_CODE_SAMPLE_LIST, true, false, ACCESS_DATE);
+
+        checkXmlAgainstTestCaseFile("service.authenticated.released.catalogue", writer.getBuffer().toString());
+    }
     
     @Test
     public void processQueryWithFileSizeGreaterThanLimitTest() throws Exception

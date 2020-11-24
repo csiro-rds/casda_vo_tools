@@ -28,6 +28,9 @@ public enum CutoutParam
     /** The BAND parameter defines the energy interval(s) to be retrieved for data. */
     BAND,
     
+    /** The channel parameter defines the range of pixels to be retrieved.  E.g. an image cutout.*/
+    CHANNEL,
+    
     /** The POL parameter defines the polarization state(s) to be retrieved for matching data.  */
     POL,
     

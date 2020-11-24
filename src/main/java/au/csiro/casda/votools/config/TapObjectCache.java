@@ -13,6 +13,7 @@ package au.csiro.casda.votools.config;
  */
 
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.joda.time.DateTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -300,6 +302,10 @@ public class TapObjectCache
             table.setDbTableName(rs.getString(TapTable.DB_NAME));
             table.setScsEnabled(rs.getBoolean(TapTable.SCS_ENABLED));
             table.setReleaseRequired(rs.getBoolean(TapTable.RELEASE_REQUIRED));
+            Date releaseDate = rs.getDate(TapTable.TABLE_RELEASE_DATE); 
+            DateTime releaseDateTime = releaseDate == null ? null : new DateTime(releaseDate);
+            table.setReleaseDate(releaseDateTime);
+
             table.setParams(rs.getString(TapTable.PARAMS));
             String tapSchemaName = rs.getString(TapTable.SCHEMA_NAME);
             TapSchema schema = schemas.get(tapSchemaName);
@@ -441,7 +447,8 @@ public class TapObjectCache
             + ConfigurationDAOImpl.SCHEMAS_TABLE_NAME + " ORDER BY schema_order, upper(schema_name)";
 
     private static final String GET_TABLES_SQL = "SELECT table_name, table_type, schema_name, description, "
-            + "utype, db_schema_name, db_table_name, scs_enabled, release_required, description_long, params FROM 'schema'."
+            + "utype, db_schema_name, db_table_name, scs_enabled, release_required, description_long, params, "
+            + "release_date FROM 'schema'."
             + ConfigurationDAOImpl.TABLES_TABLE_NAME + " ORDER BY schema_name, table_name";
 
     private static final String GET_COLUMNS_SQL = "SELECT column_name, table_name, db_column_name, description, unit, ucd, "
