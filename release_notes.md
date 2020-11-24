@@ -1,5 +1,17 @@
 # CASDA VO Tools Release Notes
 
+## v1.13 - 2020-11-12
+
+* Bug fixes
+    * Correct output of large calculated numeric values
+
+
+## v1.12 - 2020-07-09
+
+* Bug fixes
+    * Correct error in tap_tables config preventing new installations
+
+
 ## v1.11 - 2019-07-30
 
 * New Features

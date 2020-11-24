@@ -343,7 +343,7 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
 
         case Types.DECIMAL:
         case Types.NUMERIC:
-            datatype = "object";
+            datatype = "char";
             break;
             
         default: // The rest is varchar
