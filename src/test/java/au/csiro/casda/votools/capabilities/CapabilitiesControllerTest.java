@@ -141,12 +141,12 @@ public class CapabilitiesControllerTest
     public void testCapabilitiesWithSia2VoType() throws Exception
     {
         Map<String, String> configParams = new HashMap<>();
-        configParams.put("ssapURL", "http://nowhere/sia2/query?");
+        configParams.put("siapURL", "http://nowhere/sia2/query?");
         when(mockService.getSia2ConfigParams(anyString())).thenReturn(configParams);
         
         this.mockMvc.perform(get("/sia2/capabilities")).andExpect(status().isOk()).andDo(print())
                 .andExpect(forwardedUrl("sia2/capabilities.xml"))
-                .andExpect(model().attribute("ssapURL", "http://nowhere/sia2/query?"));
+                .andExpect(model().attribute("siapURL", "http://nowhere/sia2/query?"));
     }
 
     /**

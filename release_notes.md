@@ -1,5 +1,10 @@
 # CASDA VO Tools Release Notes
 
+## v1.14 - 2021-07-01
+
+* Bug fixes
+    * Correct SIA capabilities accessURL value
+
 ## v1.13 - 2020-11-12
 
 * Bug fixes

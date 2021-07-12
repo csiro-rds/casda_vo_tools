@@ -37,7 +37,7 @@ project.description = """CSIRO CASDA Project - CASDA VO Tools web application"""
 
 ext {
     majorVersion = 1
-    minorVersion = 13
+    minorVersion = 14
     springBootVer = '1.3.6.RELEASE'
     tomcatVer = '8.0.14'
 }

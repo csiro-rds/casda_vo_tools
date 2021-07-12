@@ -322,7 +322,7 @@ public class CapabilitiesService extends Configurable
 
         configParams.put("capabilitiesURL", serviceBaseUrl + "capabilities");
         configParams.put("availabilityURL", serviceBaseUrl + "availability");
-        configParams.put("ssapURL", serviceBaseUrl + "query?");
+        configParams.put("siapURL", serviceBaseUrl + "query?");
 
         return configParams;
     }
