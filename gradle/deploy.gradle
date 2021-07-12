@@ -36,7 +36,6 @@ remotes {
 def tomcatRemoteDir = '/CASDA/application/tomcat'
 def downloadFolder = "${buildDir}/download"
 def downloadedArtifact = file("${downloadFolder}/${rootProject.name}.war")
-def repoUrl = 'http://jenkins-apps.it.csiro.au:8081/nexus/service/local/artifact/maven/redirect?r=cd'
 
 task deployToServer(type: SshTask) {
 	description 'Deploy CASDA VO Tools to the required server. Intended for use by the CI job only.'
@@ -72,7 +71,7 @@ task downloadBinaryArchive(dependsOn: makeDownloadFolder) {
 
 	doLast {
 	    ext {
-	        binaryUrl = "${repoUrl}&g=${project.group}&a=${war.baseName}&e=war&v=${project.version}"
+	        binaryUrl = "https://nexus-isa.csiro.au/repository/cd/au/csiro/${war.baseName}/${project.version}/${war.baseName}-${project.version}.war"
 	    }
 	
 		ant.get(src: binaryUrl, dest: downloadedArtifact)

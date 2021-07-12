@@ -103,9 +103,11 @@ public class CapabilitiesServiceTest
         configRegistry.register(capabilityService);
         capabilityService.isReady();
         
-        Map<String, String> ssaConfigParams = capabilityService.getSia2ConfigParams("");
-        assertThat(ssaConfigParams,
+        Map<String, String> siaConfigParams = capabilityService.getSia2ConfigParams("");
+        assertThat(siaConfigParams,
                 hasEntry("capabilitiesURL", "http://localhost:8040/casda_vo_tools/sia2/capabilities"));
+        assertThat(siaConfigParams,
+                hasEntry("siapURL", "http://localhost:8040/casda_vo_tools/sia2/query?"));
     }
 
     @Test
