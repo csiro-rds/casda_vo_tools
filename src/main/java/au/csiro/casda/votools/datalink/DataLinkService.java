@@ -246,7 +246,7 @@ public class DataLinkService extends Configurable
      * @param casdaAdmin
      *            Boolean whether is casda admin
      * @param casdaLargeWebDownload
-     *            Indicates whether the user is eligable to download more than the standard limit for web downloads.
+     *            Indicates whether the user is eligible to download more than the standard limit for web downloads.
      * @param accessTime
      *            The date and time when access was requested.
      * @return true if the query was successful, false if an error occurred
@@ -440,8 +440,11 @@ public class DataLinkService extends Configurable
                         if (StringUtils.isNotBlank(asyncServiceNameInternal))
                         {
                             requestToken.setDownloadMode(RequestToken.INTERNAL_DOWNLOAD);
-                            builder.withServiceDefResult(id, "async_service", asyncServiceNameInternal, contentType,
+                            builder.withServiceDefResult(id, "pawsey_async_service", asyncServiceNameInternal, contentType,
                                     (long) contentLengthKb * Utils.ONE_KB_IN_BYTES, requestToken.toEncryptedString());
+                            
+                            builder.withServiceDefinition("pawsey_async_service", "ivo://ivoa.net/std/SODA#async-1.0",
+                                    asyncServiceUrl);
                         }
                         
                         builder.withServiceDefinition("async_service", "ivo://ivoa.net/std/SODA#async-1.0",
@@ -597,7 +600,7 @@ public class DataLinkService extends Configurable
             }
 
             String query = "select id from " + table + " where id = ?"
-                    + " and (released_date is not null or project_id in ("
+                    + " and (released_date < CURRENT_TIMESTAMP or project_id in ("
                     /*
                      * adding the ids as a string here is ok because ids are Longs and data is from a trusted
                      * source

@@ -60,9 +60,11 @@ class ExceptionHandlers
      * @param response
      *            the http response
      * @return a ResponseEntity
+     * @throws Exception when handling the exception fails.
      */
     @ExceptionHandler({ ServletException.class })
     public Object handleServletException(ServletException ex, WebRequest request, HttpServletResponse response)
+        throws Exception
     {
         logger.error("There was a {} processing request: {}", ex.getClass().getName(), request, ex);
         /*

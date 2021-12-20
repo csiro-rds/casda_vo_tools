@@ -79,6 +79,16 @@ public class DataLinkVoTableBuilderTest
                 "myAuthenticatedIdToken");
         checkXmlAgainstTestCaseFile("builder.result.service_def", builder.getXml());
     }
+    
+	@Test
+	public void testWithInternalServiceDefResult() throws Exception 
+	{
+		DataLinkVoTableBuilder builder = new DataLinkVoTableBuilder(APP_BASE_URL);
+		builder.withResultsTable().withServiceDefResult("cube-909", "pawsey_async_service", "Data Access Portal", null,
+				1024L, "myAuthenticatedIdToken");
+		checkXmlAgainstTestCaseFile("builder.result.internal.service_def", builder.getXml());
+	}
+    
 
     @Test
     public void testWithAccessUrlResult() throws Exception

@@ -847,7 +847,7 @@ public class TapService extends Configurable implements SystemTime
             {
                 fieldMap.put(
                         tapColumn.getTable().getDbSchemaName() + "|" + tapColumn.getTable().getDbTableName() + "|"
-                                + tapColumn.getDbColumnName(),
+                                + tapColumn.getId().getColumnName().toLowerCase(),
                         VoTableResultsExtractor.buildVoTableFieldHeader(tapColumn));
             }
         }
