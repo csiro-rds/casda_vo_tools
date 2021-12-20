@@ -177,7 +177,7 @@ public class TapServiceTest
         columnList = new ArrayList<>();
         TapColumn tapColumn = new TapColumn();
         tapColumn.setTable(tableCopy);
-        tapColumn.setId(new TapColumnPK(table.getTableName(), "dataproduct_type"));
+        tapColumn.setId(new TapColumnPK(table.getTableName(), "dataProduct_type"));
         tapColumn.setDatatype("VARCHAR");
         tapColumn.setSize(255);
         tapColumn.setDbColumnName("dataproduct_type_db");
@@ -246,9 +246,9 @@ public class TapServiceTest
     {
         Map<String, String> votableFieldMap = tapService.createVotableFieldMap();
         assertThat(votableFieldMap.get(""), nullValue());
-        assertThat(votableFieldMap.keySet(), containsInAnyOrder("casda|obs_core|dataproduct_type_db"));
-        assertThat(votableFieldMap.get("casda|obs_core|dataproduct_type_db"),
-                is("<FIELD name=\"dataproduct_type\" ID=\"dataproduct_type\" "
+        assertThat(votableFieldMap.keySet(), containsInAnyOrder("casda|obs_core|dataproduct_type"));
+        assertThat(votableFieldMap.get("casda|obs_core|dataproduct_type"),
+                is("<FIELD name=\"dataProduct_type\" ID=\"dataProduct_type\" "
                         + "datatype=\"char\" arraysize=\"255\" />\r\n"));
 
     }

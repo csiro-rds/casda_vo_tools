@@ -1,5 +1,17 @@
 # CASDA VO Tools Release Notes
 
+## v1.17 - 2021-12-16
+
+* New Features
+    * Add CASDA VO Tools server header 
+    * General library update including spring boot to v1.5.22
+
+* Bug fixes
+    * Update log4j to 2.16.0 to remediate CVE-2021-44228
+    * Correct handling of column metadata for columns with a different name in TAP vs database
+    * Correct datalink handling of future release dates
+
+
 ## v1.14 - 2021-07-01
 
 * Bug fixes

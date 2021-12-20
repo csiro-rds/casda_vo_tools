@@ -50,7 +50,7 @@
                     <TR>
                         <TD>catalogue-123456</TD>
                         <TD/>
-                        <TD>async_service</TD>
+                        <TD>pawsey_async_service</TD>
                         <TD/>
                         <TD>Scripted file access via Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</TD>
                         <TD>#this</TD>
@@ -61,6 +61,13 @@
                 </TABLEDATA>
             </DATA>
         </TABLE>
+    </RESOURCE>
+     <RESOURCE ID="pawsey_async_service" utype="adhoc:service" type="meta">
+        <PARAM value="ivo://ivoa.net/std/SODA#async-1.0" datatype="char" name="standardID" arraysize="*"/>
+        <PARAM value="http://localhost:8080/casda_data_access/data/async" datatype="char" name="accessURL" arraysize="*"/>
+        <GROUP name="inputParams">
+            <PARAM value="" datatype="char" ref="authenticatedIdToken" name="ID" arraysize="*"/>
+        </GROUP>
     </RESOURCE>
     <RESOURCE ID="async_service" utype="adhoc:service" type="meta">
         <PARAM value="ivo://ivoa.net/std/SODA#async-1.0" datatype="char" name="standardID" arraysize="*"/>

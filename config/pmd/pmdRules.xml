@@ -4,10 +4,68 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
   <description>casda pmd rules</description>
-  <rule ref="rulesets/java/basic.xml" />
+  <!-- <rule ref="rulesets/java/basic.xml" />
   <rule ref="rulesets/java/braces.xml" />
   <rule ref="rulesets/java/empty.xml" />
   <rule ref="rulesets/java/unnecessary.xml">
     <exclude name="UselessParentheses"/>
   </rule>
+   -->
+	<rule ref="category/java/bestpractices.xml">
+		<exclude name="GuardLogStatement" />
+		<!--  The following rules are desirable to follow but occur frequently in our code. We should tackle them as tech debts -->
+		<exclude name="LiteralsFirstInComparisons" />
+		<exclude name="AvoidReassigningParameters" />
+		<exclude name="MissingOverride" />
+		<exclude name="PreserveStackTrace" />
+		<exclude name="UseCollectionIsEmpty" />
+		<exclude name="UseVarargs" />
+		<exclude name="ForLoopCanBeForeach" />
+		<exclude name="ReplaceHashtableWithMap" />
+		<exclude name="UnusedAssignment" />
+	</rule>
+	<!-- 
+	<rule ref="category/java/codestyle.xml">
+	 <exclude name="UselessParentheses"/>
+	</rule>
+	-->
+	<!-- 
+	<rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
+		<properties>
+			<property name="ignoreMagicNumbers" value="-1,0,1,0.0" />
+			<property name="ignoreExpressions" value="true" />
+		</properties>
+	</rule>
+ 	-->
+	<rule ref="category/java/errorprone.xml">
+		<exclude name="AvoidLiteralsInIfCondition" />
+	
+		<!--  The following rules are desirable to follow but occur frequently in our code. We should tackle them as tech debts -->
+		<exclude name="BeanMembersShouldSerialize" />
+		<exclude name="UseLocaleWithCaseConversions" />
+		<exclude name="ConstructorCallsOverridableMethod" />
+		<exclude name="AvoidDuplicateLiterals" />
+		<exclude name="NullAssignment" />
+	</rule>
+	
+	<rule ref="category/java/multithreading.xml" >
+		<exclude name="DoNotUseThreads" />
+		<!--  The following rules are desirable to follow but occur frequently in our code. We should tackle them as tech debts -->
+		<exclude name="UseConcurrentHashMap" />
+		<exclude name="AvoidSynchronizedAtMethodLevel" />
+	</rule>
+	
+	<rule ref="category/java/performance.xml">
+		<exclude name="SimplifyStartsWith" />
+		<!--  The following rules are desirable to follow but occur frequently in our code. We should tackle them as tech debts -->
+		<exclude name="ConsecutiveAppendsShouldReuse"/>
+		<exclude name="InefficientEmptyStringCheck"/>
+		<exclude name="AvoidInstantiatingObjectsInLoops"/>
+		<exclude name="UselessStringValueOf" />
+		<exclude name="RedundantFieldInitializer" />
+		<exclude name="UseStringBufferForStringAppends" />
+		<exclude name="UseIndexOfChar" />
+	</rule>
+	
+	<rule ref="category/java/security.xml" />
 </ruleset>

@@ -4,11 +4,11 @@ apply plugin: 'checkstyle'
 //exclude generated files from code quality tools
 def excludePattern = '/au/csiro/casda/votools/jaxb/'
 def excludePatternAntStyle = '**' + excludePattern + '**'
-tasks.withType(FindBugs) {
-    classes = classes.filter {
-        !it.path.contains(excludePattern)
-    }
-}
+//tasks.withType(SpotBugsTask) {
+//    classes = classes.filter {
+//        !it.path.contains(excludePattern)
+//    }
+//}
 tasks.withType(Checkstyle) {
     exclude excludePatternAntStyle
 }
@@ -25,12 +25,13 @@ checkstyle {
 spotbugs {
     ignoreFailures = true
     reportLevel = "high"
-    sourceSets = [ sourceSets.main, sourceSets.test ]
+    //exclude file("config/spotbugsFilter.xml")
 }
 
 pmd {
-    toolVersion = "5.1.3"
+    toolVersion = "6.30.0"
     ignoreFailures = true
+    sourceSets = [ sourceSets.main ]
     // turn off the default rules
     ruleSets = []
     pmdMain() {
