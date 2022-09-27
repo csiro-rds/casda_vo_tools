@@ -34,6 +34,10 @@ public enum VoServiceType
      */
     datalink,
     /**
+     * SIAP v1 - Simple Image Access Protocol v1.0.
+     */
+    sia1,
+    /**
      * SIAP v2 - Simple Image Access Protocol v2.
      */
     sia2,

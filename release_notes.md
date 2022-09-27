@@ -1,5 +1,19 @@
 # CASDA VO Tools Release Notes
 
+## v1.20 - 2022-09-21
+
+* New Features
+    * Add support for Simple Image Access v1
+
+* Bug fixes
+    * Update utypes in SSA metadata response to have ssa prefix
+    
+
+## v1.17 - 2022-02-10
+
+* Bug fixes
+    * Update log4j to v2.17.1
+    
 ## v1.17 - 2021-12-16
 
 * New Features
@@ -10,7 +24,6 @@
     * Update log4j to 2.16.0 to remediate CVE-2021-44228
     * Correct handling of column metadata for columns with a different name in TAP vs database
     * Correct datalink handling of future release dates
-
 
 ## v1.14 - 2021-07-01
 

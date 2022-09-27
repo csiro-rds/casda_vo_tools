@@ -1,8 +1,14 @@
 package au.csiro.casda.votools.tap;
 
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
@@ -15,13 +21,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -450,7 +449,8 @@ public class TapServiceTest
 
         doThrow(new IOException(STR_MSG_IO_PROBLEM)).when(tapService).runTapQuery(any(String.class),
                 any(OutputFormat.class), any(Writer.class), any(Integer.class), anyMapOf(String.class, String.class),
-                any(ZonedDateTime.class), any(String.class), anyMapOf(String.class, String[].class));
+                any(ZonedDateTime.class), any(String.class), anyMapOf(String.class, String[].class),
+                anyMapOf(String.class, String.class));
         assertThat(tapService.processQuery(writer, params), is(false));
         // no results due to mock JdbcTemplate
         assertThat(writer.toString(), containsString(StringUtils.EMPTY));
@@ -478,7 +478,8 @@ public class TapServiceTest
                 new DataAccessResourceFailureException("canceling statement due to user request");
         doThrow(dataAccessResourceFailureException).when(tapService).runTapQuery(any(String.class),
                 any(OutputFormat.class), any(Writer.class), any(Integer.class), anyMapOf(String.class, String.class),
-                any(ZonedDateTime.class), any(String.class), anyMapOf(String.class, String[].class));
+                any(ZonedDateTime.class), any(String.class), anyMapOf(String.class, String[].class),
+                anyMapOf(String.class, String.class));
         assertThat(tapService.processQuery(writer, params), is(false));
         assertThat(writer.toString(), containsString("Could not finish query due to timeout."));
         testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
@@ -510,7 +511,8 @@ public class TapServiceTest
                         return extractor.extractData(emptyResultSet);
                     }
                 });
-        tapService.runTapQuery("sqlQuery", OutputFormat.VOTABLE, writer, 10, params, ZonedDateTime.now(), null, null);
+        tapService.runTapQuery("sqlQuery", OutputFormat.VOTABLE, writer, 10, params, ZonedDateTime.now(), null, null, 
+                null);
 
         assertThat(writer.toString(), containsString("Vo heading"));
     }

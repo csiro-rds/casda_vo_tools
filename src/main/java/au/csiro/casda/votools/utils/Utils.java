@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -32,10 +32,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.helpers.FileUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * #%L
@@ -57,6 +57,8 @@ import org.slf4j.Logger;
  */
 public class Utils
 {
+    private static Logger logger = LoggerFactory.getLogger(Utils.class);
+    
     /**
      * Salt length in bits.
      */
@@ -145,7 +147,7 @@ public class Utils
     public static void writeAdminCredentialsToFile(File authzFile, String[] details) throws IOException
     {
         OutputStreamWriter output = new OutputStreamWriter(new FileOutputStream(authzFile, false),
-                Charset.forName(CharEncoding.UTF_8).newEncoder());
+                StandardCharsets.UTF_8.newEncoder());
         String userName = details[0];
         String password = details[1];
         output.write(userName + " " + password);
@@ -254,8 +256,8 @@ public class Utils
         // if still no file falls back to default details
         if (authzFile != null)
         {
-            BufferedReader fileContent = new BufferedReader(
-                    new InputStreamReader(new FileInputStream(authzFile), Charset.forName(CharEncoding.UTF_8)));
+            BufferedReader fileContent =
+                    new BufferedReader(new InputStreamReader(new FileInputStream(authzFile), StandardCharsets.UTF_8));
 
             String firstLine = fileContent.readLine();
             if (firstLine != null)
@@ -334,14 +336,22 @@ public class Utils
         String loginSystem = StringUtils.EMPTY;
         String userProjects = StringUtils.EMPTY;
         String casdaLargeWebDownload = "false";
-        if (trustAuthHeader && StringUtils.isNotBlank(request.getHeader(VoKeys.VO_AUTH_HEADER_USER_ID)))
+        if (StringUtils.isNotBlank(request.getHeader(VoKeys.VO_AUTH_HEADER_USER_ID)))
         {
-            userId = request.getHeader(VoKeys.VO_AUTH_HEADER_USER_ID);
-            userName = request.getHeader(VoKeys.VO_AUTH_HEADER_USER_NAME);
-            loginSystem = request.getHeader(VoKeys.VO_AUTH_HEADER_LOGIN_SYSTEM);
-            userProjects = StringUtils.defaultString(request.getHeader(VoKeys.VO_AUTH_HEADER_USER_PROJECTS),
-                    StringUtils.EMPTY);
-            casdaLargeWebDownload = request.getHeader(VoKeys.VO_HEADER_LARGE_WEB_DOWNLOAD);
+            if (trustAuthHeader)
+            {
+                userId = request.getHeader(VoKeys.VO_AUTH_HEADER_USER_ID);
+                userName = request.getHeader(VoKeys.VO_AUTH_HEADER_USER_NAME);
+                loginSystem = request.getHeader(VoKeys.VO_AUTH_HEADER_LOGIN_SYSTEM);
+                userProjects = StringUtils.defaultString(request.getHeader(VoKeys.VO_AUTH_HEADER_USER_PROJECTS),
+                        StringUtils.EMPTY);
+                casdaLargeWebDownload = request.getHeader(VoKeys.VO_HEADER_LARGE_WEB_DOWNLOAD);
+            }
+            else
+            {
+                logger.warn("Rejecting auth header from {} for {}.", request.getRemoteAddr(),
+                        request.getHeader(VoKeys.VO_AUTH_HEADER_USER_ID));
+            }
         }
         paramsMap.put(VoKeys.USER_NAME, userName);
         paramsMap.put(VoKeys.USER_ID, userId);

@@ -28,6 +28,8 @@ public class AdqlQueryBuilder
     private List<String> selectCriteria = new ArrayList<String>();
     private String tablename;
     private Integer maxRec = null;
+    private List<String> outputCols = new ArrayList<String>();
+    private String orderBy;
 
     /**
      * Create a new AdqlQueryBuilder instance.
@@ -55,10 +57,16 @@ public class AdqlQueryBuilder
             selectClause.append(")");
         }
 
-        String query = "SELECT"+ (maxRec == null ? "" : " TOP " + maxRec.toString()) +" * FROM " + tablename;
+        String colList = outputCols.isEmpty() ? "*" :  String.join(", ", outputCols);
+        String query = "SELECT" + (maxRec == null ? "" : " TOP " + maxRec.toString()) + " " + colList + " FROM "
+                + tablename;
         if (selectClause.length() > 0)
         {
             query += " WHERE " + selectClause.toString();
+        }
+        if (StringUtils.isNotBlank(orderBy))
+        {
+            query += " ORDER BY " + orderBy;
         }
         return query;
     }
@@ -83,13 +91,13 @@ public class AdqlQueryBuilder
         }
 
         StringBuilder fieldSelect = new StringBuilder();
-        for (String criterion : criteria)
+        for (String rawCriterion : criteria)
         {
-            if (StringUtils.isBlank(criterion))
+            if (StringUtils.isBlank(rawCriterion))
             {
                 continue;
             }
-            criterion = StringUtils.trim(criterion);
+            String criterion = StringUtils.trim(rawCriterion);
             String template;
             String value = "";
             if (criterion.equals("/"))
@@ -133,7 +141,7 @@ public class AdqlQueryBuilder
     }
 
     /**
-     * Add a predefined select clause to the ADQL query being built.
+     * Add a predefined select/where clause to the ADQL query being built.
      * 
      * @param selectClause
      *            The predefined select clause.
@@ -144,6 +152,26 @@ public class AdqlQueryBuilder
         if (StringUtils.isNotBlank(selectClause))
         {
             selectCriteria.add(selectClause);
+        }
+
+        return this;
+    }
+
+    /**
+     * Add output columns to the ADQL query being built.
+     * 
+     * @param columns
+     *            The columns to be output
+     * @return The current AdqlQueryBuilder instance
+     */
+    public AdqlQueryBuilder withOutputColumns(String... columns)
+    {
+        for (String col : columns)
+        {
+            if (StringUtils.isNotBlank(col))
+            {
+                outputCols.add(col);
+            }
         }
 
         return this;
@@ -177,5 +205,10 @@ public class AdqlQueryBuilder
         {
             this.maxRec = Integer.parseInt(maxRec[0]); 
         }
+    }
+
+    public void setOrderBy(String orderBy)
+    {
+        this.orderBy = orderBy;
     }
 }

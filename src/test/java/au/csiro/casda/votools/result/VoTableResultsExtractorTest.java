@@ -1,13 +1,12 @@
 package au.csiro.casda.votools.result;
 
-import static org.hamcrest.text.MatchesPattern.matchesPattern;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyInt;
-
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
 
 import java.io.StringWriter;
 import java.sql.ResultSet;

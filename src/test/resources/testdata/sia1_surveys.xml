@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Surveys>
+	<Survey>
+		<Code>RACS-Low</Code>
+		<Name>RACS Low Epoch 1</Name>
+		<Description>RACS DR1 image set</Description>
+		<WhereClause>(dataproduct_type = 'cube' and calib_level = 3 and filename LIKE 'RACS%DR1%A.fits')</WhereClause>
+	</Survey>
+	<Survey>
+		<Code>VAST</Code>
+		<Name>Variables And Slow Transient - Epoch 1</Name>
+		<Description>Images from the first observing run of VAST</Description>
+		<WhereClause>(obs_collection = 'AS107' and dataproduct_type = 'cube' and calib_level = 3)</WhereClause>
+	</Survey>
+</Surveys>

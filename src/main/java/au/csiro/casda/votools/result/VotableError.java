@@ -15,7 +15,7 @@ package au.csiro.casda.votools.result;
 
 import java.io.IOException;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * Utility class to generate Votable errors.

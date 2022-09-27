@@ -99,6 +99,9 @@ public class Configuration extends Options
 
     /** default TAP Examples config xml file */
     public static final String DEFAULT_TAP_EXAMPLES_CONFIG = "config/tap_examples.xml";
+
+    /** default SIA Surveys config xml file */
+    public static final String DEFAULT_SIA_SURVEYS_CONFIG = "config/sia1_surveys.xml";
     
     /** default TAP configuration file name */
     public static final String DEFAULT_TAP_CONFIG = "tap_configuration.yaml";

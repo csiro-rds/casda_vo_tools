@@ -22,6 +22,9 @@ import au.csiro.casda.votools.config.EndPoint;
 import au.csiro.casda.votools.examples.TapExamplesService;
 import au.csiro.casda.votools.scs.ConeSearchTable;
 import au.csiro.casda.votools.scs.ScsService;
+import au.csiro.casda.votools.siap1.Siap1Service;
+import au.csiro.casda.votools.surveys.SiapSurvey;
+import au.csiro.casda.votools.surveys.SiapSurveysService;
 import au.csiro.casda.votools.tap.TapService;
 
 /*
@@ -94,6 +97,12 @@ public class CapabilitiesService extends Configurable
     
     @Autowired
     private TapService tapService;
+
+    @Autowired
+    private SiapSurveysService siapSurveysService;
+
+    @Autowired
+    private Siap1Service siap1Service;
     
     private boolean ready;
 
@@ -183,6 +192,9 @@ public class CapabilitiesService extends Configurable
                     ready = true;
                 }
             }
+            
+            // Initialise the SIA1 service - we are not interested if it ends up being ready though
+            siap1Service.isReady();
         }
         return ready;
     }
@@ -303,6 +315,37 @@ public class CapabilitiesService extends Configurable
         configParams.put("capabilitiesURL", serviceBaseUrl + "capabilities");
         configParams.put("availabilityURL", serviceBaseUrl + "availability");
         configParams.put("datalinkURL", serviceBaseUrl + "links");
+
+        return configParams;
+    }
+
+    /**
+     * Retrieve the configuration to be exported in the SIAP v1 capabilities document.
+     * @param capabilitiesUrl
+     *            the url used in the capabilities report, this supports providing the capabilities report both local
+     *            and proxied end points.
+     * @return Map of the SIAP v1 configuration to be exported.
+     */
+    public Map<String, Object> getSia1ConfigParams(String capabilitiesUrl)
+    {
+        Map<String, Object> configParams = new HashMap<>();
+        
+        String serviceBaseUrl = getServiceBaseUrl(capabilitiesUrl, VoServiceType.sia1) + "/";
+
+        configParams.put("capabilitiesURL", serviceBaseUrl + "capabilities");
+        configParams.put("availabilityURL", serviceBaseUrl + "availability");
+        
+        // add the specific cone search capabilities for each catalog
+        List<String[]> surveys = new ArrayList<>();
+        if (siap1Service.isEnabled())
+        {
+            for (SiapSurvey survey : siapSurveysService.getSiapSurveys())
+            {
+                String[] catData = new String[] {survey.getEndpoint(), survey.getDescription()}; 
+                surveys.add(catData);
+            }
+        }
+        configParams.put("siaSurveys", surveys);
 
         return configParams;
     }

@@ -14,6 +14,7 @@ package au.csiro.casda.votools.config;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +34,7 @@ public class KeyConfig extends Options
     private TableConfig table;
 
     /** name of source column */
-    private ArrayList<String> columns;
+    private List<String> columns;
 
     /**
      * Parameterless constructor
@@ -155,12 +156,12 @@ public class KeyConfig extends Options
         throw new ConfigurationException("Changing primary keys is not supported. Please re-create the table.");
     }
 
-    public ArrayList<String> getColumns()
+    public List<String> getColumns()
     {
         return columns;
     }
 
-    public void setColumns(ArrayList<String> columns)
+    public void setColumns(List<String> columns)
     {
         this.columns = columns;
     }

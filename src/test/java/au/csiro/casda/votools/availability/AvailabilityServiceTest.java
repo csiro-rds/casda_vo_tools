@@ -13,8 +13,8 @@ package au.csiro.casda.votools.availability;
  */
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

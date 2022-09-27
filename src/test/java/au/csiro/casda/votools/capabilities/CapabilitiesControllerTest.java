@@ -132,6 +132,24 @@ public class CapabilitiesControllerTest
     }
 
     /**
+     * Test capabilities with simple image access v1 with VO type
+     *
+     * @throws Exception
+     *             from performing get request
+     */
+    @Test
+    public void testCapabilitiesWithSia1VoType() throws Exception
+    {
+        Map<String, Object> configParams = new HashMap<>();
+        configParams.put("siapURL", "http://nowhere/sia1/query?");
+        when(mockService.getSia1ConfigParams(anyString())).thenReturn(configParams);
+        
+        this.mockMvc.perform(get("/sia1/capabilities")).andExpect(status().isOk()).andDo(print())
+                .andExpect(forwardedUrl("sia1/capabilities.xml"))
+                .andExpect(model().attribute("siapURL", "http://nowhere/sia1/query?"));
+    }
+
+    /**
      * Test capabilities with simple image access v2 with VO type
      *
      * @throws Exception

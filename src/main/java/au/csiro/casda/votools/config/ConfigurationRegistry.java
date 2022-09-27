@@ -29,7 +29,8 @@ import org.springframework.stereotype.Component;
 import au.csiro.casda.votools.VoToolsApplication.ConfigLocation;
 
 /**
- * A registry for configurable objects
+ * A registry for configurable objects. When adding new options, use the ConfigKeys enum rather than adding 
+ * more entries here.
  * 
  * Copyright 2015, CSIRO Australia All rights reserved.
  * 

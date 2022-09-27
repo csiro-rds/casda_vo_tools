@@ -15,7 +15,7 @@ package au.csiro.casda.votools.tap;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.util.Date;
@@ -34,16 +34,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import uws.UWSException;
-import uws.job.JobList;
-import uws.job.UWSJob;
-import uws.job.manager.QueuedExecutionManager;
-import uws.job.parameters.UWSParameters;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
 import au.csiro.casda.votools.config.ConfigurationTest;
 import au.csiro.casda.votools.config.EndPoint;
+import uws.UWSException;
+import uws.job.JobList;
+import uws.job.UWSJob;
+import uws.job.manager.QueuedExecutionManager;
+import uws.job.parameters.UWSParameters;
 
 /**
  * Tests for the TapUWSService.

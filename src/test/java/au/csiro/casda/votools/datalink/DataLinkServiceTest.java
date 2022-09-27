@@ -2,13 +2,13 @@ package au.csiro.casda.votools.datalink;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +24,6 @@ import org.apache.logging.log4j.Level;
 import org.custommonkey.xmlunit.DetailedDiff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.joda.time.DateTime;
-
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

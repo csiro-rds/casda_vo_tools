@@ -1,11 +1,11 @@
 package au.csiro.casda.votools.siap2;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.StringWriter;

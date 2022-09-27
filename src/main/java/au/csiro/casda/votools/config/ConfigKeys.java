@@ -23,7 +23,7 @@ public enum ConfigKeys
     /** Key for the table or view to be used for SSAP queries. */
     SSAP_TABLE("ssap.table"),
     
-    /** Key for the service configured upper limit on maxrec, being the number of records returned. */ 
+    /** Key for the service configured upper limit on SSA maxrec, being the number of records returned. */ 
     SSAP_OUTPUT_LIMIT("ssap.outputLimit.hard"),
 
     /** Key for the service configured default maxrec value. */ 
@@ -42,7 +42,23 @@ public enum ConfigKeys
     TAP_UPLOAD_ENABLED("tap.upload.enabled"),
     
     /** Flag that specifies the maximum upload limit for TAP Uploads. */
-    TAP_UPLOAD_LIMIT("tap.upload.limit.bytes");
+    TAP_UPLOAD_LIMIT("tap.upload.limit.bytes"),
+
+    /** Location of the config file describing the surveys enabled for siA1 access */
+    SIA1_SURVEYS_CONFIG_FILE("sia1.surveys.config.file"), 
+
+    /** TAP name of the table holding the SIA1 formats */
+    SIA1_FORMAT_TABLE("sia1.format.table"), 
+    
+    /** URL to produce a cutout in the required format. 
+     * Should include ${obs_publisher_did}, ${access_format}, ${pos} and ${size} placeholders. */
+    SIA1_ACCESS_URL("sia1.access.url"), 
+    
+    /** Key for the service configured upper limit on SIA1 maxrec, being the number of records returned. */ 
+    SIA1_OUTPUT_LIMIT("sia1.outputLimit.hard"), 
+    
+    /** Key for the service configured default SIA1 maxrec value. */ 
+    SIA1_DEFAULT_MAX_REC("sia1.max.records");
     
     private final String key;
 
