@@ -15,7 +15,7 @@ package au.csiro.casda.votools.result;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

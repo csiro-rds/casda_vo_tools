@@ -1,0 +1,87 @@
+/*
+ * Scripts for deploying CASDA VO Tools to a server on Nimbus.
+ *
+ * NB: This script is conditionally applied. Any new tasks will need to be 
+ * included in the conditions in build.gradle. 
+ *
+ * Usage: gradle deployToNimbusServer
+ */
+ 
+
+// Make sure the required params are supplied. This is generally done by the CI job's 
+// "Properties Content" field with a prefix of ORG_GRADLE_PROJECT_  
+// e.g.  ORG_GRADLE_PROJECT_deployuser=auser
+// or they can be added locally to your gradle.properties
+assert project.hasProperty('deployuser'), 'Properties for deployment must be provided'
+assert project.hasProperty('deployidentity'), 'The identity file for deployment must be provided, e.g. apps-team-ci_id_rsa'
+assert System.env.BUILD_NUMBER, 'Deploying must be done by the appropriate Jenkins job'
+assert project.hasProperty('remoteHost'), 'The remote host for the deployment must be specified.'
+assert project.hasProperty('appUser'), 'The application user for the deployment environment'
+
+// Allow the deploypassphrase to be optional
+def deploypassphrase = project.hasProperty('deploypassphrase') ? deploypassphrase : ""
+
+// Ssh settings
+ssh.settings {
+	knownHosts = addHostKey(file("$projectDir/known_hosts"))
+	pty = true  				// Enable PTY allocation for sudo
+}
+
+// Define the remote server we are interacting with.
+remotes {
+    targetServer {
+        host = remoteHost
+        user = deployuser
+        identity = file(deployidentity) 
+        passphrase = deploypassphrase
+        agent = false
+    }
+}
+
+def serviceName = 'casda_vo_tools'
+def tomcatRemoteDirNimbus = "/CASDA/application/${serviceName}"
+def downloadFolder = "${buildDir}/download"
+def downloadedArtifact = file("${downloadFolder}/${rootProject.name}.war")
+
+task makeDownloadFolder() {
+	mkdir file(downloadFolder)
+}
+
+task downloadBinaryArchive(dependsOn: makeDownloadFolder) {
+	description 'Download our target war file from the nexus repository'
+	group 'Continuous Delivery'
+
+	doLast {
+	    ext {
+	        binaryUrl = "https://nexus-isa.csiro.au/repository/cd/au/csiro/${war.baseName}/${project.version}/${war.baseName}-${project.version}.war"
+	    }
+	
+		ant.get(src: binaryUrl, dest: downloadedArtifact)
+	}
+}
+
+task deployToNimbusServer(dependsOn: downloadBinaryArchive) {
+	description 'Deploy CASDA Data Access to the required Nimbus VM. Intended for use by the CI job only.'
+	group 'Continuous Delivery'
+	
+    doFirst {
+        println "Deploying ${serviceName} build ${project.version} to server ${remotes.targetServer.host}"
+    }
+
+	doLast {
+		ssh.runInOrder {
+					    
+			// Note: Each sudo command here must be specifically allowed in the remote host suduers config. 
+			session(remotes.targetServer) {
+				println "Stopping ${serviceName}"
+				execute("sudo  systemctl stop ${serviceName}")
+				println "Cleaning out old app at ${tomcatRemoteDirNimbus}/webapps/${war.baseName} "
+				execute("sudo -u ${appUser} ${tomcatRemoteDirNimbus}/cleanupwarfile ${war.baseName}")
+				println "Uploading ${downloadedArtifact} to ${tomcatRemoteDirNimbus}/webapps/${war.baseName}.war"
+				put from: downloadedArtifact, into: "${tomcatRemoteDirNimbus}/webapps/${war.baseName}.war"
+				println "Starting ${serviceName}"
+				execute("sudo  systemctl start ${serviceName}")
+			}
+		}
+	}
+}

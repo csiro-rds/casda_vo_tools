@@ -1,8 +1,8 @@
 package au.csiro.casda.votools.config;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 

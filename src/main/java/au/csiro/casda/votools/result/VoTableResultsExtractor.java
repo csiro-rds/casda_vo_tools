@@ -258,7 +258,7 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
             String fieldDef = votableFieldMap.get("scs|" + name);
             // using scs| because we are hard coding UCD1 values for scs (prefer UCD1.1 in the tables)
             // If we get a table from postgres, lookup the field info.
-            if (StringUtils.isNotBlank(table))
+            if (fieldDef == null && StringUtils.isNotBlank(table))
             {
                 fieldDef = votableFieldMap.get(schema + "|" + table + "|" + name);
             }

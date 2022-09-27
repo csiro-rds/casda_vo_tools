@@ -2,12 +2,13 @@ package au.csiro.casda.votools.capabilities;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,15 +33,18 @@ import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
 import au.csiro.casda.votools.config.ConfigurationTest;
+import au.csiro.casda.votools.config.EndPoint;
 import au.csiro.casda.votools.jpa.TapColumn;
 import au.csiro.casda.votools.jpa.TapSchema;
 import au.csiro.casda.votools.jpa.TapTable;
 import au.csiro.casda.votools.jpa.repository.VoTableRepositoryService;
 import au.csiro.casda.votools.scs.ScsService;
+import au.csiro.casda.votools.siap1.Siap1Service;
+import au.csiro.casda.votools.surveys.SiapSurveysService;
 import au.csiro.casda.votools.tap.TapService;
 
 /**
- * Unit tests for capability service layer
+ * Unit tests for capability service layer. Note the configuration file unittest/application.properties is used.
  * 
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
@@ -66,6 +70,7 @@ public class CapabilitiesServiceTest
     public void setUp() throws Exception
     {
         Configuration config = ConfigurationTest.getTestConfiguration();
+        populateSia1Surveys(config);
         configRegistry.switchConfiguration(config, false);
     }
 
@@ -95,6 +100,24 @@ public class CapabilitiesServiceTest
         assertThat(ssaConfigParams,
                 hasEntry("capabilitiesURL", "http://localhost:8040/casda_vo_tools/ssa/capabilities"));
         assertThat(ssaConfigParams, hasEntry("outputLimit.hard", "20000000"));
+    }
+
+    @Test
+    public void testGetSia1ConfigParams() throws ConfigurationException
+    {
+        configRegistry.register(capabilityService);
+        capabilityService.isReady();
+        
+        Map<String, Object> siaConfigParams = capabilityService.getSia1ConfigParams("");
+        assertThat(siaConfigParams,
+                hasEntry("capabilitiesURL", "http://localhost:8040/casda_vo_tools/sia1/capabilities"));
+        @SuppressWarnings("unchecked")
+        List<String[]> siaSurveys = (List<String[]>) siaConfigParams.get("siaSurveys");
+        assertThat(siaSurveys, is(not(empty())));
+        for (String[] entry : siaSurveys)
+        {
+            assertThat(entry.length, is(2));
+        }
     }
 
     @Test
@@ -159,6 +182,21 @@ public class CapabilitiesServiceTest
         assertThat(tapConfigParams,
                 hasEntry("capabilitiesURL", "https://some.proxy/vo/tap/capabilities"));
         assertThat(tapConfigParams, hasEntry("outputLimitHard", "20000000"));
+    }
+
+    private void populateSia1Surveys(Configuration config)
+    {
+        EndPoint endPoint = config.getEndPoint("SIA1");
+        
+        List<Map<String, String>> surveyDef = new ArrayList<>();
+        Map<String, String> testSurvey = new HashMap<>();
+        testSurvey.put("code", "RACS-Low");
+        testSurvey.put("name", "RACS Low");
+        testSurvey.put("group", "RACS");
+        testSurvey.put("whereClause", "(a>5)");
+        testSurvey.put("description", "RACS DR1 simple image access");
+        surveyDef.add(testSurvey);
+        endPoint.setSurveys(surveyDef);
     }
 
     
@@ -238,6 +276,44 @@ public class CapabilitiesServiceTest
             scsService.setConfiguration(config);
             scsService.isReady();
             return scsService;
+        }
+
+        /**
+         * Create a Siap1Service instance driven by mock objects populated with our test catalogue definitions.
+         * 
+         * @return The Siap1Service instance.
+         * @throws ConfigurationException
+         */
+        @Bean
+        @Autowired
+        public static Siap1Service getSiap1Service(TapService tapService, SiapSurveysService siapSurveysService)
+                throws ConfigurationException
+        {
+            Configuration config = ConfigurationTest.getTestConfiguration();
+            Siap1Service sia1Service =
+                    new Siap1Service(ConfigurationRegistry.getStaticRegistry(), tapService, siapSurveysService);
+            sia1Service.setConfiguration(config);
+            sia1Service.isReady();
+            return sia1Service;
+        }
+
+        /**
+         * Create a Siap1Service instance driven by mock objects populated with our test catalogue definitions.
+         * 
+         * @return The Siap1Service instance.
+         * @throws ConfigurationException
+         */
+        @Bean
+        @Autowired
+        public static SiapSurveysService getSiapSurveysService() throws ConfigurationException
+        {
+            Configuration config = ConfigurationTest.getTestConfiguration();
+            //populateSurveys(config);
+            SiapSurveysService siapSurveysService =
+                    new SiapSurveysService(ConfigurationRegistry.getStaticRegistry());
+            siapSurveysService.setConfiguration(config);
+            siapSurveysService.isReady();
+            return siapSurveysService;
         }
         
         /**

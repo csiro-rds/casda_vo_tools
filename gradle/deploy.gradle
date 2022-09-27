@@ -19,8 +19,9 @@ assert project.hasProperty('remoteHost'), 'The remote host for the deployment mu
 assert project.hasProperty('appUser'), 'The application user for the deployment environment'
 
 // Ssh settings
-ssh {
-  knownHosts = allowAnyHosts    // Disable host key verification
+ssh.settings {
+	knownHosts = allowAnyHosts	// Disable host key verification
+	pty = true  				// Enable PTY allocation for sudo
 }
 
 
@@ -37,26 +38,27 @@ def tomcatRemoteDir = '/CASDA/application/tomcat'
 def downloadFolder = "${buildDir}/download"
 def downloadedArtifact = file("${downloadFolder}/${rootProject.name}.war")
 
-task deployToServer(type: SshTask) {
+task deployToServer() {
 	description 'Deploy CASDA VO Tools to the required server. Intended for use by the CI job only.'
 	group 'Continuous Delivery'
 	
     doFirst {
         println "Deploying casda_vo_tools build ${project.version} to server ${remotes.targetServer.host}"
     }
-    
-    ssh {
-        // Enable PTY allocation for sudo
-        pty = true
-    }
-	// Note: Each sudo command here must be specifically allowed in the remote host suduers config. 
-	session(remotes.targetServer) {
-		execute("sudo  ${tomcatRemoteDir}/stop")
-		println "Cleaning out old app at ${tomcatRemoteDir}/webapps/${war.baseName} "
-		execute("sudo -u ${appUser} ${tomcatRemoteDir}/cleanupwarfile ${war.baseName}")
-		println "Uploading ${downloadedArtifact} to ${tomcatRemoteDir}/webapps/${war.baseName}.war"
-		put downloadedArtifact, "${tomcatRemoteDir}/webapps/${war.baseName}.war"
-		execute("sudo  ${tomcatRemoteDir}/start")
+
+	doLast {
+		ssh.runInOrder {
+					    
+			// Note: Each sudo command here must be specifically allowed in the remote host suduers config. 
+			session(remotes.targetServer) {
+				execute("sudo  ${tomcatRemoteDir}/stop")
+				println "Cleaning out old app at ${tomcatRemoteDir}/webapps/${war.baseName} "
+				execute("sudo -u ${appUser} ${tomcatRemoteDir}/cleanupwarfile ${war.baseName}")
+				println "Uploading ${downloadedArtifact} to ${tomcatRemoteDir}/webapps/${war.baseName}.war"
+				put from: downloadedArtifact, into: "${tomcatRemoteDir}/webapps/${war.baseName}.war"
+				execute("sudo  ${tomcatRemoteDir}/start")
+			}
+		}
 	}
 }
 

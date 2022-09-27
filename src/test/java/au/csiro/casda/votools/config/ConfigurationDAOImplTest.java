@@ -1,10 +1,10 @@
 package au.csiro.casda.votools.config;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.any;
 
 import java.util.Arrays;
 import java.util.Collection;

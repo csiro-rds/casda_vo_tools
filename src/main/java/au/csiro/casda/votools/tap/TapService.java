@@ -361,7 +361,7 @@ public class TapService extends Configurable implements SystemTime
             throws ParseException, TranslationException
     {
         String sql = StringUtils.EMPTY;
-        ADQLQuery adqlQuery = creteAdqlquery(query);
+        ADQLQuery adqlQuery = createAdqlquery(query);
 
         if (!isAdmin)
         {
@@ -377,7 +377,7 @@ public class TapService extends Configurable implements SystemTime
         return sql;
     }
 
-    private ADQLQuery creteAdqlquery(String query) throws ParseException, TranslationException
+    private ADQLQuery createAdqlquery(String query) throws ParseException, TranslationException
     {
         ADQLParser parser = new ADQLParser();
         parser.disable_tracing();
@@ -399,7 +399,7 @@ public class TapService extends Configurable implements SystemTime
      */
     private String getSingleTableName(String query) throws ParseException, TranslationException
     {
-        ADQLQuery adqlQuery = creteAdqlquery(query);
+        ADQLQuery adqlQuery = createAdqlquery(query);
         int size = adqlQuery.getFrom().getTables().size();
         if (size > 1)
         {
@@ -472,7 +472,7 @@ public class TapService extends Configurable implements SystemTime
                     if (table.getDBLink() != null
                             && tapTable.getDbSchemaName().equals(table.getDBLink().getDBSchemaName())
                             && tapTable.getDbTableName().equals(table.getDBLink().getDBName())
-                            && Boolean.TRUE == tapTable.getReleaseRequired())
+                            && Boolean.TRUE.equals(tapTable.getReleaseRequired()))
                     {
 
                         String tableref = (StringUtils.isNotBlank(table.getAlias())) ? table.getAlias()
@@ -589,13 +589,16 @@ public class TapService extends Configurable implements SystemTime
      *            Name of the table if the query includes only one table.
      * @param extraMetaDataMap
      *            The map of metadata to be included in the query result. May be null
+     * @param customVotableFieldMap 
+     *            The map of field definitions to be appended when using VOTable format. 
      * @throws InterruptedException
      *             If the query was interrupted.
      * @throws IOException
      *             If the result cannot be written to the writer.
      */
     void runTapQuery(String sqlQuery, OutputFormat format, Writer writer, int maxrecs, Map<String, String> params,
-            ZonedDateTime started, String singleTableName, Map<String, String[]> extraMetaDataMap)
+            ZonedDateTime started, String singleTableName, Map<String, String[]> extraMetaDataMap, 
+            Map<String, String> customVotableFieldMap)
             throws InterruptedException, IOException
     {
         int recsLimit = Math.min(maxrecs, maxRecords);
@@ -687,7 +690,7 @@ public class TapService extends Configurable implements SystemTime
             }
             boolean proxiedOutput = StringUtils.isNotBlank(params.get(VoKeys.USER_ID))
                     && !VoKeys.ANONYMOUS_USER.equalsIgnoreCase(params.get(VoKeys.USER_ID));
-            extractor = new VoTableResultsExtractor(writer, maxrecs, votableFieldMap, voTableHeading, metaDataMap,
+            extractor = new VoTableResultsExtractor(writer, maxrecs, customVotableFieldMap, voTableHeading, metaDataMap,
                     baseUrl, proxyUrl, proxiedOutput, votableXsl);
             break;
 
@@ -799,7 +802,7 @@ public class TapService extends Configurable implements SystemTime
                     @Override
                     public int compare(TapColumn o1, TapColumn o2)
                     {
-                        return Integer.valueOf(o1.getColumnOrder()).compareTo(Integer.valueOf(o2.getColumnOrder()));
+                        return Integer.compare(o1.getColumnOrder(), o2.getColumnOrder());
                     }
 
                 });
@@ -1072,6 +1075,30 @@ public class TapService extends Configurable implements SystemTime
     public boolean processQuery(Writer writer, Map<String, String> paramsMap, Map<String, String[]> metaDataMap,
             List<UploadedTable> uploadedTables) throws ConfigurationException
     {
+        return processQuery(writer, paramsMap, metaDataMap, uploadedTables, votableFieldMap);
+    }
+    
+    /**
+     * Validate and process TAP query and write the result to the supplied writer. If an error is encountered the error
+     * will be written in VOTABLE format to the writer.
+     * 
+     * @param writer
+     *            The destination for the query output.
+     * @param paramsMap
+     *            The parameters for this job.
+     * @param metaDataMap
+     *            The map of metadata to be included in the query result. May be null
+     * @param uploadedTables
+     *            The list of tables the user has supplied for querying.
+     * @param customVotableFieldMap
+     *            The map of field definitions to be appended when using VOTable format. 
+     * @return true if the query was successful, false if an error occurred
+     * @throws ConfigurationException
+     *             if there were configuration problems
+     */
+    public boolean processQuery(Writer writer, Map<String, String> paramsMap, Map<String, String[]> metaDataMap,
+            List<UploadedTable> uploadedTables, Map<String, String> customVotableFieldMap) throws ConfigurationException
+    {
         ZonedDateTime started = now();
         String query = paramsMap.get(VoKeys.STR_KEY_ADQL_QUERY);
         String maxRecValue = paramsMap.get(VoKeys.STR_KEY_MAXREC);
@@ -1111,7 +1138,7 @@ public class TapService extends Configurable implements SystemTime
 
                 logger.debug("Updated query for isCasdaAdmin={}: {}", isCasdaAdmin, sqlForQuery);
                 runTapQuery(sqlForQuery, outputFormat, writer, maxRec, paramsMap, started, singleTableName,
-                        metaDataMap);
+                        metaDataMap, customVotableFieldMap);
                 result = true;
             }
         }
@@ -1187,6 +1214,28 @@ public class TapService extends Configurable implements SystemTime
         }
         return null;
     }
+    
+    /**
+     * Find the metadata key for the ADQL table. This is composed from the database schema and table names.
+     * @param adqlSchema The ADQL schema of the target table.
+     * @param adqlTableName The ADQL table name of the target table.
+     * @return The metadata key e.g. schema|table
+     */
+    public String getTableMetdataKey(String adqlSchema, String adqlTableName)
+    {
+        String adqlKey = String.format("%s.%s", adqlSchema, adqlTableName);
+        List<TapTable> tapTables = voTableRepositoryService.getTables();
+        for (TapTable tapTable : tapTables)
+        {
+            if (adqlKey.equalsIgnoreCase(tapTable.getTableName()))
+            {
+                return String.format("%s|%s", tapTable.getDbSchemaName(), tapTable.getDbTableName());
+            }
+        }
+        
+        return "";
+    }
+    
     /**
      * Forms a log message reporting a failure
      * 

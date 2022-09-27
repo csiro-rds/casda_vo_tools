@@ -75,6 +75,10 @@ public class CapabilitiesController
         {
             return getSsaCapabilities(capabilitiesUrl);
         }
+        else if (voServiceType == VoServiceType.sia1)
+        {
+            return getSia1Capabilities(capabilitiesUrl);
+        }
         else if (voServiceType == VoServiceType.sia2)
         {
             return getSia2Capabilities(capabilitiesUrl);
@@ -115,6 +119,14 @@ public class CapabilitiesController
         ModelAndView mav = new ModelAndView();
         mav.setViewName("datalink/capabilities.xml");
         mav.getModel().putAll(capabilitiesService.getDatalinkConfigParams(capabilitiesUrl));
+        return mav;
+    }
+
+    private ModelAndView getSia1Capabilities(String capabilitiesUrl)
+    {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("sia1/capabilities.xml");
+        mav.getModel().putAll(capabilitiesService.getSia1ConfigParams(capabilitiesUrl));
         return mav;
     }
 

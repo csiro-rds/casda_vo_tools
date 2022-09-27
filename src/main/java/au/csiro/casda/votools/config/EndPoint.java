@@ -1,5 +1,6 @@
 package au.csiro.casda.votools.config;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +41,7 @@ public class EndPoint extends Options
         /** Table Access Protocol */
         TAP,
 
-        /** Simple Image Access Protocol */
+        /** Simple Image Access Protocol 1 and 2 */
         SIAP,
 
         /** Simple Spectral Access Protocol */
@@ -56,6 +57,8 @@ public class EndPoint extends Options
     private Set<String> tables;
     
     private Set<Map<String, String>> examples;
+    
+    private Collection<Map<String, String>> surveys;
 
     private static EndPoint helpPoint = helpEndPoint();
 
@@ -97,10 +100,14 @@ public class EndPoint extends Options
     {
         EndPoint tap = config.getEndPoint("TAP") == null ? new EndPoint() : config.getEndPoint("TAP");
         EndPoint scs = config.getEndPoint("SCS") == null ? new EndPoint() : config.getEndPoint("SCS");
+        EndPoint sia1 = config.getEndPoint("SIA1") == null ? new EndPoint() : config.getEndPoint("SIA1");        
         tap.setConfig(config);
         scs.setConfig(config);
+        sia1.setConfig(config);
         config.getEndPoints().put("TAP", tap);
         config.getEndPoints().put("SCS", scs);
+        config.getEndPoints().put("SIA1", sia1);
+
         tap.putDefault("tap.job.name.prefix", registry.getTapJobNamePrefix());
         tap.putDefault("tap.data.access.url", registry.getTapDataAccessUrl());
         tap.putDefault("tap.max.running.jobs", String.valueOf(registry.getTapMaxRunningJobs()));
@@ -145,6 +152,10 @@ public class EndPoint extends Options
             else if (key.startsWith("scs"))
             {
                 scs.putDefault(key, registry.getConfigValue(key));
+            } 
+            else if (key.startsWith("sia1"))
+            {
+                sia1.putDefault(key, registry.getConfigValue(key));
             } 
             
         }
@@ -253,6 +264,16 @@ public class EndPoint extends Options
     public void setExamples(Set<Map<String, String>> examples)
     {
         this.examples = examples;
+    }
+    
+    public Collection<Map<String, String>> getSurveys()
+    {
+        return surveys;
+    }
+
+    public void setSurveys(Collection<Map<String, String>> surveys)
+    {
+        this.surveys = surveys;
     }
 
     /**

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import au.csiro.casda.votools.VoServiceType;
 import au.csiro.casda.votools.jaxb.availability.Availability;
+import au.csiro.casda.votools.siap1.Siap1Service;
 import au.csiro.casda.votools.ssap.SsapService;
 
 /**
@@ -47,6 +48,8 @@ public class AvailabilityService
 
     private static Logger logger = LoggerFactory.getLogger(AvailabilityService.class);
 
+    private Siap1Service siap1Service;
+
     /**
      * @param healthEndpoint
      *            Spring Actuator HealthEndpoint - used here to check application
@@ -54,13 +57,17 @@ public class AvailabilityService
      *            contains system upSince
      * @param ssapService
      *            The SsapService 
+     * @param siap1Service
+     *            The SIAP v1 service 
      */
     @Autowired
-    public AvailabilityService(HealthEndpoint healthEndpoint, SystemStatus systemStatus, SsapService ssapService)
+    public AvailabilityService(HealthEndpoint healthEndpoint, SystemStatus systemStatus, SsapService ssapService,
+            Siap1Service siap1Service)
     {
         this.systemStatus = systemStatus;
         this.healthEndpoint = healthEndpoint;
         this.ssapService = ssapService;
+        this.siap1Service = siap1Service;
     }
 
     /**
@@ -75,6 +82,11 @@ public class AvailabilityService
         {
             avail.setAvailable(false);
             avail.getNote().add("SSAP is not supported by this service");
+        }
+        else if (voServiceType == VoServiceType.sia1 && !siap1Service.isEnabled())
+        {
+            avail.setAvailable(false);
+            avail.getNote().add("SIAP v1 is not supported by this service");
         }
         else
         {

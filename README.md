@@ -9,6 +9,7 @@ This web application provides access to astronomical data using the following Vi
 | [Table Access Protocol](http://www.ivoa.net/Documents/TAP/) | v1.0 | /tap |
 | [Simple Cone Search](http://www.ivoa.net/Documents/latest/ConeSearch.html) | v1.03 | /scs |
 | [Simple Spectral Access](http://www.ivoa.net/documents/SSA/) | v1.1  | /ssa |
+| [Simple Image Access](http://www.ivoa.net/documents/SIA/) | v1.0  | /sia1 |
 | [Simple Image Access](http://www.ivoa.net/documents/SIA/) | v2.0  | /sia2 |
 | [Datalink](http://www.ivoa.net/documents/DataLink/index.html) | v1.0 | /datalink |
  
@@ -24,7 +25,7 @@ configuration rather than via code.
 Release History
 ---------------
 
-Current Release: v1.17
+Current Release: v1.20
 
 Notes for each release are available at  [release_notes.md](./release_notes.md)
 
@@ -42,7 +43,7 @@ Installation
 
 CASDA VO Tools is distributed as a ready to install war file (web archive). This can be directly deployed in a Java web container such as Tomcat.
 
-The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.17 on CSIRO Data Access Portal](https://doi.org/10.25919/pvez-z359)
+The casda\_vo\_tools.war file can either be downloaded from the files tab at [CASDA VO Tools v1.20 on CSIRO Data Access Portal](https://doi.org/10.25919/exjz-8a50)
 or you can build it using the instructions below.
 
 ### Deployment
@@ -60,7 +61,7 @@ Configuration
 -------------
 
 A full guide to interactive configuration is provided at 
-[Deploying_CASDA_VO_Tools.pdf](https://data.csiro.au/dap/ws/v2/collections/53386/support/5216) however a short intro is provided here.
+[Deploying_CASDA_VO_Tools.pdf](https://data.csiro.au/dap/ws/v2/collections/56337/support/5631) however a short intro is provided here.
 
 ### Application config
 Two configuration systems are available for use in the CASDA VO Tools application.
