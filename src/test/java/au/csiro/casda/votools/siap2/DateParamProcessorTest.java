@@ -6,13 +6,13 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /*
  * #%L
@@ -37,49 +37,38 @@ public class DateParamProcessorTest
     /**
      * Check the validate method's handling of valid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateDateValidTest
     {
 
-        @Parameters
-        public static Collection<Object[]> data()
+        // Param values (may be multiple)
+        // TODO once the siap2 specs are finilised in regards to date formats this code can
+        // either be reinstated or deleted
+        /**
+         * removed due to change in specs but kept in case of future changes return Arrays.asList( new Object[][] { {
+         * "2012-01-01" }, { "2012-01-01T22:22:22" }, { "2012-01-01T22:22:22.1234" }, { "2012-01-01 2014-01-10" }, {
+         * "2012-01-01T22:22:22 2015-01-01T22:22:22" }, { "2012-01-01T22:22:22.1234 2015-01-01T22:22:22.1234" } });
+         **/
+        public static Stream<Arguments> queryParams()
         {
-            // Param values (may be multiple)
-            //TODO once the siap2 specs are finilised in regards to date formats this code can 
-            //either be reinstated or deleted
-            /** removed due to change in specs but kept in case of future changes
-            return Arrays.asList(
-                    new Object[][] { { "2012-01-01" }, { "2012-01-01T22:22:22" }, { "2012-01-01T22:22:22.1234" },
-                            { "2012-01-01 2014-01-10" }, { "2012-01-01T22:22:22 2015-01-01T22:22:22" },
-                            { "2012-01-01T22:22:22.1234 2015-01-01T22:22:22.1234" } });
-            **/
-            return Arrays.asList(new Object[][] { { "55678.123456" }, { "55678.123456 55778.123456" } });
+            return Stream.of(Arguments.arguments((Object) new String[] { "55678.123456" }),
+                    Arguments.arguments((Object) new String[] { "55678.123456 55778.123456" }));
         }
-
-        private String[] validParamValues;
 
         private DateParamProcessor processor;
 
-        public ValidateDateValidTest(Object validValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
             processor = new DateParamProcessor();
-
-            if (validValue instanceof String[])
-            {
-                validParamValues = (String[]) validValue;
-            }
-            else if (validValue instanceof String)
-            {
-                validParamValues = new String[] { (String) validValue };
-            }
         }
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.DateParamProcessor#validate(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testValidateDate()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testValidateDate(String[] validParamValues)
         {
             assertThat("Expected '" + ArrayUtils.toString(validParamValues) + "' to be valid.",
                     processor.validate("TIME", validParamValues), is(empty()));
@@ -89,41 +78,31 @@ public class DateParamProcessorTest
     /**
      * Check the validate method's handling of invalid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateDateInvalidTest
     {
 
-        @Parameters
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            return Arrays.asList(new Object[][] { { "2012-01-01.345" }, { "55678.123456a 55778.123456" },
-                    { "55678.123456 55778.123456a" } });
+            return Stream.of(Arguments.arguments((Object) new String[] { "2012-01-01.345" }),
+                    Arguments.arguments((Object) new String[] { "55678.123456a 55778.123456" }),
+                    Arguments.arguments((Object) new String[] { "55678.123456 55778.123456a" }));
         }
-
-        private String[] invalidParamValues;
 
         private DateParamProcessor processor;
 
-        public ValidateDateInvalidTest(Object invalidValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
             processor = new DateParamProcessor();
-
-            if (invalidValue instanceof String[])
-            {
-                invalidParamValues = (String[]) invalidValue;
-            }
-            else if (invalidValue instanceof String)
-            {
-                invalidParamValues = new String[] { (String) invalidValue };
-            }
         }
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.DateParamProcessor#validate(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testInValidateDate()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testInValidateDate(String[] invalidParamValues)
         {
             assertEquals("Expected '" + ArrayUtils.toString(invalidParamValues) + "' to be invalid.",
                     Arrays.asList("UsageFault: Your query contained an invalid date format. "
@@ -135,44 +114,32 @@ public class DateParamProcessorTest
     /**
      * Check the validate method's handling of invalid date range.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateDateRangeInvalidTest
     {
 
-        @Parameters
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            return Arrays.asList(new Object[][] { { "65678.123456 55778.123456" } });
+            return Stream.of(Arguments.arguments((Object) new String[] { "65678.123456 55778.123456" }));
         }
-
-        private String[] invalidParamValues;
 
         private DateParamProcessor processor;
 
-        public ValidateDateRangeInvalidTest(Object invalidValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
             processor = new DateParamProcessor();
-
-            if (invalidValue instanceof String[])
-            {
-                invalidParamValues = (String[]) invalidValue;
-            }
-            else if (invalidValue instanceof String)
-            {
-                invalidParamValues = new String[] { (String) invalidValue };
-            }
         }
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.DateParamProcessor#validate(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testInValidateDateRange()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testInValidateDateRange(String[] invalidParamValues)
         {
-            assertEquals("Expected '" + ArrayUtils.toString(invalidParamValues) + "' to be invalid.",
-                    Arrays.asList(
-                            "UsageFault: The first date in your query must be earlier (chronoligically) than the second"),
+            assertEquals("Expected '" + ArrayUtils.toString(invalidParamValues) + "' to be invalid.", Arrays.asList(
+                    "UsageFault: The first date in your query must be earlier (chronoligically) than the second"),
                     processor.validate("TIME", invalidParamValues));
         }
     }
@@ -180,40 +147,30 @@ public class DateParamProcessorTest
     /**
      * Check the validate method's handling of invalid date range.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateDateRangeValidTest
     {
 
-        @Parameters
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            return Arrays.asList(new Object[][] { { "45678.123456 55778.123456" }, { "45678.123456 45678.123456" } });
+            return Stream.of(Arguments.arguments((Object) new String[] { "45678.123456 55778.123456" }),
+                    Arguments.arguments((Object) new String[] { "45678.123456 45678.123456" }));
         }
-
-        private String[] validParamValues;
 
         private DateParamProcessor processor;
 
-        public ValidateDateRangeValidTest(Object validValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
             processor = new DateParamProcessor();
-
-            if (validValue instanceof String[])
-            {
-                validParamValues = (String[]) validValue;
-            }
-            else if (validValue instanceof String)
-            {
-                validParamValues = new String[] { (String) validValue };
-            }
         }
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.DateParamProcessor#validate(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testInValidateDateRange()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testInValidateDateRange(String[] validParamValues)
         {
             assertThat("Expected '" + ArrayUtils.toString(validParamValues) + "' to be valid.",
                     processor.validate("TIME", validParamValues), is(empty()));
@@ -223,50 +180,27 @@ public class DateParamProcessorTest
     /**
      * Check the BuildQuery method with valid values.
      */
-    @RunWith(Parameterized.class)
     public static class BuildQueryTest
     {
 
-        @Parameters
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            /**
-            return Arrays.asList(new Object[][] { 
-                    { "2012-01-01", "(TIME >= 55927.0)" },
-                    { "2012-01-10T23:59:59", "(TIME >= 55936.99998842592)" },
-                    { "2012-01-10T23:59:59.999", "(TIME >= 55936.999999988424)" },
-                    { " 2012-01-01", "(TIME <= 55927.999999988424)" }, 
-                    { " 2012-01-10T23:59:59", "(TIME <= 55936.999999988424)" },
-                    { " 2012-01-10T23:59:59.999", "(TIME <= 55936.999999988424)" },
-                    { "2012-01-01 2014-01-01", "(TIME >= 55927.0 AND maxCol <= 56658.999999988424)" },
-                    { "2012-01-10T23:59:59 2014-01-10T21:59:59",
-                            "(TIME >= 55936.99998842592 AND maxCol <= 56667.916666655095)" },
-                    { "2012-01-10T23:59:59.999 2015-01-10T23:59:23",
-                            "(TIME >= 55936.999999988424 AND maxCol <= 57032.99958332176)" } });
-                            
-            */
-            return Arrays.asList(new Object[][] { 
-                { "55936.99998842592", "(TIME <= 55936.99998842592 AND maxCol >= 55936.99998842592)" },
-                { " 55936.999999988424", "(TIME <= 55936.999999988424 AND maxCol >= 55936.999999988424)" },
-                { "55927.0 56658.999999", "(TIME >= 55927.0 AND maxCol <= 56658.999999)" },
-                { "  55927.0    56658.999999 ", "(TIME >= 55927.0 AND maxCol <= 56658.999999)" }});
+            return Stream.of(
+                    Arguments.arguments((Object) new String[] { "55936.99998842592" },
+                            "(TIME <= 55936.99998842592 AND maxCol >= 55936.99998842592)"),
+                    Arguments.arguments((Object) new String[] { " 55936.999999988424" },
+                            "(TIME <= 55936.999999988424 AND maxCol >= 55936.999999988424)"),
+                    Arguments.arguments((Object) new String[] { "55927.0 56658.999999" },
+                            "(TIME >= 55927.0 AND maxCol <= 56658.999999)"),
+                    Arguments.arguments((Object) new String[] { "  55927.0    56658.999999 " },
+                            "(TIME >= 55927.0 AND maxCol <= 56658.999999)"));
         }
 
-        private String[] paramValues;
         private DateParamProcessor processor;
-        private String result;
 
-        public BuildQueryTest(Object value, String result)
+        @BeforeEach
+        public void setup()
         {
-            this.result = result;
-            if (value instanceof String[])
-            {
-                paramValues = (String[]) value;
-            }
-            else if (value instanceof String)
-            {
-                paramValues = new String[] { (String) value };
-            }
             processor = new DateParamProcessor();
         }
 
@@ -274,8 +208,9 @@ public class DateParamProcessorTest
          * Test method for
          * {@link au.csiro.casda.votools.siap2.DateParamProcessor#buildQuery(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testWithValidParams()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testWithValidParams(String[] paramValues, String result)
         {
             assertEquals("Incorrect value for " + ArrayUtils.toString(paramValues), result,
                     processor.buildQuery("TIME", "maxCol", paramValues));

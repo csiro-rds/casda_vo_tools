@@ -573,12 +573,20 @@ public class Configuration extends Options
         {
             tableConfig.init();
             tableConfig.export(this, fullDbTableName);
-            wireTable(tableConfig);
+            if (tableConfig.isEmpty())
+            {
+                // Table does not exist.
+                logger.info("Table " + fullDbTableName + " does not exist.");
+            }
+            else
+            {
+                wireTable(tableConfig);
+            }
         }
         catch (BadSqlGrammarException e)
         {
             // Table does not exist.
-            logger.debug("Table does not exist.", e);
+            logger.info("Table " + fullDbTableName + " does not exist.", e);
         }
         return tableConfig;
     }
@@ -788,7 +796,7 @@ public class Configuration extends Options
         return exported;
     }
 
-    /**
+    /*
      * Add to exported object options that are available in the current configuration.
      */
     private void addOptions(Configuration other)

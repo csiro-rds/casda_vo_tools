@@ -4,22 +4,24 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import au.csiro.BaseTest;
+import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
 import au.csiro.casda.votools.tap.TapService;
 import au.csiro.casda.votools.utils.VoKeys;
@@ -41,14 +43,13 @@ import au.csiro.casda.votools.utils.VoKeys;
  * <p>
  * Copyright 2015, CSIRO Australia All rights reserved.
  */
-@RunWith(Enclosed.class)
 public class Siapv2ServiceTest
 {
 
     /**
      * Check the buildQuery method
      */
-    public static class ValidateBuildQuery
+    public static class ValidateBuildQuery extends BaseTest
     {
 
         @Mock
@@ -59,9 +60,9 @@ public class Siapv2ServiceTest
 
         private Siapv2Service siapv2Service;
 
-        public ValidateBuildQuery() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             siapv2Service = new Siapv2Service(configRegistry, tapService);
         }
 
@@ -113,13 +114,40 @@ public class Siapv2ServiceTest
             assertEquals("SELECT * FROM ivoa.obscore WHERE ((em_min <= 300 AND em_max >= 300)) AND "
                     + "(dataproduct_type IN ('cube', 'image', 'visibility'))", query);
         }
+
+        @Test
+        public void testBuildQueryConeSearch()
+        {
+            HashMap<String, String[]> paramsMap = new HashMap<String, String[]>();
+            paramsMap.put("pos", new String[] { "CIRCLE 10.0 -12.0 0.125" });
+            paramsMap.put("maxrec", new String[] { "10" });
+            String query = siapv2Service.buildQuery(paramsMap);
+            assertEquals("SELECT "
+                    + "DISTANCE(POINT('ICRS GEOCENTER',s_ra,s_dec),POINT('ICRS GEOCENTER',10.0, -12.0)) as \"distance\", "
+                    + "* FROM ivoa.obscore "
+                    + "WHERE ((INTERSECTS(CIRCLE('ICRS GEOCENTER', 10.0, -12.0, 0.125),s_region)=1)) AND "
+                    + "(dataproduct_type IN ('cube', 'image', 'visibility')) " + "ORDER BY 1 ASC", query);
+        }
+
+        @Test
+        public void testBuildQueryPolygon()
+        {
+            HashMap<String, String[]> paramsMap = new HashMap<String, String[]>();
+            paramsMap.put("pos", new String[] { "POLYGON 10.0 -12.0 10.5 -12.0 10.5 -12.5 10.0 -12.5" });
+            paramsMap.put("maxrec", new String[] { "10" });
+            String query = siapv2Service.buildQuery(paramsMap);
+            assertEquals("SELECT " + "* FROM ivoa.obscore "
+                    + "WHERE ((INTERSECTS(POLYGON('ICRS GEOCENTER', 10.0, -12.0, 10.5, -12.0, 10.5, -12.5, 10.0, -12.5)"
+                    + ",s_region)=1)) AND " //
+                    + "(dataproduct_type IN ('cube', 'image', 'visibility'))", query);
+        }
         
     }
 
     /**
      * Check the buildQuery method
      */
-    public static class ValidateBuildSiapQueryText
+    public static class ValidateBuildSiapQueryText extends BaseTest
     {
 
         @Mock
@@ -130,9 +158,9 @@ public class Siapv2ServiceTest
 
         private Siapv2Service siapv2Service;
 
-        public ValidateBuildSiapQueryText() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             siapv2Service = new Siapv2Service(configRegistry, tapService);
         }
 
@@ -175,7 +203,7 @@ public class Siapv2ServiceTest
     /**
      * Check the validateSiapv2Job method
      */
-    public static class ValidateValidateSiap2Job
+    public static class ValidateValidateSiap2Job extends BaseTest
     {
 
         @Mock
@@ -186,9 +214,9 @@ public class Siapv2ServiceTest
 
         private Siapv2Service siapv2Service;
 
-        public ValidateValidateSiap2Job() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             siapv2Service = new Siapv2Service(configRegistry, tapService);
         }
 
@@ -269,7 +297,7 @@ public class Siapv2ServiceTest
     /**
      * Check params passed to Tap service for siap 2 job
      */
-    public static class CheckParamsPassedToTapServiceForSiap2Job
+    public static class CheckParamsPassedToTapServiceForSiap2Job extends BaseTest
     {
 
         private static final int NUM_STANDARD_JOB_PARAMS = 9;
@@ -282,10 +310,12 @@ public class Siapv2ServiceTest
 
         private Siapv2Service siapv2Service;
 
-        public CheckParamsPassedToTapServiceForSiap2Job() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             siapv2Service = new Siapv2Service(configRegistry, tapService);
+            siapv2Service.setDistanceFieldKey("SCS|Distance");
+            siapv2Service.setDistanceFieldHeader("header");
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -297,10 +327,14 @@ public class Siapv2ServiceTest
             siapv2Service.processQuery(writer, paramsMap);
 
             ArgumentCaptor<Map> tapJobParamsCaptor = ArgumentCaptor.forClass(Map.class);
-            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture());
+            ArgumentCaptor<Map> fieldMapParamsCaptor = ArgumentCaptor.forClass(Map.class);
+            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture(), eq(null), any(ArrayList.class),
+                    fieldMapParamsCaptor.capture());
             Map<String, String> tapJobParams = (Map<String, String>) tapJobParamsCaptor.getValue();
             assertEquals(Siapv2Service.CASDA_SIAPV2_RESULT_NAME, tapJobParams.get(VoKeys.VO_TABLE_HEADING));
             assertEquals(NUM_STANDARD_JOB_PARAMS, tapJobParams.size());
+            Map<String, String> fieldMap = (Map<String, String>) fieldMapParamsCaptor.getValue();
+            assertEquals("header", fieldMap.get("SCS|Distance"));
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -313,11 +347,46 @@ public class Siapv2ServiceTest
             siapv2Service.processQuery(writer, paramsMap);
 
             ArgumentCaptor<Map> tapJobParamsCaptor = ArgumentCaptor.forClass(Map.class);
-            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture());
+            verify(tapService).processQuery(eq(writer), tapJobParamsCaptor.capture(), eq(null), any(List.class),
+                    any(Map.class));
             Map<String, String> tapJobParams = (Map<String, String>) tapJobParamsCaptor.getValue();
             assertEquals(Siapv2Service.CASDA_SIAPV2_RESULT_NAME, tapJobParams.get(VoKeys.VO_TABLE_HEADING));
             assertEquals("7", tapJobParams.get(VoKeys.STR_KEY_MAXREC));
             assertEquals(NUM_STANDARD_JOB_PARAMS + 1, tapJobParams.size());
+        }
+    }
+    
+    /**
+     * Tests for the createDistanceFieldHeader method.
+     */
+    public static class CheckCreateDistanceFieldHeader extends BaseTest
+    {
+
+        @Mock
+        private ConfigurationRegistry configRegistry;
+
+        @Mock
+        private TapService tapService;
+
+        private Siapv2Service siapv2Service;
+
+        @BeforeEach
+        public void setup() throws ConfigurationException
+        {
+            siapv2Service = new Siapv2Service(configRegistry, tapService);
+        }
+        
+
+        @Test
+        public void testCreateDistanceFieldHeader()
+        {
+            siapv2Service.createDistanceFieldHeader();
+            assertEquals("scs|distance", siapv2Service.getDistanceFieldKey());
+            assertEquals("<FIELD name=\"distance\" ID=\"distance\" datatype=\"double\" unit=\"deg\" "
+                    + "ucd=\"pos.angDistance\" >\r\n"
+                    + " <DESCRIPTION>The angular distance of the centre of the parent image from the requested "
+                    + "position</DESCRIPTION>\r\n" //
+                    + "</FIELD>\r\n", siapv2Service.getDistanceFieldHeader());
         }
     }
 }

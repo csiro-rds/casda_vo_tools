@@ -7,9 +7,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -17,10 +17,9 @@ import java.util.HashSet;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +31,6 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import au.csiro.casda.votools.VoToolsApplication;
 import au.csiro.casda.votools.VoToolsApplication.ConfigLocation;
@@ -58,9 +56,8 @@ import au.csiro.casda.votools.jpa.TapTable;
  * Copyright 2015, CSIRO Australia All rights reserved.
  * 
  */
-@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { ConfigurationTest.Config.class })
-@Ignore("Database modification tests should be used only when modifying the config handling")
+@Disabled("Database modification tests should be used only when modifying the config handling")
 public class ConfigurationTest
 {
     @Autowired
@@ -81,7 +78,7 @@ public class ConfigurationTest
     private YamlParser parser;
     private boolean haveDB;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
         if (datasourceUrl == null) // properties not found, set default values spring.datasource.url

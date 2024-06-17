@@ -18,9 +18,10 @@ The libraries in this directory are produced by external parties but not availab
 * Publisher: CSIRO
 
 
-## uws-4.jar
+## uws_4.1b.jar
 
 * License: LGPL v3
 * Website: http://cdsportal.u-strasbg.fr/uwstuto/index.html
-* Version: 4.0
+* Version: 4.1 as at commit 2a1e578 14 Nov 2014
 * Publisher: CDS/ARI
+* This is a custom build of the UWS 4.1 library just before the UPLOAD support was added.

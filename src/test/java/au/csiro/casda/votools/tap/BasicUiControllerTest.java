@@ -21,14 +21,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.config.ConfigValueKeys;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
@@ -40,7 +40,7 @@ import au.csiro.casda.votools.result.OutputFormat;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-public class BasicUiControllerTest
+public class BasicUiControllerTest extends BaseTest
 {
     @Mock
     private Configuration config;
@@ -49,26 +49,26 @@ public class BasicUiControllerTest
     private ConfigurationRegistry configReg;
 
     private MockMvc mockMvc;
-
+    
+    private BasicUiController controller;
+    
     /**
      * Set up the ui controller before each test.
      * 
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
-    {
-        MockitoAnnotations.initMocks(this);
-        
+    {      
         Mockito.when(config.get(ConfigValueKeys.ENVIRONMENT)).thenReturn("local");
         
-        BasicUiController controller = new BasicUiController(configReg);  
+        controller = new BasicUiController(configReg);  
         controller.setConfiguration(config);
-            
+        
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
-
+    
     /**
      * Tests a GET /tap.html
      * 
@@ -83,7 +83,9 @@ public class BasicUiControllerTest
                 Arrays.asList(OutputFormat.values()).stream().flatMap(output -> output.getIdentifiers().stream())
                         .collect(Collectors.toList());
 
-        this.mockMvc.perform(get("/tap.html")).andExpect(status().isOk()).andExpect(view().name("tap/show"))
+        this.mockMvc.perform(get("/tap"))
+            .andExpect(status().isOk()) //
+            .andExpect(view().name("tap/show")) //
                 .andExpect(model().attribute("outputFormats", (outputList)));
     }
 

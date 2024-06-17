@@ -7,8 +7,8 @@ import static org.hamcrest.Matchers.is;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import au.csiro.casda.votools.TestUtils;
 import au.csiro.casda.votools.jpa.TapSchema;
@@ -36,7 +36,7 @@ public class ConeSearchTableTest
 {
     private TapSchema casdaSchema;
 
-    @Before
+    @BeforeEach
     public void setup()
     {
         casdaSchema = new TapSchema();
@@ -46,8 +46,8 @@ public class ConeSearchTableTest
 
     /**
      * Test method for
-     * {@link au.csiro.casda.votools.scs.ConeSearchTable# 
-     * addColumn(au.csiro.casda.votools.scs.ConeSearchTable.Verbosity, java.lang.String)}
+     * {@link au.csiro.casda.votools.scs.ConeSearchTable} addColumn(
+     * {@link au.csiro.casda.votools.scs.ConeSearchTable.Verbosity}, java.lang.String)
      * .
      */
     @Test

@@ -18,15 +18,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.VoServiceType;
 import au.csiro.casda.votools.jaxb.availability.Availability;
 
@@ -36,7 +36,7 @@ import au.csiro.casda.votools.jaxb.availability.Availability;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-public class AvailabilityControllerTest
+public class AvailabilityControllerTest extends BaseTest
 {
     @Mock
     private AvailabilityService mockService;
@@ -52,10 +52,9 @@ public class AvailabilityControllerTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
         this.mockMvc = MockMvcBuilders.standaloneSetup(availabilityController).build();
     }
 

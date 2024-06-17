@@ -172,8 +172,8 @@ public class CapabilitiesService extends Configurable
                 languageDescription = tap.get("tap.language.description", languageDescription);
                 outputFormatMime = tap.get("tap.output.format.mime", outputFormatMime);
                 outputFormatAlias = tap.get("tap.output.format.alias", outputFormatAlias);
-                retentionPeriodDefault = tap.get("tap.retention.period.default", retentionPeriodDefault);
-                retentionPeriodHard = tap.get("tap.retention.period.hard", retentionPeriodHard);
+                retentionPeriodDefault = tap.get(ConfigKeys.TAP_RETENTION_PERIOD_DEFAULT.getKey(), retentionPeriodDefault);
+                retentionPeriodHard = tap.get(ConfigKeys.TAP_RETENTION_PERIOD_HARD.getKey(), retentionPeriodHard);
                 executionDurationDefault = tap.get("tap.execution.duration.default", executionDurationDefault);
                 executionDurationHard = tap.get("tap.execution.duration.hard", executionDurationHard);
                 outputLimitHard = tap.get("tap.output.limit.hard", outputLimitHard);

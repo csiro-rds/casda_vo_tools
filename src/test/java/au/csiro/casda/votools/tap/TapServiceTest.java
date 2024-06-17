@@ -10,10 +10,10 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -42,11 +42,10 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,9 +53,10 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import adql.parser.ParseException;
+import au.csiro.BaseTest;
 import au.csiro.casda.Log4JTestAppender;
 import au.csiro.casda.logging.CasdaFormatter;
 import au.csiro.casda.votools.config.Configuration;
@@ -92,9 +92,10 @@ import au.csiro.casda.votools.utils.VoKeys;
  * 
  * Copyright 2014, CSIRO Australia All rights reserved.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ConfigurationTest.Config.class })
-public class TapServiceTest
+public class TapServiceTest extends BaseTest
 {
     private static final String STR_MSG_UNKNOWN_QUERY_LANGUAGE = "Unknown query language";
     private static final String STR_MSG_MISSING_QUERY_PARAMETER = "Missing QUERY parameter";
@@ -149,12 +150,11 @@ public class TapServiceTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
         testAppender = Log4JTestAppender.createAppender();
-
-        MockitoAnnotations.initMocks(this);
+        
         TapSchema tapSchema = new TapSchema();
         tapSchema.setSchemaName("ivoa");
 
@@ -448,10 +448,9 @@ public class TapServiceTest
         Map<String, String> params = createValidParamsForUser(mode, STR_QUERY_SELECT_STAR_FROM_DSFDFDASF, true);
 
         doThrow(new IOException(STR_MSG_IO_PROBLEM)).when(tapService).runTapQuery(any(String.class),
-                any(OutputFormat.class), any(Writer.class), any(Integer.class), anyMapOf(String.class, String.class),
-                any(ZonedDateTime.class), any(String.class), anyMapOf(String.class, String[].class),
-                anyMapOf(String.class, String.class));
-        assertThat(tapService.processQuery(writer, params), is(false));
+                any(OutputFormat.class), any(Writer.class), any(Integer.class), anyMap(), any(ZonedDateTime.class),
+                any(String.class), eq(null), eq(null));
+        assertFalse(tapService.processQuery(writer, params));
         // no results due to mock JdbcTemplate
         assertThat(writer.toString(), containsString(StringUtils.EMPTY));
         verify(tapService, times(2)).generateSqlForQuery(eq(STR_QUERY_SELECT_STAR_FROM_DSFDFDASF), eq(false),
@@ -477,10 +476,9 @@ public class TapServiceTest
         DataAccessResourceFailureException dataAccessResourceFailureException =
                 new DataAccessResourceFailureException("canceling statement due to user request");
         doThrow(dataAccessResourceFailureException).when(tapService).runTapQuery(any(String.class),
-                any(OutputFormat.class), any(Writer.class), any(Integer.class), anyMapOf(String.class, String.class),
-                any(ZonedDateTime.class), any(String.class), anyMapOf(String.class, String[].class),
-                anyMapOf(String.class, String.class));
-        assertThat(tapService.processQuery(writer, params), is(false));
+                any(OutputFormat.class), any(Writer.class), any(Integer.class), anyMap(), any(ZonedDateTime.class),
+                any(String.class), eq(null), eq(null));
+        assertFalse(tapService.processQuery(writer, params));
         assertThat(writer.toString(), containsString("Could not finish query due to timeout."));
         testAppender.verifyLogMessage(Level.INFO, "Initialised connection");
         testAppender.verifyLogMessage(Level.ERROR, "Could not finish query due to timeout.",
@@ -503,7 +501,7 @@ public class TapServiceTest
                     @Override
                     public Boolean answer(InvocationOnMock invocation) throws Throwable
                     {
-                        ResultSetExtractor<Boolean> extractor = invocation.getArgumentAt(1, ResultSetExtractor.class);
+                        ResultSetExtractor<Boolean> extractor = invocation.getArgument(1, ResultSetExtractor.class);
                         ResultSet emptyResultSet = mock(ResultSet.class);
                         ResultSetMetaData metadata = mock(ResultSetMetaData.class);
                         when(emptyResultSet.getMetaData()).thenReturn(metadata);

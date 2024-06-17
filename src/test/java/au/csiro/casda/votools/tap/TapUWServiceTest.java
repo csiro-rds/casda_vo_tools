@@ -24,16 +24,16 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
@@ -51,9 +51,10 @@ import uws.job.parameters.UWSParameters;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ConfigurationTest.Config.class })
-public class TapUWServiceTest
+public class TapUWServiceTest extends BaseTest
 {
     @Autowired
     private ConfigurationRegistry configRegistry;
@@ -67,12 +68,10 @@ public class TapUWServiceTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
         Mockito.when(tapService.isReady()).thenReturn(true);
-
         Configuration config = ConfigurationTest.getTestConfiguration();
         EndPoint tapEndPoint = config.getEndPoint("TAP");
         tapEndPoint.put("log.timezone", "UTC");

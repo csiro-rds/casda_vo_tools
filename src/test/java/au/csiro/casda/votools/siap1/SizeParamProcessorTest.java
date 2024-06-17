@@ -7,14 +7,14 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /*
  * #%L
@@ -33,37 +33,36 @@ import org.junit.runners.Parameterized.Parameters;
  * <p>
  * Copyright 2022, CSIRO Australia All rights reserved.
  */
-@RunWith(Enclosed.class)
 public class SizeParamProcessorTest
 {
     /**
      * Check the validate method's handling of valid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateValidTest
-    {
-
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+    {   
+        public static Stream<Arguments> queryParams()
         {
-            // Param values (may be multiple)
-            return Arrays.asList(new Object[][] { { "0.01" }, { "1E-2" }, { "0.2E+1" }, { "0.2e1" }, { "0.05" },
-                    { "1" }, { "0" }, { "1.5,1.3" } });
+            return Stream.of(Arguments.arguments((Object) new String[]{ "0.01" }),
+                    Arguments.arguments((Object) new String[]{ "1E-2" }),
+                    Arguments.arguments((Object) new String[]{ "0.2E+1" }),
+                    Arguments.arguments((Object) new String[]{ "0.2e1" }),
+                    Arguments.arguments((Object) new String[]{ "0.05" }),
+                    Arguments.arguments((Object) new String[]{ "1" }),
+                    Arguments.arguments((Object) new String[]{ "0" }),
+                    Arguments.arguments((Object) new String[]{ "1.5,1.3" }));
         }
-
-        private String[] validParamValues;
 
         private SizeParamProcessor processor;
 
-        public ValidateValidTest(String validValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
             processor = new SizeParamProcessor();
-
-            validParamValues = new String[] { (String) validValue };
         }
 
-        @Test
-        public void testValidate()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testValidate(String [] validParamValues)
         {
             assertThat("Expected '" + ArrayUtils.toString(validParamValues) + "' to be valid.",
                     processor.validate("SIZE", validParamValues), is(empty()));
@@ -73,27 +72,39 @@ public class SizeParamProcessorTest
     /**
      * Check the validate method's handling of generically invalid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateGenericInvalidTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            // Param values (may be multiple)
-            return Arrays.asList(new Object[][] { { "a" }, { "300//" }, { "300/n" }, { "/600/" }, { "2." },
-                    { "300,NaN" }, { "NaN,60" }, { "17," }, { "-inf,600" }, { "300,+inf" }, { "inf,600" },
-                    { "300,inf" }, { "2.3-01" }, { "2.3e" }, { "2.3e-" }, { "2.3e 6" }, { "2.3 e-5" },
-                    { "300 600 1300" }, { "300/600" }, { "30/60" }, { "1;ICRS" } });
+            return Stream.of(Arguments.arguments("a"),
+                    Arguments.arguments("300//"),
+                    Arguments.arguments("300/n"),
+                    Arguments.arguments("/600/"),
+                    Arguments.arguments("2."),
+                    Arguments.arguments("300,NaN"),
+                    Arguments.arguments("NaN,60"),
+                    Arguments.arguments("17,"),
+                    Arguments.arguments("-inf,600"),
+                    Arguments.arguments("300,+inf"),
+                    Arguments.arguments("inf,600"),
+                    Arguments.arguments("300,inf"),
+                    Arguments.arguments("2.3-01"),
+                    Arguments.arguments("2.3e"),
+                    Arguments.arguments("2.3e-"),
+                    Arguments.arguments("2.3e 6"),
+                    Arguments.arguments("2.3 e-5"),
+                    Arguments.arguments("300 600 1300"),
+                    Arguments.arguments("300/600"),
+                    Arguments.arguments("30/60"),
+                    Arguments.arguments("1;ICRS"));
         }
-
+       
         private SizeParamProcessor processor;
 
-        private String invalidValue;
-
-        public ValidateGenericInvalidTest(String invalidValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
-            this.invalidValue = invalidValue;
             processor = new SizeParamProcessor();
         }
 
@@ -101,8 +112,9 @@ public class SizeParamProcessorTest
          * Test method for
          * {@link au.csiro.casda.votools.siap2.Siapv2Service#validateDouble(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testValidate()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testValidate(String invalidValue)
         {
             assertEquals("Expected '" + ArrayUtils.toString(invalidValue) + "' to be invalid.",
                     Arrays.asList("UsageFault: Invalid SIZE value " + invalidValue),
@@ -113,32 +125,24 @@ public class SizeParamProcessorTest
     /**
      * Check the validate method's handling of invalid values with specific error messages.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateSpecificInvalidTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            // Pairs of param values (may be multiple) and the expected error message prefix
-            return Arrays.asList(new Object[][] { { "1,2,3", "Only 2 entries allowed in" },
-                    { "1,2,3,4", "Only 2 entries allowed in" }, { "-1", "Value must be between 0 and 2.0 in" },
-                    { "15.001", "Value must be between 0 and 2.0 in" },
-                    { "1.6E1", "Value must be between 0 and 2.0 in" },
-                    { "", "Either one or two numbers must be provided in" } });
-
+            return Stream.of(Arguments.arguments("1,2,3", "Only 2 entries allowed in"),
+                    Arguments.arguments("1,2,3,4", "Only 2 entries allowed in"),
+                    Arguments.arguments("-1", "Value must be between 0 and 2.0 in"),
+                    Arguments.arguments("15.001", "Value must be between 0 and 2.0 in"),
+                    Arguments.arguments("1.6E1", "Value must be between 0 and 2.0 in"),
+                    Arguments.arguments("", "Either one or two numbers must be provided in"));
         }
 
         private SizeParamProcessor processor;
 
-        private String invalidValue;
-
-        private String expectedErrorMessageFragment;
-
-        public ValidateSpecificInvalidTest(String invalidValue, String expectedErrorMessageFragment) throws Exception
+        @BeforeEach
+        public void setup()
         {
-            this.invalidValue = invalidValue;
-            this.expectedErrorMessageFragment = expectedErrorMessageFragment;
             processor = new SizeParamProcessor();
         }
 
@@ -146,8 +150,9 @@ public class SizeParamProcessorTest
          * Test method for
          * {@link au.csiro.casda.votools.siap2.Siapv2Service#validateDouble(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testValidate()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testValidate(String invalidValue, String expectedErrorMessageFragment)
         {
             assertEquals("Expected '" + invalidValue + "' to be invalid.",
                     Arrays.asList("UsageFault: " + expectedErrorMessageFragment + " SIZE value " + invalidValue),
@@ -158,77 +163,55 @@ public class SizeParamProcessorTest
     /**
      * Check the BuildQuery method with a set of values.
      */
-    @RunWith(Parameterized.class)
     public static class BuildQueryTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            // Pairs of param values (may be multiple) and the expected where clause
-            return Arrays.asList(new Object[][] { { "10", "" }, { new String[] { "1.05e+1", "2.1" }, "" } });
+            return Stream.of(Arguments.arguments((Object) new String[]{ "10" }, ""),
+                    Arguments.arguments((Object) new String[]{ "1.05e+1", "2.1" }, ""));
         }
 
-        private String[] paramValues;
-        private String expectedAdql;
         private SizeParamProcessor processor;
 
-        public BuildQueryTest(Object value, String expectedWhereClause)
+        @BeforeEach
+        public void setup()
         {
-            this.expectedAdql = expectedWhereClause;
-            if (value instanceof String[])
-            {
-                paramValues = (String[]) value;
-            }
-            else if (value instanceof String)
-            {
-                paramValues = new String[] { (String) value };
-            }
             processor = new SizeParamProcessor();
         }
 
-        @Test
-        public void testWithDoubleRange()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testWithDoubleRange(String [] value, String expectedAdql)
         {
-            assertEquals("Incorrect result for pos " + ArrayUtils.toString(paramValues), expectedAdql,
-                    processor.buildQuery("minCol", "maxCol", paramValues));
+            assertEquals("Incorrect result for pos " + ArrayUtils.toString(value), expectedAdql,
+                    processor.buildQuery("minCol", "maxCol", value));
         }
     }
 
     /**
      * Check the BuildQuery method with a set of values for a single field parameter.
      */
-    @RunWith(Parameterized.class)
     public static class BuildQuerySingleFieldTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            // Pairs of param values (may be multiple) and the expected where clause
-            return Arrays.asList(new Object[][] { { "10", "" }, { new String[] { "1.05e+1", "2.1" }, "" } });
+            return Stream.of(Arguments.arguments((Object) new String[]{ "10" }, ""),
+                    Arguments.arguments((Object) new String[]{ "1.05e+1", "2.1" }, ""));
         }
 
-        private String[] paramValues;
-        private String expectedAdql;
         private SizeParamProcessor processor;
 
-        public BuildQuerySingleFieldTest(Object value, String expectedWhereClause)
+        @BeforeEach
+        public void setup()
         {
-            this.expectedAdql = expectedWhereClause;
-            if (value instanceof String[])
-            {
-                paramValues = (String[]) value;
-            }
-            else if (value instanceof String)
-            {
-                paramValues = new String[] { (String) value };
-            }
             processor = new SizeParamProcessor();
         }
 
-        @Test
-        public void testWithDoubleRange()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testWithDoubleRange(String [] paramValues, String expectedAdql)
         {
             assertEquals("Incorrect result for size " + ArrayUtils.toString(paramValues), expectedAdql,
                     processor.buildQuery("s_fov", "s_fov", paramValues));
@@ -255,37 +238,32 @@ public class SizeParamProcessorTest
     /**
      * Check the getSizeDegrees method's handling of valid values.
      */
-    @RunWith(Parameterized.class)
     public static class GetSizeDegreesTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            // Param values (may be multiple)
-            return Arrays.asList(
-                    new Object[][] { { "0.01", new double[] { 0.01, 0.01 } }, { "1E-2", new double[] { 0.01, 0.01 } },
-                            { "0.2E+1", new double[] { 2.0, 2.0 } }, { "0.2e1", new double[] { 2.0, 2.0 } },
-                            { "0.05", new double[] { 0.05, 0.05 } }, { "1", new double[] { 1.0, 1.0 } },
-                            { "0", new double[] { 0.2, 0.2 } }, { "1.5,1.3", new double[] { 1.5, 1.3 } } });
+            return Stream.of(Arguments.arguments((Object) new String[]{"0.01"}, new double[] { 0.01, 0.01 }),
+                    Arguments.arguments((Object) new String[]{"1E-2"},  new double[] { 0.01, 0.01 }),
+                    Arguments.arguments((Object) new String[]{"0.2E+1"}, new double[] { 2.0, 2.0 }),
+                    Arguments.arguments((Object) new String[]{"0.2e1"}, new double[] { 2.0, 2.0 }),
+                    Arguments.arguments((Object) new String[]{"0.05"}, new double[] { 0.05, 0.05 }),
+                    Arguments.arguments((Object) new String[]{"1"}, new double[] { 1.0, 1.0 }),
+                    Arguments.arguments((Object) new String[]{"0"}, new double[] { 0.2, 0.2 }),
+                    Arguments.arguments((Object) new String[]{"1.5,1.3"}, new double[] { 1.5, 1.3 }));
         }
-
-        private String[] validParamValues;
-
-        private double[] expectedValue;
 
         private SizeParamProcessor processor;
 
-        public GetSizeDegreesTest(String validValue, double[] expectedValue) throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
-            this.expectedValue = expectedValue;
             processor = new SizeParamProcessor();
-
-            this.validParamValues = new String[] { (String) validValue };
         }
 
-        @Test
-        public void testGetSizeDegrees()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testGetSizeDegrees(String [] validParamValues, double[] expectedValue)
         {
 
             double[] sizeDegrees = processor.getSizeDegrees(validParamValues);
@@ -297,37 +275,35 @@ public class SizeParamProcessorTest
     /**
      * Check the getSizeDegrees method's handling of valid values.
      */
-    @RunWith(Parameterized.class)
     public static class GetSearchRadiusTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            // Param values (may be multiple)
-            return Arrays.asList(new Object[][] { { "0.01", 0.005d }, { "1E-2", 0.005d }, { "0.2E+1", 1.0d },
-                    { "0.2e1", 1.0d }, { "0.05", 0.025d }, { "1", 0.5d }, { "0", 0.1d }, { "1.5,1.3", 0.75d } });
+            return Stream.of(Arguments.arguments((Object) new String[]{"0.01"}, 0.005d),
+                    Arguments.arguments((Object) new String[]{"1E-2"},  0.005d),
+                    Arguments.arguments((Object) new String[]{"0.2E+1"}, 1.0d),
+                    Arguments.arguments((Object) new String[]{"0.2e1"}, 1.0d),
+                    Arguments.arguments((Object) new String[]{"0.05"}, 0.025d),
+                    Arguments.arguments((Object) new String[]{"1"}, 0.5d),
+                    Arguments.arguments((Object) new String[]{"0"}, 0.1d),
+                    Arguments.arguments((Object) new String[]{"1.5,1.3"}, 0.75d));
         }
-
-        private String[] validParamValues;
-
-        private double expectedValue;
-
+        
         private SizeParamProcessor processor;
 
-        public GetSearchRadiusTest(String validValue, double expectedValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
-            this.expectedValue = expectedValue;
             processor = new SizeParamProcessor();
-
-            this.validParamValues = new String[] { (String) validValue };
         }
 
-        @Test
-        public void testGetSizeDegrees()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testGetSizeDegrees(String [] validValue, double expectedValue)
         {
 
-            double radius = processor.getSearchRadius(validParamValues);
+            double radius = processor.getSearchRadius(validValue);
             assertThat("Unexpected radius.", radius, is(closeTo(expectedValue, 1e-5)));
         }
     }

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneOffset;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import au.csiro.casda.votools.result.CsvTsvResultsExtractor.OutputType;

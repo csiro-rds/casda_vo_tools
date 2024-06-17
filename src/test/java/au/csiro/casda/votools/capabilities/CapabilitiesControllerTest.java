@@ -1,20 +1,6 @@
 package au.csiro.casda.votools.capabilities;
 
-/*
- * #%L
- * CSIRO ASKAP Science Data Archive
- * %%
- * Copyright (C) 2015 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230.
- * %%
- * Licensed under the CSIRO Open Source License Agreement (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License in the LICENSE file.
- * #L%
- */
-
-
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,14 +13,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.utils.VoKeys;
 
 /**
@@ -43,7 +29,7 @@ import au.csiro.casda.votools.utils.VoKeys;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-public class CapabilitiesControllerTest
+public class CapabilitiesControllerTest extends BaseTest
 {
 
     @Mock
@@ -60,14 +46,13 @@ public class CapabilitiesControllerTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
         this.mockMvc = MockMvcBuilders.standaloneSetup(capabilitiesController).build();
-
         doReturn(true).when(mockService).isReady();
     }
+
 
     /**
      * Basic test
@@ -80,7 +65,7 @@ public class CapabilitiesControllerTest
     {
         Map<String, String> configParams = new HashMap<>();
         configParams.put("tapURL", "http://nowhere/tap");
-        when(mockService.getTapConfigParams(anyString())).thenReturn(configParams);
+        when(mockService.getTapConfigParams(eq(null))).thenReturn(configParams);
         
         this.mockMvc.perform(get("/tap/capabilities")).andExpect(status().isOk()).andDo(print())
                 .andExpect(forwardedUrl("tap/capabilities.xml"))
@@ -123,7 +108,7 @@ public class CapabilitiesControllerTest
         Map<String, Object> configParams = new HashMap<>();
         configParams.put("scsTestCatalog", "casda.continuum_component");
         configParams.put("scsMaxRadius", "10.2");
-        when(mockService.getScsConfigParams(anyString())).thenReturn(configParams);
+        when(mockService.getScsConfigParams(eq(null))).thenReturn(configParams);
         
         this.mockMvc.perform(get("/scs/capabilities")).andExpect(status().isOk()).andDo(print())
                 .andExpect(forwardedUrl("scs/capabilities.xml"))
@@ -142,7 +127,7 @@ public class CapabilitiesControllerTest
     {
         Map<String, Object> configParams = new HashMap<>();
         configParams.put("siapURL", "http://nowhere/sia1/query?");
-        when(mockService.getSia1ConfigParams(anyString())).thenReturn(configParams);
+        when(mockService.getSia1ConfigParams(eq(null))).thenReturn(configParams);
         
         this.mockMvc.perform(get("/sia1/capabilities")).andExpect(status().isOk()).andDo(print())
                 .andExpect(forwardedUrl("sia1/capabilities.xml"))
@@ -160,7 +145,7 @@ public class CapabilitiesControllerTest
     {
         Map<String, String> configParams = new HashMap<>();
         configParams.put("siapURL", "http://nowhere/sia2/query?");
-        when(mockService.getSia2ConfigParams(anyString())).thenReturn(configParams);
+        when(mockService.getSia2ConfigParams(eq(null))).thenReturn(configParams);
         
         this.mockMvc.perform(get("/sia2/capabilities")).andExpect(status().isOk()).andDo(print())
                 .andExpect(forwardedUrl("sia2/capabilities.xml"))
@@ -175,7 +160,7 @@ public class CapabilitiesControllerTest
     {
         Map<String, String> configParams = new HashMap<>();
         configParams.put("datalinkURL", "http://nowhere/datalink/links");
-        when(mockService.getDatalinkConfigParams(anyString())).thenReturn(configParams);
+        when(mockService.getDatalinkConfigParams(eq(null))).thenReturn(configParams);
         
         this.mockMvc.perform(get("/datalink/capabilities")).andExpect(status().isOk()).andDo(print())
                 .andExpect(forwardedUrl("datalink/capabilities.xml"))
@@ -190,7 +175,7 @@ public class CapabilitiesControllerTest
     {
         Map<String, String> configParams = new HashMap<>();
         configParams.put("ssapURL", "http://nowhere/ssa/query?");
-        when(mockService.getSsaConfigParams(anyString())).thenReturn(configParams);
+        when(mockService.getSsaConfigParams(eq(null))).thenReturn(configParams);
         
         this.mockMvc.perform(get("/ssa/capabilities")).andExpect(status().isOk()).andDo(print())
                 .andExpect(forwardedUrl("ssa/capabilities.xml"))

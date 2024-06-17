@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import com.fasterxml.jackson.core.JsonGenerationException;

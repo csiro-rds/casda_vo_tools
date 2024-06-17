@@ -43,6 +43,12 @@ public enum ConfigKeys
     
     /** Flag that specifies the maximum upload limit for TAP Uploads. */
     TAP_UPLOAD_LIMIT("tap.upload.limit.bytes"),
+    
+    /** The default retention period for TAP asynchronous job results, seconds. */
+    TAP_RETENTION_PERIOD_DEFAULT("tap.retention.period.default"),
+
+    /** The maximum retention period for TAP asynchronous job results, seconds */
+    TAP_RETENTION_PERIOD_HARD("tap.retention.period.hard"),
 
     /** Location of the config file describing the surveys enabled for siA1 access */
     SIA1_SURVEYS_CONFIG_FILE("sia1.surveys.config.file"), 

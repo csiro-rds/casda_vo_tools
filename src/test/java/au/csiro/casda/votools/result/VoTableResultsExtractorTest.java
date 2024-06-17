@@ -6,7 +6,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.io.StringWriter;
 import java.sql.ResultSet;
@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.postgresql.util.PGobject;
 
@@ -146,7 +146,7 @@ public class VoTableResultsExtractorTest
     private Map<String, String[]> metadataMap;
     private DateTimeFormatter format;
 
-    @Before
+    @BeforeEach
     public void setup()
     {
         votableFieldMap = new HashMap<String, String>();

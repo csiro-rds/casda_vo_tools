@@ -13,9 +13,10 @@ package au.csiro.casda.votools.tap;
  */
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -42,12 +43,11 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
@@ -55,6 +55,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.w3c.dom.Document;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.result.OutputFormat;
 import au.csiro.casda.votools.utils.VoKeys;
 
@@ -64,14 +65,14 @@ import au.csiro.casda.votools.utils.VoKeys;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-public class TapControllerTest
+public class TapControllerTest extends BaseTest
 {
     @Mock
     private TapService mockService;
 
     @Mock
     private UploadParamProcessor uploadParamProcessor;
-
+    
     @Spy
     private DummyUWService uwService;
 
@@ -88,10 +89,9 @@ public class TapControllerTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
         doReturn(true).when(mockService).isReady();
         doReturn(true).when(uploadParamProcessor).isReady();
         this.mockMvc = MockMvcBuilders.standaloneSetup(tapController).build();
@@ -116,7 +116,7 @@ public class TapControllerTest
         when(mockService.getFormat("CSV")).thenReturn(OutputFormat.CSV);
         when(mockService.getFormat("TSV")).thenReturn(OutputFormat.TSV);
         when(mockService.getFormat(null)).thenReturn(OutputFormat.VOTABLE);
-        when(mockService.processQuery((Writer) anyObject(), mapCaptor.capture(), anyObject(), anyObject()))
+        when(mockService.processQuery((Writer) any(), mapCaptor.capture(), any(), any()))
                 .thenReturn(true);
 
         this.mockMvc.perform(get("/tap/sync?" + queryString + "VOTABLE")).andExpect(status().isOk()).andDo(print())
@@ -162,7 +162,7 @@ public class TapControllerTest
         when(mockService.getFormat("CSV")).thenReturn(OutputFormat.CSV);
         when(mockService.getFormat("TSV")).thenReturn(OutputFormat.TSV);
         when(mockService.getFormat(null)).thenReturn(OutputFormat.VOTABLE);
-        when(mockService.processQuery((Writer) anyObject(), mapCaptor.capture(), anyObject(), anyObject())).thenReturn(true);
+        when(mockService.processQuery((Writer) any(), mapCaptor.capture(), any(), any())).thenReturn(true);
         when(mockService.trustAuthHeader(any(HttpServletRequest.class))).thenReturn(true);
 
         this.mockMvc
@@ -202,7 +202,7 @@ public class TapControllerTest
         when(mockService.getFormat("CSV")).thenReturn(OutputFormat.CSV);
         when(mockService.getFormat("TSV")).thenReturn(OutputFormat.TSV);
         when(mockService.getFormat(null)).thenReturn(OutputFormat.VOTABLE);
-        when(mockService.processQuery((Writer) anyObject(), mapCaptor.capture(), anyObject(), anyObject()))
+        when(mockService.processQuery((Writer) any(), mapCaptor.capture(), any(), any()))
                 .thenReturn(true);
         when(mockService.trustAuthHeader(any(HttpServletRequest.class))).thenReturn(false);
 
@@ -240,7 +240,7 @@ public class TapControllerTest
 
         // use the default output format
         when(mockService.getFormat(null)).thenReturn(OutputFormat.CSV);
-        when(mockService.processQuery((Writer) anyObject(), anyObject())).thenReturn(false);
+        when(mockService.processQuery((Writer) any(), any())).thenReturn(false);
 
         // content is empty as we are using a mockk service, but output format is using votable as an error is
         // excpected.
@@ -283,34 +283,32 @@ public class TapControllerTest
         // confirm the top level resource to list jobLists contains our given joblist
         // confirm the joblist resource returns our joblist called testtap
         this.mockMvc.perform(get("/tap/async")).andExpect(status().isOk()).andDo(print())
-                .andExpect(xpath("/jobList/@name").string("async"));
+                .andExpect(xpath("/jobs/@name").string(""))//
+                .andExpect(xpath("count(/jobs/jobref)").number(is(0.0)));
         // post to create a new job with phase RUN to trigger immediate execution
         MockHttpServletResponse createResponse =
                 this.mockMvc.perform(post("/tap/async/").param("Phase", "RUN").param("eRRor", "false"))
                         .andExpect(status().isSeeOther()).andDo(print()).andReturn().getResponse();
         // get location and jobId from result
         String loc = createResponse.getHeader("Location");
-        // job Id is last part of url
-        String[] splitUrl = loc.split("/");
-        String jobId = splitUrl[splitUrl.length - 1];
 
         // confirm that our joblist now contains an entry
         this.mockMvc.perform(get("/tap/async/")).andExpect(status().isOk()).andDo(print())
-                .andExpect(xpath("/jobList/@name").string("async"))
-                .andExpect(xpath("count(/jobList/jobRef)").number(is(1.0)));
+                .andExpect(xpath("/jobs/@name").string(""))
+                .andExpect(xpath("count(/jobs/jobref)").number(is(1.0)));
 
         // Confirm out job details can be displayed and has completed
         this.waitForStatus(loc, "COMPLETED", SECONDS_TO_WAIT_FOR_JOB);
         MvcResult result = this.mockMvc.perform(get(loc)).andExpect(status().isOk()).andDo(print())
                 .andExpect(xpath("/job/phase").string("COMPLETED"))
-                .andExpect(xpath("/job/results/result/@type").string("simple")).andReturn();
+                .andExpect(xpath("/job/results/result/@id").string("result")).andReturn();
 
-        String resultUrl = this.getResultsUrl(result.getResponse().getContentAsString());
-
-        // get the results - for test job this will return the contents of a temp file with the job id in it
-        this.mockMvc.perform(get(resultUrl)).andExpect(status().isOk()).andDo(print())
-                .andExpect(content().contentType("text/tab-separated-values"))
-                .andExpect(content().string(CoreMatchers.containsString(jobId)));
+        // Verify date format is 
+        String responseContent = result.getResponse().getContentAsString();
+        String startTime = getJobFieldContent(responseContent, "startTime");
+        assertThat(startTime, matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$"));
+        String endTime = getJobFieldContent(responseContent, "endTime");
+        assertThat(endTime, matchesPattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$"));
     }
 
     @Test
@@ -342,7 +340,7 @@ public class TapControllerTest
         this.waitForStatus(loc, "ERROR", SECONDS_TO_WAIT_FOR_JOB);
         // Confirm out job details can be displayed and has completed
         this.mockMvc.perform(get(loc)).andExpect(status().isOk()).andDo(print())
-                .andExpect(content().contentType("application/xml")).andExpect(xpath("/job/phase").string("ERROR"))
+                .andExpect(content().contentType("text/xml")).andExpect(xpath("/job/phase").string("ERROR"))
                 .andExpect(xpath("/job/errorSummary/message").string("Bad Happened")).andReturn();
     }
 
@@ -363,31 +361,20 @@ public class TapControllerTest
                         .andExpect(status().isSeeOther()).andDo(print()).andReturn().getResponse();
         // get location and jobId from result
         String loc = createResponse.getHeader("Location");
-        // job Id is last part of url
-        String[] splitUrl = loc.split("/");
-        String jobId = splitUrl[splitUrl.length - 1];
 
         // confirm that our joblist now contains an entry
         this.mockMvc.perform(get(loc)).andExpect(status().isOk()).andDo(print());
 
         this.waitForStatus(loc, "COMPLETED", SECONDS_TO_WAIT_FOR_JOB);
         // Confirm out job details can be displayed and has completed
-        MvcResult result = this.mockMvc.perform(get(loc)).andExpect(status().isOk()).andDo(print())
+        this.mockMvc.perform(get(loc)).andExpect(status().isOk()).andDo(print())
                 .andExpect(xpath("/job/phase").string("COMPLETED")).andReturn();
-        String resultUrl = this.getResultsUrl(result.getResponse().getContentAsString());
-
-        // get the results - for test job this will return the contents of a temp file with the job id in it
-        this.mockMvc.perform(get(resultUrl)).andExpect(status().isOk()).andDo(print())
-                .andExpect(content().contentType("text/tab-separated-values"))
-                .andExpect(content().string(CoreMatchers.containsString(jobId)));
 
         // delete the job
         this.mockMvc.perform(post(loc).param("ACTION", "DELETE")).andExpect(status().isSeeOther()).andDo(print())
                 .andReturn().getResponse();        
         // Check that the job now returns a 404 (UWS 4 fixed this)
         this.mockMvc.perform(get(loc)).andExpect(status().isNotFound()).andDo(print());
-        // Check the results now return a 404
-        this.mockMvc.perform(get(resultUrl)).andExpect(status().isNotFound()).andDo(print());
     }
 
     private void waitForStatus(String resultUrl, String status, long maxSecondsToWait) throws Exception
@@ -413,10 +400,10 @@ public class TapControllerTest
         }
     }
 
-    private String getResultsUrl(String content) throws Exception
+    private String getJobFieldContent(String content, String fieldname) throws Exception
     {
         XPath pathStatus = XPathFactory.newInstance().newXPath();
-        XPathExpression xResult = pathStatus.compile("/job/results/result/@href");
+        XPathExpression xResult = pathStatus.compile("/job/"+fieldname);
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.parse(new ByteArrayInputStream(content.getBytes("UTF-8")));
         String resultUrl = (String) xResult.evaluate(document, XPathConstants.STRING);

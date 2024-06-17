@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import au.csiro.casda.votools.tap.TapController.TimedRequest;
 import au.csiro.casda.votools.utils.VoKeys;
 
@@ -23,7 +23,7 @@ import au.csiro.casda.votools.utils.VoKeys;
  */
 
 /**
- * <add description here>
+ * Test for Tap Controller timed requests
  * <p>
  * Copyright 2015, CSIRO Australia. All rights reserved.
  */

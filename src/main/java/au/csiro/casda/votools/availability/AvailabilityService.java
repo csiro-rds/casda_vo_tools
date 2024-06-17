@@ -22,7 +22,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.endpoint.HealthEndpoint;
+import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.stereotype.Service;
 
@@ -90,7 +90,7 @@ public class AvailabilityService
         }
         else
         {
-            Status status = healthEndpoint.invoke().getStatus();
+            Status status = healthEndpoint.health().getStatus();
             if (Status.UP.equals(status))
             {
                 avail.setAvailable(true);

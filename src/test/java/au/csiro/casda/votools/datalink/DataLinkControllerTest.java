@@ -7,13 +7,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import au.csiro.BaseTest;
 
 /*
  * #%L
@@ -34,7 +35,7 @@ import org.springframework.test.web.servlet.MvcResult;
  * Copyright 2018, CSIRO Australia All rights reserved.
  *
  */
-public class DataLinkControllerTest
+public class DataLinkControllerTest extends BaseTest
 {
     @InjectMocks
     DataLinkController dataLinkController;
@@ -50,10 +51,9 @@ public class DataLinkControllerTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
         mockMvc = standaloneSetup(dataLinkController).build();
 
         when(dataLinkService.isReady()).thenReturn(true);

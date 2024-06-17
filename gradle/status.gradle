@@ -27,7 +27,7 @@ ext {
       protocol = "https"
     }
      
-    endpoint = "${protocol}://${remoteHost}${port}/casda_vo_tools/health"
+    endpoint = "${protocol}://${remoteHost}${port}/casda_vo_tools/actuator/health"
 }
 
 task status(type: au.csiro.serverStatus.ServerStatus) {

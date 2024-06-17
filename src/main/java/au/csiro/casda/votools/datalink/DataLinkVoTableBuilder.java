@@ -14,7 +14,7 @@ import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.sun.xml.internal.bind.marshaller.NamespacePrefixMapper;
+import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 import net.ivoa.vo.Data;
 import net.ivoa.vo.DataType;
@@ -467,7 +467,7 @@ public class DataLinkVoTableBuilder
 
         // IE required namespace prefix in xml for XSL transform.
         // append namespace prefix "VOT" into all elements
-        m.setProperty("com.sun.xml.internal.bind.namespacePrefixMapper", new NamespacePrefixMapper()
+        m.setProperty("com.sun.xml.bind.namespacePrefixMapper", new NamespacePrefixMapper()
         {
             @Override
             public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix)
@@ -476,7 +476,7 @@ public class DataLinkVoTableBuilder
             }
         });
 
-        m.setProperty("com.sun.xml.internal.bind.xmlHeaders",
+        m.setProperty("com.sun.xml.bind.xmlHeaders",
                 "<?xml-stylesheet href='" + baseUrl + "votable.xsl' type='text/xsl' ?>\n");
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         m.marshal(votable, xmlStream);
@@ -491,8 +491,8 @@ public class DataLinkVoTableBuilder
         }
     }
 
-    /**
-     * @return
+    /*
+     * Create IVOA Td complex type
      */
     private Td buildTd(String value)
     {

@@ -14,22 +14,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.ModelAndView;
+
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.config.ConfigKeys;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
@@ -51,9 +50,9 @@ import au.csiro.casda.votools.config.ConfigurationTest;
  * Copyright 2017, CSIRO Australia All rights reserved.
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ConfigurationTest.Config.class })
-public class TapExamplesServiceTest
+public class TapExamplesServiceTest extends BaseTest
 {
     @InjectMocks
     private TapExamplesService tapExamplesService;
@@ -63,9 +62,6 @@ public class TapExamplesServiceTest
 
     private TapExamples tapExamples;
     private Configuration config;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private HttpServletResponse mockedResponse;
     private MockHttpServletRequest mockedRequest;
@@ -81,10 +77,9 @@ public class TapExamplesServiceTest
      * @throws ConfigurationException
      *             ConfigurationException
      */
-    @Before
+    @BeforeEach
     public void setup() throws ConfigurationException
     {
-        MockitoAnnotations.initMocks(this);
 
         // setup Configuration
         config = ConfigurationTest.getTestConfiguration();

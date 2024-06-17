@@ -5,7 +5,6 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-
     <!-- Suppressions for unit testing code --> 
     <suppress 
         checks="MagicNumber" 
@@ -13,6 +12,10 @@
     />
     <suppress 
         checks="JavadocVariable" 
+        files="[/\\]src[/\\]test[/\\]java[/\\]" 
+    /> 
+    <suppress 
+        checks="JavadocMethod" 
         files="[/\\]src[/\\]test[/\\]java[/\\]" 
     /> 
     <suppress
@@ -27,10 +30,9 @@
         checks="VisibilityModifierCheck" 
         files="[/\\]src[/\\]test[/\\]java[/\\]" 
     /> 
-        <suppress 
-        checks="JavadocMethod" 
+    <suppress 
+        checks="AvoidStaticImport" 
         files="[/\\]src[/\\]test[/\\]java[/\\]" 
     /> 
-
 </suppressions>
         

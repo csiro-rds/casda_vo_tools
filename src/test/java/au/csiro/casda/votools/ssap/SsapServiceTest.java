@@ -8,8 +8,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -21,19 +22,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.unitils.util.FileUtils;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.config.ConfigKeys;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
@@ -58,14 +56,13 @@ import au.csiro.casda.votools.utils.VoKeys;
  * <p>
  * Copyright 2015, CSIRO Australia All rights reserved.
  */
-@RunWith(Enclosed.class)
 public class SsapServiceTest
 {
 
     /**
      * Check the buildQuery method
      */
-    public static class ValidateBuildQuery
+    public static class ValidateBuildQuery extends BaseTest
     {
 
         @Mock
@@ -79,9 +76,9 @@ public class SsapServiceTest
 
         private SsapService ssapService;
 
-        public ValidateBuildQuery() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             ssapService = prepareSsapService(tapService, configuration, configRegistry);
         }
 
@@ -105,7 +102,7 @@ public class SsapServiceTest
         }
 
         @Test
-        @Ignore(value="Ignored until we implement date SSAP parameters")
+        @Disabled(value="Ignored until we implement date SSAP parameters")
         public void testBuildQueryDate()
         {
             HashMap<String, String[]> paramsMap = new HashMap<String, String[]>();
@@ -116,7 +113,7 @@ public class SsapServiceTest
         }
 
         @Test
-        @Ignore(value="Ignored until we implement text SSAP parameters")
+        @Disabled(value="Ignored until we implement text SSAP parameters")
         public void testBuildQueryText()
         {
             HashMap<String, String[]> paramsMap = new HashMap<String, String[]>();
@@ -165,7 +162,7 @@ public class SsapServiceTest
     /**
      * Check the buildQuery method
      */
-    public static class ValidateBuildSiapQueryText
+    public static class ValidateBuildSiapQueryText extends BaseTest
     {
 
         @Mock
@@ -179,9 +176,9 @@ public class SsapServiceTest
 
         private SsapService ssapService;
 
-        public ValidateBuildSiapQueryText() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             ssapService = prepareSsapService(tapService, configuration, configRegistry);
         }
 
@@ -224,7 +221,7 @@ public class SsapServiceTest
     /**
      * Check the validateSsapJob method
      */
-    public static class ValidateValidateSsapJob
+    public static class ValidateValidateSsapJob extends BaseTest
     {
 
         @Mock
@@ -238,9 +235,9 @@ public class SsapServiceTest
 
         private SsapService ssapService;
 
-        public ValidateValidateSsapJob() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             ssapService = prepareSsapService(tapService, configuration, configRegistry);
         }
 
@@ -432,7 +429,7 @@ public class SsapServiceTest
     /**
      * Check params passed to Tap service for siap 2 job
      */
-    public static class CheckParamsPassedToTapServiceForSsapJob
+    public static class CheckParamsPassedToTapServiceForSsapJob extends BaseTest
     {
 
         private static final int NUM_STANDARD_JOB_PARAMS = 10;
@@ -448,9 +445,9 @@ public class SsapServiceTest
 
         private SsapService ssapService;
 
-        public CheckParamsPassedToTapServiceForSsapJob() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             ssapService = prepareSsapService(tapService, configuration, configRegistry);
         }
 
@@ -523,7 +520,7 @@ public class SsapServiceTest
     /**
      * Check validation errors are correctly handled for SSAP jobs
      */
-    public static class CheckErrorsReportedForSsapJob
+    public static class CheckErrorsReportedForSsapJob extends BaseTest
     {
 
         @Mock
@@ -536,10 +533,10 @@ public class SsapServiceTest
         private TapService tapService;
 
         private SsapService ssapService;
-
-        public CheckErrorsReportedForSsapJob() throws Exception
+        
+        @BeforeEach
+        public void setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             ssapService = prepareSsapService(tapService, configuration, configRegistry);
         }
 
@@ -551,7 +548,7 @@ public class SsapServiceTest
             paramsMap.put("request", new String[] {"invalid"});
             boolean result = ssapService.processQuery(writer, paramsMap);
 
-            verify(tapService, never()).processQuery(anyObject(), anyObject());
+            verify(tapService, never()).processQuery(any(), any());
             
             String errorResult = writer.toString();
             //System.out.println(errorResult);
@@ -567,13 +564,10 @@ public class SsapServiceTest
     /**
      * Check metadata request processing
      */
-    public static class CheckMetadataRequest
+    public static class CheckMetadataRequest extends BaseTest
     {
-        @Rule
-        public ExpectedException thrown = ExpectedException.none();
-
-        @Rule
-        public TemporaryFolder tempFolder = new TemporaryFolder();
+        @TempDir
+        public File tempFolder;
         
         @Mock
         private ConfigurationRegistry configRegistry;
@@ -586,9 +580,9 @@ public class SsapServiceTest
 
         private SsapService ssapService;
 
-        public CheckMetadataRequest() throws Exception
+        @BeforeEach
+        public void setup() throws ConfigurationException
         {
-            MockitoAnnotations.initMocks(this);
             ssapService = prepareSsapService(tapService, configuration, configRegistry);
         }
 
@@ -601,7 +595,7 @@ public class SsapServiceTest
             paramsMap.put("format", new String[] {"metadata"});
             boolean result = ssapService.processQuery(writer, paramsMap);
 
-            verify(tapService, never()).processQuery(anyObject(), anyObject());
+            verify(tapService, never()).processQuery(any(), any());
             
             String metadataResult = writer.toString();
             //System.out.println(metadataResult);
@@ -620,17 +614,18 @@ public class SsapServiceTest
         @Test
         public void testMissingMetadataResponse() throws Exception
         {
-            thrown.expect(FileNotFoundException.class);
+            assertThrows(FileNotFoundException.class, () -> {
+                Mockito.when(configuration.get(ConfigKeys.SSAP_METADATA_RESPONSE.getKey())).thenReturn("foo");
+                ssapService.setConfiguration(configuration);
+                ssapService.isReady();
+                
+                StringWriter writer = new StringWriter();
+                Map<String, String[]> paramsMap = new HashMap<>();
+                paramsMap.put("request", new String[] {"querydata"});
+                paramsMap.put("format", new String[] {"metadata"});
+                ssapService.processQuery(writer, paramsMap);
+            });
             
-            Mockito.when(configuration.get(ConfigKeys.SSAP_METADATA_RESPONSE.getKey())).thenReturn("foo");
-            ssapService.setConfiguration(configuration);
-            ssapService.isReady();
-            
-            StringWriter writer = new StringWriter();
-            Map<String, String[]> paramsMap = new HashMap<>();
-            paramsMap.put("request", new String[] {"querydata"});
-            paramsMap.put("format", new String[] {"metadata"});
-            ssapService.processQuery(writer, paramsMap);
         }
 
         @Test
@@ -638,7 +633,7 @@ public class SsapServiceTest
         {
             String expectedResponse = "<xml>This is a response</xml>";
 
-            File responseFile = tempFolder.newFile("response.xml");
+            File responseFile = new File(tempFolder, "response.xml");
             FileUtils.writeStringToFile(responseFile, expectedResponse);
             
             Mockito.when(configuration.get(ConfigKeys.SSAP_METADATA_RESPONSE.getKey()))
@@ -652,7 +647,7 @@ public class SsapServiceTest
             paramsMap.put("format", new String[] {"metadata"});
             boolean result = ssapService.processQuery(writer, paramsMap);
 
-            verify(tapService, never()).processQuery(anyObject(), anyObject());
+            verify(tapService, never()).processQuery(any(), any());
             
             String metadataResult = writer.toString();
             assertThat(metadataResult, is(expectedResponse));

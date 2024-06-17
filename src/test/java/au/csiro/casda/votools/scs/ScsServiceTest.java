@@ -21,10 +21,10 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -46,17 +46,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
 import org.apache.logging.log4j.Level;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.Log4JTestAppender;
 import au.csiro.casda.logging.CasdaFormatter;
 import au.csiro.casda.votools.TestUtils;
@@ -80,9 +80,10 @@ import au.csiro.casda.votools.utils.VoKeys;
  * Copyright 2014, CSIRO Australia All rights reserved.
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ConfigurationTest.Config.class })
-public class ScsServiceTest
+public class ScsServiceTest extends BaseTest
 {
     // use a non-standard IP addresses because of checkstyle, but doesn't matter for our purposes because
     // we are only using it in a string comparison
@@ -114,12 +115,11 @@ public class ScsServiceTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
         testAppender = Log4JTestAppender.createAppender();
 
-        MockitoAnnotations.initMocks(this);
         when(voTableRepositoryService.isReady()).thenReturn(true);
 
         tapSchema = new TapSchema();

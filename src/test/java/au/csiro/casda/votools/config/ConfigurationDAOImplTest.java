@@ -3,23 +3,22 @@ package au.csiro.casda.votools.config;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+
+import au.csiro.BaseTest;
 
 /*
  * #%L
@@ -38,40 +37,40 @@ import org.springframework.jdbc.core.RowMapper;
  * <p>
  * Copyright 2016, CSIRO Australia. All rights reserved.
  */
-@RunWith(Enclosed.class)
 public class ConfigurationDAOImplTest
 {
 
     /**
      * Verify the convertToTapType method.
      */
-    @RunWith(Parameterized.class)
     public static class ConvertToTapTypeTest
     {
 
         private ConfigurationDAOImpl daoImpl;
-        private String dbType;
-        private String tapType;
 
-        @Parameters(name="{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> types()
         {
-            // Pairs of dbtype and taptype
-            return Arrays.asList(new Object[][] { { "double precision", "DOUBLE" },
-                    { "character varying(64)", "VARCHAR" }, { "character(10)", "CHAR" }, { "text", "VARCHAR" },
-                    { "integer", "INTEGER" }, { "bigint", "BIGINT" }, { "spoly", "REGION" }, { "geometry", "REGION" },
-                    {"timestamp with time zone", "TIMESTAMP"}, {"TIMESTAMP WITHOUT TIME ZONE", "TIMESTAMP"}});
+            return Stream.of(Arguments.arguments("double precision", "DOUBLE"),
+                    Arguments.arguments("character varying(64)", "VARCHAR"),
+                    Arguments.arguments("character(10)", "CHAR"),
+                    Arguments.arguments("text", "VARCHAR"),
+                    Arguments.arguments("integer", "INTEGER"),
+                    Arguments.arguments("bigint", "BIGINT"),
+                    Arguments.arguments("spoly", "REGION"),
+                    Arguments.arguments("geometry", "REGION"),
+                    Arguments.arguments("timestamp with time zone", "TIMESTAMP"),
+                    Arguments.arguments("TIMESTAMP WITHOUT TIME ZONE", "TIMESTAMP"));
         }
 
-        public ConvertToTapTypeTest(String dbType, String tapType) throws Exception
+        @BeforeEach
+        public void setup()
         {
-            this.dbType = dbType;
-            this.tapType = tapType;
             daoImpl = new ConfigurationDAOImpl();
         }
 
-        @Test
-        public void testValidate()
+        @ParameterizedTest
+        @MethodSource("types")
+        public void testValidate(String dbType, String tapType)
         {
             assertThat("Incorrect type returned", daoImpl.convertToTapType(dbType), is(tapType));
         }
@@ -81,7 +80,7 @@ public class ConfigurationDAOImplTest
      * 
      * Verify the configuration methods
      */
-    public static class ConfigTest
+    public static class ConfigTest extends BaseTest
     {
         private ConfigurationDAOImpl configDaoImpl;
         
@@ -91,10 +90,9 @@ public class ConfigurationDAOImplTest
         @Mock
         private JdbcTemplate template;
 
-        @Before
+        @BeforeEach
         public void setup()
         {
-            MockitoAnnotations.initMocks(this);
             configDaoImpl = new ConfigurationDAOImpl(template);
         }
         

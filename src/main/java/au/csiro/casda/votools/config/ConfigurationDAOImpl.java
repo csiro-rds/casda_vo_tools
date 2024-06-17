@@ -466,7 +466,8 @@ public class ConfigurationDAOImpl implements ConfigurationDAO
         catch (Exception e)
         {
             String msg = e.getMessage();
-            if (msg.contains("ERROR") && msg.contains("does not exist"))
+            if (msg.contains("ERROR") && (msg.contains("does not exist")
+                    || msg.contains("cross-database references are not implemented")))
             {
                 return TABLE_DOES_NOT_EXIST;
             }

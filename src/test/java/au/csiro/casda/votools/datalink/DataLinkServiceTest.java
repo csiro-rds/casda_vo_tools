@@ -2,10 +2,10 @@ package au.csiro.casda.votools.datalink;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -16,26 +16,30 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
-import org.custommonkey.xmlunit.DetailedDiff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.xml.sax.SAXException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.Difference;
 
+import com.google.common.collect.Iterators;
+
+import au.csiro.BaseTest;
 import au.csiro.casda.Log4JTestAppender;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
@@ -61,9 +65,9 @@ import au.csiro.casda.votools.jpa.repository.VoTableRepositoryService;
  * Copyright 2015, CSIRO Australia All rights reserved.
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ConfigurationTest.Config.class })
-public class DataLinkServiceTest
+public class DataLinkServiceTest extends BaseTest
 {
     @Autowired
     private ConfigurationRegistry configRegistry;
@@ -91,11 +95,10 @@ public class DataLinkServiceTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
         testAppender = Log4JTestAppender.createAppender();
-        MockitoAnnotations.initMocks(this);
         Configuration config = ConfigurationTest.getTestConfiguration();
         configRegistry.switchConfiguration(config, false);
         dataLinkService = new DataLinkService(configRegistry, voTableRepositoryService);
@@ -368,14 +371,15 @@ public class DataLinkServiceTest
 
     private void checkXmlAgainstTestCaseFile(String testCase, String xml) throws SAXException, IOException
     {
-        XMLUnit.setIgnoreWhitespace(true);
-        XMLUnit.setIgnoreAttributeOrder(true);
+        String testXml = FileUtils.readFileToString(new File("src/test/resources/datalink/" + testCase + ".xml"));
+        Diff diff = DiffBuilder.compare(xml).withTest(testXml)
+                .ignoreWhitespace()
+                .withNodeFilter(n -> n.getNodeName().equals("?xml-stylesheet"))
+                .build();
+        
+        Iterator<Difference> allDifferences = diff.getDifferences().iterator();
 
-        DetailedDiff diff = new DetailedDiff(XMLUnit.compareXML(
-                FileUtils.readFileToString(new File("src/test/resources/datalink/" + testCase + ".xml")), xml));
-
-        List<?> allDifferences = diff.getAllDifferences();
-        assertEquals("Differences found: " + diff.toString(), 0, allDifferences.size());
+        assertEquals(0, Iterators.size(allDifferences), "Differences found: " + diff.toString());
     }
     
     @Test

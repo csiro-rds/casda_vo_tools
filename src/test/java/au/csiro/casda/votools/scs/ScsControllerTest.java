@@ -14,7 +14,7 @@ package au.csiro.casda.votools.scs;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,15 +29,15 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.utils.VoKeys;
 
 /**
@@ -46,7 +46,7 @@ import au.csiro.casda.votools.utils.VoKeys;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-public class ScsControllerTest
+public class ScsControllerTest extends BaseTest
 {
     @Mock
     private ScsService mockService;
@@ -62,10 +62,9 @@ public class ScsControllerTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
         doReturn(true).when(mockService).isReady();
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }

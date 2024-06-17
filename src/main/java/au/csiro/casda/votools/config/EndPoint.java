@@ -120,8 +120,6 @@ public class EndPoint extends Options
         tap.putDefault("tap.language.description", registry.getTapLanguageDescription());
         tap.putDefault("tap.output.format.mime", registry.getTapOutputFormatMime());
         tap.putDefault("tap.output.format.alias", registry.getTapOutputFormatAlias());
-        tap.putDefault("tap.retention.period.default", String.valueOf(registry.getTapRetentionPeriodDefault()));
-        tap.putDefault("tap.retention.period.hard", String.valueOf(registry.getTapRetentionPeriodHard()));
         tap.putDefault("tap.execution.duration.default", String.valueOf(registry.getTapExecutionDurationDefault()));
         tap.putDefault("tap.execution.duration.hard", String.valueOf(registry.getTapExecutionDurationHard()));
         tap.putDefault("tap.sync.timeout", String.valueOf(registry.getTapSyncTimeout()));

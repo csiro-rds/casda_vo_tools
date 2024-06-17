@@ -13,7 +13,7 @@
       doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/>
 
 	<!-- release date column position -->
-	<xsl:variable name="rDatePosition" select="34" />
+	<xsl:variable name="rDatePosition" select="40" />
 
     <!-- Hide everything by default. --> 
     <xsl:template match="text()"/>
@@ -50,7 +50,7 @@
                      </xsl:otherwise>
                  </xsl:choose>
              </xsl:attribute>
-             <xsl:apply-templates select="vot:TD[position()&lt;12]"/>
+             <xsl:apply-templates select="vot:TD[position()&lt;13]"/>
              <!-- release date column value -->
              <xsl:apply-templates select="vot:TD[position() = $rDatePosition]"/>
     	</tr>
@@ -101,7 +101,7 @@
 				</xsl:for-each>
 			</colgroup>        
             <tr class="tableHeader">
-                <xsl:apply-templates select="vot:RESOURCE/vot:TABLE/vot:FIELD[position()&lt;12]"/>
+                <xsl:apply-templates select="vot:RESOURCE/vot:TABLE/vot:FIELD[position()&lt;13]"/>
                 <!-- release date column header -->
                 <xsl:apply-templates select="vot:RESOURCE/vot:TABLE/vot:FIELD[position() = $rDatePosition]"/>
             </tr>

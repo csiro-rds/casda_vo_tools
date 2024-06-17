@@ -5,9 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /*
  * #%L
@@ -32,7 +32,7 @@ public class OptionsTest
 
     Options options, options2;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
         options = new Options();

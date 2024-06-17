@@ -128,9 +128,8 @@ public class DateParamProcessor implements SiapParamProcessor
         return fieldSelect.toString();
     }
 
-    /**
-     * 
-     * @return the date(s) in MJD format as a string array
+    /*
+     * return the date(s) in MJD format as a string array
      */
     private String[] splitDates(String criterion)
     {

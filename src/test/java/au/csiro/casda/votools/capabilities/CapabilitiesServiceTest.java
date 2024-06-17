@@ -13,9 +13,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +24,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import au.csiro.casda.votools.TestUtils;
 import au.csiro.casda.votools.VoToolsApplication;
@@ -49,7 +49,8 @@ import au.csiro.casda.votools.tap.TapService;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { CapabilitiesServiceTest.Config.class })
 public class CapabilitiesServiceTest
 {
@@ -66,7 +67,7 @@ public class CapabilitiesServiceTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
         Configuration config = ConfigurationTest.getTestConfiguration();

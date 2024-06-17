@@ -15,7 +15,7 @@ package au.csiro.casda.votools.tap;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -26,13 +26,13 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.TestUtils;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationDAO;
@@ -48,7 +48,7 @@ import au.csiro.casda.votools.jpa.repository.VoTableRepositoryService;
  * <p>
  * Copyright 2015, CSIRO Australia. All rights reserved.
  */
-public class TapServiceGenerateSqlQueryTest
+public class TapServiceGenerateSqlQueryTest extends BaseTest
 {
     @Mock
     private ConfigurationRegistry configRegistry;
@@ -67,11 +67,9 @@ public class TapServiceGenerateSqlQueryTest
     /* Todays date */ 
     DateTime date = new DateTime(DateTimeZone.UTC);
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
-
         List<TapTable> tableList = new ArrayList<>();
 
         // sample table that doesn't require released_date to be populated to expose data
@@ -163,9 +161,7 @@ public class TapServiceGenerateSqlQueryTest
     }
     
     private void setup2() throws ConfigurationException
-    {
-        MockitoAnnotations.initMocks(this);
-        
+    {   
         tapService = null;
         configRegistry = Mockito.mock(ConfigurationRegistry.class);
         voTableRepositoryService = Mockito.mock(VoTableRepositoryService.class);
