@@ -7,57 +7,56 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 /**
  * Tests for the SurveyParamProcessor class.
  * <p>
  * Copyright 2022, CSIRO Australia. All rights reserved.
  */
-@RunWith(Enclosed.class)
 public class SurveyParamProcessorTest
 {
 
     /**
      * Check the validate method's handling of valid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateValidTest
     {
-
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        
+        public static Stream<Arguments> queryParams()
         {
-            // Param values (may be multiple)
-            return Arrays.asList(new Object[][] { { "RACS-Low" }, { "racs-low" }, { "RACS-LOW" }, { "survey2" },
-                    { "sUrVeY2" }, { "SURVEY2" }, { "VAST Epoch 1" }, { "VAST EPOCH 1" } });
+            return Stream.of(Arguments.arguments((Object) new String[]{"RACS-Low"}),
+                    Arguments.arguments((Object) new String[]{"racs-low"}),
+                    Arguments.arguments((Object) new String[]{"RACS-LOW"}),
+                    Arguments.arguments((Object) new String[]{"survey2"}),
+                    Arguments.arguments((Object) new String[]{"sUrVeY2"}),
+                    Arguments.arguments((Object) new String[]{"SURVEY2"}),
+                    Arguments.arguments((Object) new String[]{"VAST Epoch 1"}),
+                    Arguments.arguments((Object) new String[]{"VAST EPOCH 1"}));
         }
-
-        private String[] validParamValues;
-
+        
         private SurveyParamProcessor processor;
 
-        public ValidateValidTest(Object validValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
             processor = new SurveyParamProcessor();
             processor.setSurveys(Arrays.asList("RACS-Low", "Survey2", "VAST Epoch 1"));
-
-            validParamValues = new String[] { (String) validValue };
         }
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.FormatParamProcessor#validate(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testValidate()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testValidate(String [] validParamValues)
         {
             assertThat("Expected '" + ArrayUtils.toString(validParamValues) + "' to be valid.",
                     processor.validate("SURVEY", validParamValues), is(empty()));
@@ -67,30 +66,29 @@ public class SurveyParamProcessorTest
     /**
      * Check the validate method's handling of invalid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateInvalidTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> invalidParams()
         {
-            return Arrays.asList(new Object[][] { { "unexpected" }, { "unknown" }, { "RACS-Low,Survey2" }, { "" } });
+            return Stream.of(Arguments.arguments((Object) new String[]{"unexpected"}),
+                    Arguments.arguments((Object) new String[]{"unknown"}),
+                    Arguments.arguments((Object) new String[]{"RACS-Low,Survey2"}),
+                    Arguments.arguments((Object) new String[]{""}));
         }
-
-        private String[] invalidParamValues;
 
         private SurveyParamProcessor processor;
 
-        public ValidateInvalidTest(Object invalidValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
             processor = new SurveyParamProcessor();
             processor.setSurveys(Arrays.asList("RACS-Low", "Survey2", "VAST Epoch 1"));
-
-            invalidParamValues = new String[] { (String) invalidValue };
         }
 
-        @Test
-        public void testInValidate()
+        @ParameterizedTest
+        @MethodSource("invalidParams")
+        public void testInValidate(String [] invalidParamValues)
         {
             assertThat(processor.validate("SURVEY", invalidParamValues),
                     contains("UsageFault: SURVEY " + invalidParamValues[0] + " is not supported"));
@@ -124,26 +122,26 @@ public class SurveyParamProcessorTest
     /**
      * Check the BuildQuery method with valid values.
      */
-    @RunWith(Parameterized.class)
     public static class BuildQueryTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            return Arrays.asList(
-                    new Object[][] { { "RACS-Low", "" }, { "racs-low", "" }, { "RACS-LOW", "" }, { "survey2", "" },
-                            { "sUrVeY2", "" }, { "SURVEY2", "" }, { "VAST Epoch 1", "" }, { "VAST EPOCH 1", "" } });
+            return Stream.of(Arguments.arguments((Object) new String[]{"RACS-Low"}, ""),
+                    Arguments.arguments((Object) new String[]{"racs-low"}, ""),
+                    Arguments.arguments((Object) new String[]{"RACS-LOW"}, ""),
+                    Arguments.arguments((Object) new String[]{"survey2"}, ""),
+                    Arguments.arguments((Object) new String[]{"sUrVeY2"}, ""),
+                    Arguments.arguments((Object) new String[]{"SURVEY2"}, ""),
+                    Arguments.arguments((Object) new String[]{"VAST Epoch 1"}, ""),
+                    Arguments.arguments((Object) new String[]{"VAST EPOCH 1"}, ""));
         }
 
-        private String[] paramValues;
         private SurveyParamProcessor processor;
-        private String result;
 
-        public BuildQueryTest(Object value, String result)
+        @BeforeEach
+        public void setup()
         {
-            this.result = result;
-            paramValues = new String[] { (String) value };
             processor = new SurveyParamProcessor();
         }
 
@@ -151,11 +149,12 @@ public class SurveyParamProcessorTest
          * Test method for
          * {@link au.csiro.casda.votools.siap2.FormatParamProcessor#buildQuery(java.lang.String)}.
          */
-        @Test
-        public void testWithValidParams()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testWithValidParams(String [] params, String result)
         {
-            assertEquals("Incorrect value for " + ArrayUtils.toString(paramValues), result,
-                    processor.buildQuery(null, null, paramValues));
+            assertEquals("Incorrect value for " + ArrayUtils.toString(params), result,
+                    processor.buildQuery(null, null, params));
         }
     }
 

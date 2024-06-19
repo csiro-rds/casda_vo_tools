@@ -196,8 +196,8 @@ public class VoTableResultsExtractor extends ResultsExtractor implements ResultS
      *            The ResultSet to extract data from
      * @param columnCount
      *            The number of columns in the result.
-     * @param dateColList
-     *            A list of the indexes of columns identified to contain date information
+     * @param dataTypes
+     *            A list of the data types for each column
      * @return The text of the row to be output.
      * @throws SQLException
      *             If the data cannot be read

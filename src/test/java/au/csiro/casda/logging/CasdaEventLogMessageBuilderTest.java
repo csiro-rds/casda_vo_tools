@@ -16,7 +16,7 @@ package au.csiro.casda.logging;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.MissingFormatArgumentException;
 import java.util.TimeZone;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * 
@@ -79,21 +79,23 @@ public class CasdaEventLogMessageBuilderTest
     /**
      * Test building a message with a missing argument. This should throw an exception.
      */
-    @Test(expected = MissingFormatArgumentException.class)
+    @Test
     public void testMissingArgument()
     {
-        new CasdaEventLogMessageBuilder(CasdaTestEvent.TEST).toString();
-        fail("Message building should throw an exception if no argument is provided");
+        assertThrows(MissingFormatArgumentException.class, () -> {
+            new CasdaEventLogMessageBuilder(CasdaTestEvent.TEST).toString();
+        });
     }
 
     /**
      * Test building a message with an argument of the incorrect type. This should throw an exception.
      */
-    @Test(expected = IllegalFormatConversionException.class)
+    @Test
     public void testWrongArgumentType()
     {
-        new CasdaEventLogMessageBuilder(CasdaTestEvent.TEST).add("wrong argument type").toString();
-        fail("Message building should throw an exception if the wrong type of argument is provided");
+        assertThrows(IllegalFormatConversionException.class, () -> {
+            new CasdaEventLogMessageBuilder(CasdaTestEvent.TEST).add("wrong argument type").toString();
+        });
     }
 
     /**

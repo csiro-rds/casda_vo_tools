@@ -82,12 +82,6 @@ public class ConfigurationRegistry
     @Value("${tap.outputFormat.alias}")
     private String tapOutputFormatAlias;
 
-    @Value("${tap.retentionPeriod.default}")
-    private int tapRetentionPeriodDefault;
-
-    @Value("${tap.retentionPeriod.hard}")
-    private int tapRetentionPeriodHard;
-
     @Value("${tap.executionDuration.default}")
     private int tapExecutionDurationDefault;
 
@@ -538,26 +532,6 @@ public class ConfigurationRegistry
     public void setTapOutputFormatAlias(String tapOutputFormatAlias)
     {
         this.tapOutputFormatAlias = tapOutputFormatAlias;
-    }
-
-    public int getTapRetentionPeriodDefault()
-    {
-        return tapRetentionPeriodDefault;
-    }
-
-    public void setTapRetentionPeriodDefault(int tapRetentionPeriodDefault)
-    {
-        this.tapRetentionPeriodDefault = tapRetentionPeriodDefault;
-    }
-
-    public int getTapRetentionPeriodHard()
-    {
-        return tapRetentionPeriodHard;
-    }
-
-    public void setTapRetentionPeriodHard(int tapRetentionPeriodHard)
-    {
-        this.tapRetentionPeriodHard = tapRetentionPeriodHard;
     }
 
     public int getTapExecutionDurationDefault()

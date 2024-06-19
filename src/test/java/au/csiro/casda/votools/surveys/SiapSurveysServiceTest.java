@@ -13,17 +13,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.config.ConfigKeys;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
@@ -45,9 +43,10 @@ import au.csiro.casda.votools.config.ConfigurationTest;
  * Copyright 2022, CSIRO Australia All rights reserved.
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ConfigurationTest.Config.class })
-public class SiapSurveysServiceTest
+public class SiapSurveysServiceTest extends BaseTest
 {
     @InjectMocks
     private SiapSurveysService siapSurveysService;
@@ -57,20 +56,15 @@ public class SiapSurveysServiceTest
 
     private Configuration config;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     /**
      * Setup
      * 
      * @throws ConfigurationException
      *             ConfigurationException
      */
-    @Before
+    @BeforeEach
     public void setup() throws ConfigurationException
     {
-        MockitoAnnotations.initMocks(this);
-
         // setup Configuration
         config = ConfigurationTest.getTestConfiguration();
         configRegistry.switchConfiguration(config, false);

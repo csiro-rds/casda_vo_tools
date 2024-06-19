@@ -19,15 +19,14 @@ import static org.hamcrest.Matchers.contains;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.actuate.endpoint.HealthEndpoint;
+import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.health.Health;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.VoServiceType;
 import au.csiro.casda.votools.jaxb.availability.Availability;
 
@@ -37,7 +36,7 @@ import au.csiro.casda.votools.jaxb.availability.Availability;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-public class AvailabilityServiceTest
+public class AvailabilityServiceTest extends BaseTest
 {
 
     @Mock
@@ -49,25 +48,13 @@ public class AvailabilityServiceTest
     @InjectMocks
     private AvailabilityService availabilityService;
 
-    /**
-     * Set up the ui controller before each test.
-     * 
-     * @throws Exception
-     *             any exception thrown during set up
-     */
-    @Before
-    public void setUp() throws Exception
-    {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
     public void testGetAvailableUp()
     {
         ZonedDateTime cal = ZonedDateTime.now(ZoneId.of("UTC"));
         Mockito.when(mockSystemStatus.getUpSince()).thenReturn(cal);
         Health health = Health.up().build();
-        Mockito.when(mockHealthEndpoint.invoke()).thenReturn(health);
+        Mockito.when(mockHealthEndpoint.health()).thenReturn(health);
 
         Availability availability = availabilityService.getAvailability(VoServiceType.tap);
         assertThat(availability.isAvailable(), is(true));
@@ -80,7 +67,7 @@ public class AvailabilityServiceTest
         ZonedDateTime cal = ZonedDateTime.now(ZoneId.of("UTC"));
         Mockito.when(mockSystemStatus.getUpSince()).thenReturn(cal);
         Health health = Health.down().build();
-        Mockito.when(mockHealthEndpoint.invoke()).thenReturn(health);
+        Mockito.when(mockHealthEndpoint.health()).thenReturn(health);
 
         Availability availability = availabilityService.getAvailability(VoServiceType.tap);
         assertThat(availability.isAvailable(), is(false));

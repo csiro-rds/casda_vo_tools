@@ -11,8 +11,8 @@ import java.sql.Date;
 import java.sql.ResultSet;
 
 import org.joda.time.DateTime;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import au.csiro.casda.votools.config.TapObjectCache.SchemaMapper;
 import au.csiro.casda.votools.config.TapObjectCache.TableMapper;
@@ -30,7 +30,7 @@ public class TapObjectCacheTest
     private TapObjectCache tapObjectCache;
     private DateTime futureDate = DateTime.now().plusHours(1);
     
-    @Before
+    @BeforeEach
     public void setup() throws Exception
     {
         tapObjectCache = new TapObjectCache();

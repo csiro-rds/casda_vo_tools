@@ -6,14 +6,13 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /*
  * #%L
@@ -32,47 +31,35 @@ import org.junit.runners.Parameterized.Parameters;
  * <p>
  * Copyright 2015, CSIRO Australia All rights reserved.
  */
-@RunWith(Enclosed.class)
 public class TextParamProcessorTest
 {
     /**
      * Check the validate method's handling of valid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateTextValidTest
     {
-        // atm only the DPType values are validated
-        @Parameters
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            return Arrays.asList(new Object[][] { { "image" }, { "cube" } });
+            // atm only the DPType values are validated
+            return Stream.of(Arguments.arguments((Object) new String[]{"image"}),
+                    Arguments.arguments((Object) new String[]{"cube"}));
         }
-
-        private String[] validParamValues;
 
         private TextParamProcessor processor;
 
-        public ValidateTextValidTest(Object validValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
             processor = new TextParamProcessor();
-
-            if (validValue instanceof String[])
-            {
-                validParamValues = (String[]) validValue;
-            }
-            else if (validValue instanceof String)
-            {
-                validParamValues = new String[] { (String) validValue };
-            }
         }
-
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.TextParamProcessor#validate(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testValidateText()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testValidateText(String[] validParamValues)
         {
             assertThat("Expected '" + ArrayUtils.toString(validParamValues) + "' to be valid.",
                     processor.validate("DPTYPE", validParamValues), is(empty()));
@@ -82,33 +69,30 @@ public class TextParamProcessorTest
     /**
      * Check the validate method's handling of invalid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateTextInvalidTest
     {
-
-        @Parameters
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            return Arrays.asList(new Object[][] { { "image-1" }, { "cutout" } });
+            // atm only the DPType values are validated
+            return Stream.of(Arguments.arguments("image-1"),
+                    Arguments.arguments("cutout"));
         }
 
         private TextParamProcessor processor;
 
-        private String invalidValue;
-
-        public ValidateTextInvalidTest(String invalidValue) throws Exception
+        @BeforeEach
+        public void setup()
         {
-            this.invalidValue = invalidValue;
             processor = new TextParamProcessor();
         }
-
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.TextParamProcessor#validate(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testValidate()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testValidate(String invalidValue)
         {
             assertEquals("Expected '" + ArrayUtils.toString(invalidValue) + "' to be invalid.",
                     Arrays.asList("UsageFault: The value '" + invalidValue + "' is not valid for the DPTYPE. The value "
@@ -120,33 +104,21 @@ public class TextParamProcessorTest
     /**
      * Check the BuildQuery method with valid values.
      */
-    @RunWith(Parameterized.class)
     public static class BuildQueryTest
     {
-
-        @Parameters
-        public static Collection<Object[]> data()
+        
+        public static Stream<Arguments> queryParams()
         {
-            return Arrays.asList(new Object[][] {
-                    { "cube", "(lower(DPTYPE) = 'cube')" },
-                    { "image", "(lower(DPTYPE) = 'image')" } });
+            // atm only the DPType values are validated
+            return Stream.of(Arguments.arguments((Object) new String[]{"cube"}, "(lower(DPTYPE) = 'cube')"),
+                    Arguments.arguments((Object) new String[]{"image"}, "(lower(DPTYPE) = 'image')"));
         }
 
-        private String[] paramValues;
         private TextParamProcessor processor;
-        private String result;
 
-        public BuildQueryTest(Object value, String result)
+        @BeforeEach
+        public void setup()
         {
-            this.result = result;
-            if (value instanceof String[])
-            {
-                paramValues = (String[]) value;
-            }
-            else if (value instanceof String)
-            {
-                paramValues = new String[] { (String) value };
-            }
             processor = new TextParamProcessor();
         }
 
@@ -154,8 +126,9 @@ public class TextParamProcessorTest
          * Test method for
          * {@link au.csiro.casda.votools.siap2.TextParamProcessor#buildQuery(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testWithValidParams()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testWithValidParams(String[] paramValues, String result)
         {
             assertEquals("Incorrect value for " + ArrayUtils.toString(paramValues), result,
                     processor.buildQuery("DPTYPE", "maxCol", paramValues));

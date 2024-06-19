@@ -1,16 +1,20 @@
 package au.csiro.casda.votools.datalink;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.custommonkey.xmlunit.DetailedDiff;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.Difference;
+
+import com.google.common.collect.Iterators;
 
 /*
  * #%L
@@ -79,16 +83,15 @@ public class DataLinkVoTableBuilderTest
                 "myAuthenticatedIdToken");
         checkXmlAgainstTestCaseFile("builder.result.service_def", builder.getXml());
     }
-    
-	@Test
-	public void testWithInternalServiceDefResult() throws Exception 
-	{
-		DataLinkVoTableBuilder builder = new DataLinkVoTableBuilder(APP_BASE_URL);
-		builder.withResultsTable().withServiceDefResult("cube-909", "pawsey_async_service", "Data Access Portal", null,
-				1024L, "myAuthenticatedIdToken");
-		checkXmlAgainstTestCaseFile("builder.result.internal.service_def", builder.getXml());
-	}
-    
+
+    @Test
+    public void testWithInternalServiceDefResult() throws Exception
+    {
+        DataLinkVoTableBuilder builder = new DataLinkVoTableBuilder(APP_BASE_URL);
+        builder.withResultsTable().withServiceDefResult("cube-909", "pawsey_async_service", "Data Access Portal", null,
+                1024L, "myAuthenticatedIdToken");
+        checkXmlAgainstTestCaseFile("builder.result.internal.service_def", builder.getXml());
+    }
 
     @Test
     public void testWithAccessUrlResult() throws Exception
@@ -111,13 +114,11 @@ public class DataLinkVoTableBuilderTest
 
     private void checkXmlAgainstTestCaseFile(String testCase, String xml) throws SAXException, IOException
     {
-        XMLUnit.setIgnoreWhitespace(true);
-        XMLUnit.setIgnoreAttributeOrder(true);
+        String testXml = FileUtils.readFileToString(new File("src/test/resources/datalink/" + testCase + ".xml"));
+        Diff diff = DiffBuilder.compare(xml.toString()).withTest(testXml.toString()).ignoreWhitespace().build();
 
-        DetailedDiff diff = new DetailedDiff(XMLUnit.compareXML(
-                FileUtils.readFileToString(new File("src/test/resources/datalink/" + testCase + ".xml")), xml));
+        Iterator<Difference> allDifferences = diff.getDifferences().iterator();
 
-        List<?> allDifferences = diff.getAllDifferences();
-        Assert.assertEquals("Differences found: " + diff.toString(), 0, allDifferences.size());
+        assertEquals(0, Iterators.size(allDifferences), "Differences found: " + diff.toString());
     }
 }

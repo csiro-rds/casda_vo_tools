@@ -17,7 +17,7 @@ tasks.withType(Pmd) {
 }
 
 checkstyle {
-    toolVersion = "5.9"
+    toolVersion = "9.3"
     ignoreFailures = true
     configProperties.putAt("projectDir", projectDir)
 }

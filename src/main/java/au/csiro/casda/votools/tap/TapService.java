@@ -301,7 +301,7 @@ public class TapService extends Configurable implements SystemTime
             maxRecords = tapEndPoint.getInt("tap.max.records");
             logTimezone = tapEndPoint.get("log.timezone");
             executionDurationDefault = tapEndPoint.getInt("tap.execution.duration.default");
-            retentionPeriodDefault = tapEndPoint.getInt("tap.retention.period.default");
+            retentionPeriodDefault = tapEndPoint.getInt(ConfigKeys.TAP_RETENTION_PERIOD_DEFAULT.getKey());
             votableXsl = tapEndPoint.get(ConfigKeys.TAP_VOTABLE_XSL.getKey());
             ready = true;
             createDbChecker();
@@ -1368,5 +1368,13 @@ public class TapService extends Configurable implements SystemTime
     public DateTime getCurrentUTCDateTime()
     {
         return new DateTime(DateTimeZone.UTC);
+    }
+
+    /**
+     * @return A copy of the votable field map.
+     */
+    public Map<String, String> getVotableFieldMap()
+    {
+        return new HashMap<>(votableFieldMap);
     }
 }

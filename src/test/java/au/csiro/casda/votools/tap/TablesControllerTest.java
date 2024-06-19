@@ -23,15 +23,15 @@ import java.util.Arrays;
 
 import javax.xml.xpath.XPathExpressionException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.jaxb.vodataservice.TableSet;
 import au.csiro.casda.votools.jpa.TapColumn;
 import au.csiro.casda.votools.jpa.TapColumnPK;
@@ -47,7 +47,7 @@ import au.csiro.casda.votools.jpa.repository.VoTableRepositoryService;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-public class TablesControllerTest
+public class TablesControllerTest extends BaseTest
 {
     @InjectMocks
     private TablesController controller;
@@ -63,10 +63,9 @@ public class TablesControllerTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
         Mockito.doReturn(true).when(tableService).isReady();
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }

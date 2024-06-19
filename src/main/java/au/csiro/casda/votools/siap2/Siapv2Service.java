@@ -1,6 +1,7 @@
 package au.csiro.casda.votools.siap2;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -10,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -27,8 +29,11 @@ import au.csiro.casda.votools.config.Configurable;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
+import au.csiro.casda.votools.jpa.TapColumn;
+import au.csiro.casda.votools.jpa.TapColumnPK;
 import au.csiro.casda.votools.logging.CasdaVoToolsEvents;
 import au.csiro.casda.votools.result.OutputFormat;
+import au.csiro.casda.votools.result.VoTableResultsExtractor;
 import au.csiro.casda.votools.result.VotableError;
 import au.csiro.casda.votools.tap.TapService;
 import au.csiro.casda.votools.utils.VoKeys;
@@ -68,6 +73,10 @@ public class Siapv2Service extends Configurable
     private boolean ready;
 
     private TapService tapService;
+
+    private String distanceFieldHeader;
+
+    private String distanceFieldKey;
 
     /**
      * Constructor
@@ -125,6 +134,7 @@ public class Siapv2Service extends Configurable
         if (!ready && config != null && tapService.isReady())
         {
             authTrustedIp = config.getList("auth.trusted.ip");
+            createDistanceFieldHeader();
             ready = true;
         }
         return ready;
@@ -259,7 +269,12 @@ public class Siapv2Service extends Configurable
             {
                 tapParams.put(VoKeys.STR_KEY_MAXREC, paramsMap.get(VoKeys.STR_KEY_MAXREC)[0]);
             }
-            tapService.processQuery(writer, tapParams);
+
+            // Add the metadata for the generated distance column
+            Map<String, String> votableFieldMap = tapService.getVotableFieldMap();
+            votableFieldMap.put(distanceFieldKey, distanceFieldHeader);
+
+            tapService.processQuery(writer, tapParams, null, new ArrayList<>(), votableFieldMap);
         }
         catch (Exception e)
         {
@@ -273,6 +288,48 @@ public class Siapv2Service extends Configurable
         }
 
         return true;
+    }
+
+    /**
+     * Populate the distanceFieldKey and distanceFieldHeader fields used to describe the distance field. The values are
+     * based on the distance defjnitions in the SIAP1 fields properties file.
+     */
+    void createDistanceFieldHeader()
+    {
+        String fieldName = "distance";
+        TapColumn tapColumn = new TapColumn();
+        tapColumn.setId(new TapColumnPK("", fieldName));
+        try (InputStream propertiesStream =
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("siap1-fields.properties"))
+        {
+            Properties fieldProperties = new Properties();
+            fieldProperties.load(propertiesStream);
+            if (!fieldProperties.containsKey(fieldName + ".key"))
+            {
+                logger.error("Unable to find " + fieldName + ".key in siap1-fields.properties.");
+                return;
+            }
+            distanceFieldKey = fieldProperties.getProperty(fieldName + ".key");
+            tapColumn.setDatatype(fieldProperties.getProperty(fieldName + ".datatype"));
+            tapColumn.setDescription(fieldProperties.getProperty(fieldName + ".description"));
+            if (fieldProperties.containsKey(fieldName + ".unit"))
+            {
+                tapColumn.setUnit(fieldProperties.getProperty(fieldName + ".unit"));
+            }
+            if (fieldProperties.containsKey(fieldName + ".ucd"))
+            {
+                tapColumn.setUcd(fieldProperties.getProperty(fieldName + ".ucd"));
+            }
+
+        }
+        catch (IOException e)
+        {
+            logger.error("Could not load siap1 field properties: ", e);
+            throw new RuntimeException("Could not load siap1 field properties");
+        }
+        
+        distanceFieldHeader = VoTableResultsExtractor.buildVoTableFieldHeader(tapColumn);
+        return;
     }
 
     /**
@@ -303,6 +360,16 @@ public class Siapv2Service extends Configurable
             }
         }
 
+        // Add a distance column if this is a cone search
+        PositionParamProcessor ppp = (PositionParamProcessor) Siap2Param.POS.getParamType().getProcessor();
+        String distance = ppp.buildDistanceFunction(paramsMap.get(Siap2Param.POS.toString().toLowerCase()));
+        if (StringUtils.isNotEmpty(distance))
+        {
+            builder.withOutputColumns(String.format("%s as \"distance\"",  distance));
+            builder.withOutputColumns("*");
+            builder.setOrderBy("1 ASC");
+        }
+        
         // Limit to just images and visibilities
         builder.withSpecificClause("dataproduct_type IN ('cube', 'image', 'visibility')");
 
@@ -341,6 +408,26 @@ public class Siapv2Service extends Configurable
         }
 
         return builder.toString();
+    }
+
+    void setDistanceFieldHeader(String distanceFieldHeader)
+    {
+        this.distanceFieldHeader = distanceFieldHeader;
+    }
+
+    public String getDistanceFieldHeader()
+    {
+        return distanceFieldHeader;
+    }
+
+    void setDistanceFieldKey(String distanceFieldKey)
+    {
+        this.distanceFieldKey = distanceFieldKey;
+    }
+
+    public String getDistanceFieldKey()
+    {
+        return distanceFieldKey;
     }
 
 }

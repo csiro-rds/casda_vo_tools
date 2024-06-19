@@ -21,8 +21,9 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.hamcrest.CustomTypeSafeMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.mockito.ArgumentMatcher;
 
 /*
  * #%L
@@ -207,16 +208,7 @@ public final class Log4JTestAppender implements Appender
     public void verifyLogMessage(Level level, String messageFragment, final Class<? extends Exception> exceptionClass,
             final Matcher<String> exceptionMessageMatcher)
     {
-        this.verifyLogMessage(level, containsString(messageFragment), new ArgumentMatcher<Throwable>()
-        {
-            @Override
-            public boolean matches(Object ex)
-            {
-                boolean exceptionClassSame = ex.getClass().equals(exceptionClass);
-                boolean messageAsExpected = exceptionMessageMatcher.matches(((Throwable) ex).getMessage());
-                return exceptionClassSame && messageAsExpected;
-            }
-        });
+        this.verifyLogMessage(level, containsString(messageFragment), exceptionClass, exceptionMessageMatcher);
     }
 
     /**
@@ -236,14 +228,29 @@ public final class Log4JTestAppender implements Appender
     public void verifyLogMessage(Level level, Matcher<String> messageMatcher,
             final Class<? extends Exception> exceptionClass, final Matcher<String> exceptionMessageMatcher)
     {
-        this.verifyLogMessage(level, messageMatcher, new ArgumentMatcher<Throwable>()
+        this.verifyLogMessage(level, messageMatcher, new CustomTypeSafeMatcher<Throwable>(
+                String.format("Throwable is %s with message", exceptionClass))
         {
             @Override
-            public boolean matches(Object ex)
+            public boolean matchesSafely(Throwable ex)
             {
                 boolean exceptionClassSame = ex.getClass().equals(exceptionClass);
                 boolean messageAsExpected = exceptionMessageMatcher.matches(((Throwable) ex).getMessage());
                 return exceptionClassSame && messageAsExpected;
+            }
+            
+            @Override
+            public void describeMismatchSafely(Throwable ex, Description description)
+            {
+                if (!ex.getClass().equals(exceptionClass))
+                {
+                    description.appendText("was a ").appendText(ex.getClass().getName()).appendText(" (")
+                            .appendValue(ex).appendText(")");
+                }
+                else if (!exceptionMessageMatcher.matches(((Throwable) ex).getMessage()))
+                {
+                    exceptionMessageMatcher.describeMismatch(ex, description);
+                }
             }
         });
     }

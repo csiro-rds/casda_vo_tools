@@ -20,8 +20,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.regex.Pattern;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 /**
@@ -36,7 +36,7 @@ public class CasdaLoggingSettingsTest
     /**
      * Make sure the mdc is clear before starting
      */
-    @Before
+    @BeforeEach
     public void setUp()
     {
         MDC.clear();

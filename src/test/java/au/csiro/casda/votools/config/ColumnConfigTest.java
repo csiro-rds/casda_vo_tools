@@ -3,7 +3,7 @@ package au.csiro.casda.votools.config;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /*
  * #%L

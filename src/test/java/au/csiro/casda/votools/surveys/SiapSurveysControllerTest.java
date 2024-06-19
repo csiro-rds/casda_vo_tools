@@ -11,20 +11,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import au.csiro.BaseTest;
 
 /**
  * Tests for the SIAP1 surveys controller.
  * <p>
  * Copyright 2022, CSIRO Australia. All rights reserved.
  */
-public class SiapSurveysControllerTest
+public class SiapSurveysControllerTest extends BaseTest
 {
 
     @Mock
@@ -41,10 +42,9 @@ public class SiapSurveysControllerTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
         this.mockMvc = MockMvcBuilders.standaloneSetup(surveysController).build();
 
         doReturn(true).when(mockService).isReady();

@@ -9,13 +9,13 @@ import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.config.Configuration.Change;
 
 /*
@@ -36,17 +36,16 @@ import au.csiro.casda.votools.config.Configuration.Change;
  * Copyright 2020, CSIRO Australia
  * All rights reserved.
  */
-public class TapConfigurationTest
+public class TapConfigurationTest extends BaseTest
 {
     @Mock
     private JdbcTemplate template;
 
     private ConfigurationDAOImpl daoImpl;
 
-    @Before
+    @BeforeEach
     public void setup()
     {
-        MockitoAnnotations.initMocks(this);
         daoImpl = new ConfigurationDAOImpl(template);
     }
     

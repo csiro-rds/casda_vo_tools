@@ -19,13 +19,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
@@ -38,7 +38,7 @@ import au.csiro.casda.votools.tap.TapService;
  * Copyright 2014, CSIRO Australia All rights reserved.
  * 
  */
-public class VoToolsUiControllerTest
+public class VoToolsUiControllerTest extends BaseTest
 {
     @Mock
     private TapService tapService;
@@ -60,10 +60,9 @@ public class VoToolsUiControllerTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
         config = new Configuration();
         voToolsUiController = new VoToolsUiController(tapService, scsService, configReg);
         

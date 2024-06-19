@@ -15,12 +15,13 @@ package au.csiro.casda.votools.tap;
 
 import java.io.File;
 
+import au.csiro.casda.votools.config.ConfigurationException;
+import au.csiro.casda.votools.uws.UWSLogger;
+import au.csiro.casda.votools.uws.UWServiceInterface;
 import uws.UWSException;
 import uws.job.JobList;
 import uws.service.UWSService;
 import uws.service.file.LocalUWSFileManager;
-import au.csiro.casda.votools.config.ConfigurationException;
-import au.csiro.casda.votools.uws.UWServiceInterface;
 
 /**
  * Dummy UWS service that uses DummyThread for testing the UWS library and tap controller.
@@ -33,7 +34,7 @@ public class DummyUWService extends UWSService implements UWServiceInterface
 
     public DummyUWService() throws UWSException
     {
-        super(new DummyUWSFactory(), new LocalUWSFileManager(new File("temp")), "/tap");
+        super(new DummyUWSFactory(),  new LocalUWSFileManager(new File("temp")), new UWSLogger(), "/tap");
 
         this.setDescription("desc");
         this.addJobList(new JobList("async"));

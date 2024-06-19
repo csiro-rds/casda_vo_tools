@@ -17,9 +17,9 @@ import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import au.csiro.casda.votools.siap2.Siap2Param;
 import au.csiro.casda.votools.utils.Utils;
@@ -45,7 +45,7 @@ import au.csiro.casda.votools.utils.Utils;
 public class UtilTest
 {
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
         File file = new File("config", Utils.AUTH_FILE_NAME);
@@ -232,7 +232,7 @@ public class UtilTest
     }
     
     
-    @After
+    @AfterEach
     public void doAfter()
     {
         File file = new File("config", Utils.AUTH_FILE_NAME);

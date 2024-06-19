@@ -26,6 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import au.csiro.casda.votools.config.Configurable;
+import au.csiro.casda.votools.config.Configuration;
+import au.csiro.casda.votools.config.ConfigurationException;
+import au.csiro.casda.votools.config.ConfigurationRegistry;
+import au.csiro.casda.votools.config.EndPoint;
+import au.csiro.casda.votools.uws.UWSLogger;
+import au.csiro.casda.votools.uws.UWServiceInterface;
 import uws.UWSException;
 import uws.job.ErrorSummary;
 import uws.job.JobList;
@@ -41,12 +48,6 @@ import uws.service.UWSUrl;
 import uws.service.backup.DefaultUWSBackupManager;
 import uws.service.backup.UWSBackupManager;
 import uws.service.file.LocalUWSFileManager;
-import au.csiro.casda.votools.config.Configurable;
-import au.csiro.casda.votools.config.Configuration;
-import au.csiro.casda.votools.config.ConfigurationException;
-import au.csiro.casda.votools.config.ConfigurationRegistry;
-import au.csiro.casda.votools.config.EndPoint;
-import au.csiro.casda.votools.uws.UWServiceInterface;
 
 /**
  * TAP implementation of UWS service configured to manage tap async queries via the TapThread class.
@@ -148,7 +149,8 @@ public class TapUWService extends Configurable implements UWServiceInterface
 
     private void setupNewUws(EndPoint endPoint) throws UWSException
     {
-        File resultsDir = new File(endPoint.get("results.dir", DEFAULT_RESULTS_DIR));
+        String resultsDirName = endPoint.get("results.dir", DEFAULT_RESULTS_DIR);
+        File resultsDir = new File(resultsDirName);
         String asyncBaseUrl = endPoint.get("async.base.url", DEFAULT_ASYNC_BASE_URL);
         String asyncDescription = endPoint.get("async.description", DEFAULT_ASYNC_DESCRIPTION);
         String asyncJobListName = endPoint.get("async.job.list.name", DEFAULT_ASYNC_JOB_LIST_NAME);
@@ -156,6 +158,17 @@ public class TapUWService extends Configurable implements UWServiceInterface
 
         if (uws == null) // create new service, changing configuration parameters requires restart
         {
+            try
+            {
+                logger.info("Configuring UWS to write result files to " + resultsDir.getCanonicalPath()
+                        + " This can be changed using the tap.results.dir setting.");
+            }
+            catch (IOException e1)
+            {
+                String message = "Failed to resolve reference to results.dir of " + resultsDirName;
+                logger.error(message, e1);
+                throw new UWSException(message);
+            }
             LocalUWSFileManager fileManager;
             try
             {
@@ -168,7 +181,7 @@ public class TapUWService extends Configurable implements UWServiceInterface
             }
             
             uws = new UWSService(new TapUWSFactory(tapService), fileManager,
-                    new TapUWSUrl(asyncBaseUrl));
+                     new UWSLogger(), new TapUWSUrl(asyncBaseUrl));
             uws.setDescription(asyncDescription);
             JobList jobList = new JobList(asyncJobListName, new QueuedExecutionManager(uws.getLogger(), maxRunningJobs));
             uws.addJobList(jobList);

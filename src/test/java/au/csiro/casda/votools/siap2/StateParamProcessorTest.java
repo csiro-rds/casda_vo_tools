@@ -6,14 +6,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /*
  * #%L
@@ -32,50 +30,35 @@ import org.junit.runners.Parameterized.Parameters;
  * <p>
  * Copyright 2015, CSIRO Australia All rights reserved.
  */
-@RunWith(Enclosed.class)
 public class StateParamProcessorTest
 {
     /**
      * Check the validateState method's handling of valid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateStateValidTest
     {
-        @Parameters
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> testParams()
         {
-            // Param values (may be multiple)
-            return Arrays.asList(new Object[][] { { "" }, { "Q" }, { " U " }, { "       " }, { "xX" }, { "rR" }, {"POLi"},
-                {new String[] { "I", "q" }}, {new String[] { "I", "", "q" }}
-            });
-            
-        }
-        
-        private String[] validParamValues;
-
-        private StateParamProcessor processor;
-
-        public ValidateStateValidTest(Object validValue) throws Exception
-        {
-            processor = new StateParamProcessor();
-
-            if (validValue instanceof String[])
-            {
-                validParamValues = (String[]) validValue;
-            }
-            else if (validValue instanceof String)
-            {
-                validParamValues = new String[] { (String) validValue };
-            }
+            return Stream.of(Arguments.arguments((Object) new String[] { "" }),
+                    Arguments.arguments((Object) new String[] { "Q" }),
+                    Arguments.arguments((Object) new String[] { "U" }),
+                    Arguments.arguments((Object) new String[] { "       " }),
+                    Arguments.arguments((Object) new String[] { "xX" }),
+                    Arguments.arguments((Object) new String[] { "rR" }),
+                    Arguments.arguments((Object) new String[] { "POLi" }),
+                    Arguments.arguments((Object) new String[] { "I", "q" }),
+                    Arguments.arguments((Object) new String[] { "I", "", "q" }));
         }
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.Siapv2Service#validateState(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testValidateState()
+        @ParameterizedTest
+        @MethodSource("testParams")
+        public void testValidateState(String[] validParamValues)
         {
+            StateParamProcessor processor = new StateParamProcessor();
             assertThat("Expected '" + ArrayUtils.toString(validParamValues) + "' to be valid.",
                     processor.validate("State", validParamValues), is(empty()));
         }
@@ -84,34 +67,23 @@ public class StateParamProcessorTest
     /**
      * Check the validateState method's handling of invalid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateStateInvalidTest
     {
-
-        @Parameters
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> testParams()
         {
-            // Param values (may be multiple)
-            return Arrays.asList(new Object[][] { { "/" }, { "//" }, { "UU" }, { "X X" }, {"POL i"}});
-        }
-
-        private StateParamProcessor processor;
-
-        private String invalidValue;
-
-        public ValidateStateInvalidTest(String invalidValue) throws Exception
-        {
-            this.invalidValue = invalidValue;
-            processor = new StateParamProcessor();
+            return Stream.of(Arguments.arguments("/"), Arguments.arguments("//"), Arguments.arguments("UU"),
+                    Arguments.arguments("X X"), Arguments.arguments("POL i"));
         }
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.Siapv2Service#validateState(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testValidateState()
+        @ParameterizedTest
+        @MethodSource("testParams")
+        public void testValidateState(String invalidValue)
         {
+            StateParamProcessor processor = new StateParamProcessor();
             assertEquals("Expected '" + ArrayUtils.toString(invalidValue) + "' to be invalid.",
                     Arrays.asList("UsageFault: Invalid STATE value " + invalidValue),
                     processor.validate("STATE", new String[] { invalidValue }));
@@ -121,47 +93,25 @@ public class StateParamProcessorTest
     /**
      * Check the BuildQuery method with a set of values.
      */
-    @RunWith(Parameterized.class)
     public static class BuildQueryTest
     {
 
-        @Parameters
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> testParams()
         {
-            // Pairs of param values (may be multiple) and the expected where clause            
-            // @formatter:off
-            return Arrays.asList(new Object[][] { 
-                { "XX", "(pol_states LIKE '%/XX/%')" },
-                { new String[] { "XX", "YY" }, "(pol_states LIKE '%/XX/%') OR (pol_states LIKE '%/YY/%')" }, 
-                { new String[] { "XX", "YY" , "I"}, "(pol_states LIKE '%/XX/%') OR (pol_states LIKE '%/YY/%')"
-                        + " OR (pol_states LIKE '%/I/%')" }, 
-                { "", "" },
-                { "//", "" }
-            });
-            // @formatter:on
+            return Stream.of(Arguments.arguments((Object) new String[] { "XX" }, "(pol_states LIKE '%/XX/%')"),
+                    Arguments.arguments((Object) new String[] { "XX", "YY" },
+                            "(pol_states LIKE '%/XX/%') OR (pol_states LIKE '%/YY/%')"),
+                    Arguments.arguments((Object) new String[] { "XX", "YY", "I" },
+                            "(pol_states LIKE '%/XX/%') OR (pol_states LIKE '%/YY/%') OR (pol_states LIKE '%/I/%')"),
+                    Arguments.arguments((Object) new String[] { "" }, ""),
+                    Arguments.arguments((Object) new String[] { "//" }, ""));
         }
 
-        private String[] paramValues;
-        private String expectedAdql;
-        private StateParamProcessor processor;
-
-        public BuildQueryTest(Object value, String expectedWhereClause)
+        @ParameterizedTest
+        @MethodSource("testParams")
+        public void testWithValidParams(String[] paramValues, String expectedAdql)
         {
-            this.expectedAdql = expectedWhereClause;
-            if (value instanceof String[])
-            {
-                paramValues = (String[]) value;
-            }
-            else if (value instanceof String)
-            {
-                paramValues = new String[] { (String) value };
-            }
-            processor = new StateParamProcessor();
-        }
-
-        @Test
-        public void testWithValidParams()
-        {
+            StateParamProcessor processor = new StateParamProcessor();
             assertEquals("Incorrect result for range " + ArrayUtils.toString(paramValues), expectedAdql,
                     processor.buildQuery("", "", paramValues));
         }

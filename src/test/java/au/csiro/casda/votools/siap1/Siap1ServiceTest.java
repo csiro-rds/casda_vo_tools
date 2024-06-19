@@ -10,8 +10,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,13 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.config.ConfigKeys;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
@@ -56,7 +55,6 @@ import au.csiro.casda.votools.utils.VoKeys;
  * <p>
  * Copyright 2022, CSIRO Australia All rights reserved.
  */
-@RunWith(Enclosed.class)
 public class Siap1ServiceTest
 {
 
@@ -65,7 +63,7 @@ public class Siap1ServiceTest
      * <p>
      * Copyright 2022, CSIRO Australia. All rights reserved.
      */
-    public abstract static class BaseSiap1ServiceTest
+    public abstract static class BaseSiap1ServiceTest extends BaseTest
     {
         @Mock
         protected ConfigurationRegistry configRegistry;
@@ -80,9 +78,9 @@ public class Siap1ServiceTest
 
         private Configuration config;
 
-        protected BaseSiap1ServiceTest() throws Exception
+        @BeforeEach
+        public void baseSiap1Setup() throws Exception
         {
-            MockitoAnnotations.initMocks(this);
             siap1Service = new Siap1Service(configRegistry, tapService, siapSurveysService);
             config = new Configuration();
             siap1Service.setConfiguration(config);
@@ -139,7 +137,8 @@ public class Siap1ServiceTest
     public static class CheckBuildQuery extends BaseSiap1ServiceTest
     {
 
-        public CheckBuildQuery() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
             configureSurveys();
             assertTrue(siap1Service.isReady());
@@ -239,7 +238,8 @@ public class Siap1ServiceTest
     public static class ValidateValidateSiap1Job extends BaseSiap1ServiceTest
     {
 
-        public ValidateValidateSiap1Job() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
             configureSurveys();
             assertTrue(siap1Service.isReady());
@@ -329,7 +329,8 @@ public class Siap1ServiceTest
 
         private StringWriter writer = new StringWriter();
 
-        public CheckProcessQuery() throws Exception
+        @BeforeEach
+        public void setup() throws Exception
         {
             configureSurveys();
             assertTrue(siap1Service.isReady());
@@ -342,7 +343,7 @@ public class Siap1ServiceTest
             params.put("pos", new String[] { "foo" });
             assertFalse("processQuery should have returned failure", siap1Service.processQuery(writer, params));
 
-            verify(tapService, never()).processQuery(anyObject(), anyObject());
+            verify(tapService, never()).processQuery(any(), any());
 
             String errorResult = writer.toString();
             // System.out.println(errorResult);
@@ -359,7 +360,7 @@ public class Siap1ServiceTest
 
             assertTrue("processQuery should have returned success", siap1Service.processQuery(writer, paramsMap));
             String metadataResult = writer.toString();
-            assertThat(metadataResult, containsString("<RESOURCE name=\"CASDA SIAP Result\" type=\"results\">"));
+            assertThat(metadataResult, containsString("<RESOURCE name=\"CASDA SIAP Result\" type=\"meta\">"));
             assertThat(metadataResult,
                     containsString("<DESCRIPTION>A First Survey Simple Image Access Service</DESCRIPTION>"));
             assertThat(metadataResult, containsString("<INFO name=\"QUERY_STATUS\" value=\"OK\">"));
@@ -371,7 +372,7 @@ public class Siap1ServiceTest
             assertThat(metadataResult, containsString("<PARAM name=\"INPUT:FORMAT\""));
             assertThat(metadataResult, containsString("<OPTION value=\"image/fits\" />"));
             assertThat(metadataResult, containsString("<OPTION value=\"all\" />"));
-            assertThat(metadataResult, containsString("<PARAM name=\"OUTPUT:image_title\" "));
+            assertThat(metadataResult, containsString("<FIELD name=\"OUTPUT:image_title\" "));
         }
 
         @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -407,12 +408,7 @@ public class Siap1ServiceTest
      */
     public static class CheckReadFields extends BaseSiap1ServiceTest
     {
-
-        public CheckReadFields() throws Exception
-        {
-            super();
-        }
-
+        
         @Test
         public void testReadFields()
         {
@@ -429,9 +425,8 @@ public class Siap1ServiceTest
             assertEquals("deg", imageScale.getUnit());
             assertEquals("VOX:Image_Scale", imageScale.getUcd());
             assertEquals("Spatial resolution of data", imageScale.getDescription());
-            assertNull("Arraysize should not be defined", imageScale.getArraysize());
             assertEquals(
-                    "<FIELD ID=\"image_scale\" name=\"image_scale\" datatype=\"double\" unit=\"deg\" "
+                    "<FIELD ID=\"image_scale\" name=\"image_scale\" datatype=\"double\" arraysize=\"*\" unit=\"deg\" "
                             + "ucd=\"VOX:Image_Scale\"><DESCRIPTION>Spatial resolution of data</DESCRIPTION> </FIELD>",
                     imageScale.getFieldDef());
 
@@ -459,7 +454,7 @@ public class Siap1ServiceTest
                             "scs|est_size_bytes"));
 
             assertEquals(
-                    "<FIELD ID=\"image_scale\" name=\"image_scale\" datatype=\"double\" unit=\"deg\" "
+                    "<FIELD ID=\"image_scale\" name=\"image_scale\" datatype=\"double\" arraysize=\"*\" unit=\"deg\" "
                             + "ucd=\"VOX:Image_Scale\"><DESCRIPTION>Spatial resolution of data</DESCRIPTION> </FIELD>",
                     votableFieldMap.get("scs|image_scale"));
             assertEquals(

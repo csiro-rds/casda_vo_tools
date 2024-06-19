@@ -416,7 +416,8 @@ public class ScsService extends Configurable
      *            the stream to write to
      * @param maxrecs
      *            the maximum number of records to include
-     * @param map
+     * @param votableFieldMap
+     *            a map of field definitions
      * @return the result set extractor
      */
     private ResultSetExtractor<Boolean> getExtractor(String formatStr, Writer writer, int maxrecs,

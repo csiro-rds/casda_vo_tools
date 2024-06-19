@@ -15,7 +15,7 @@ package au.csiro.casda.votools.tap;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.anyObject;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -23,12 +23,12 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
+import au.csiro.BaseTest;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.utils.VoKeys;
 import uws.UWSException;
@@ -40,7 +40,7 @@ import uws.job.parameters.UWSParameters;
  *
  * Copyright 2014, CSIRO Australia All rights reserved.
  */
-public class TapThreadTest
+public class TapThreadTest extends BaseTest
 {
 
     @Mock
@@ -52,11 +52,10 @@ public class TapThreadTest
      * @throws Exception
      *             any exception thrown during set up
      */
-    @Before
+    @BeforeEach
     public void setUp() throws Exception
     {
-        MockitoAnnotations.initMocks(this);
-        Mockito.when(mockService.processQuery((Writer) anyObject(), anyObject())).thenReturn(false);
+        Mockito.when(mockService.processQuery((Writer) any(), any())).thenReturn(false);
     }
 
     @Test
@@ -70,7 +69,7 @@ public class TapThreadTest
         TapThread thread = new TapThread(job, mockService);
         StringWriter writer = new StringWriter();
         assertThat(thread.processQuery(writer), is(false));
-        Mockito.verify(mockService, Mockito.atLeastOnce()).processQuery((Writer) anyObject(), anyObject());
+        Mockito.verify(mockService, Mockito.atLeastOnce()).processQuery((Writer) any(), any());
 
     }
 }

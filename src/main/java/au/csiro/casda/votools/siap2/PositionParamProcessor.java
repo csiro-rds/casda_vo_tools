@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import au.csiro.casda.votools.utils.Utils;
@@ -265,13 +266,13 @@ public class PositionParamProcessor implements SiapParamProcessor
         }
 
         StringBuilder fieldSelect = new StringBuilder();
-        for (String criterion : criteria)
+        for (String crit : criteria)
         {
-            if (StringUtils.isBlank(criterion))
+            if (StringUtils.isBlank(crit))
             {
                 continue;
             }
-            criterion = StringUtils.trimToEmpty(criterion);
+            String criterion = StringUtils.trimToEmpty(crit);
             String[] criterionParts = criterion.split(" +");
             String value = "";
 
@@ -328,4 +329,26 @@ public class PositionParamProcessor implements SiapParamProcessor
         return fieldSelect.toString();
     }
 
+    /**
+     * Build the formula for the distance of the image centre to the target position.
+     * 
+     * @param criteria
+     *            The set of parameters that have been supplied for the field.
+     * @return A distance formula, or an empty string if the POS is not a single CIRCLE criterion.
+     */
+    public String buildDistanceFunction(String[] criteria)
+    {
+        if (ArrayUtils.isEmpty(criteria) || criteria.length > 1 || !criteria[0].matches(CIRCLE_PATTERN))
+        {
+            // We only produce a distance when there is a single CIRCLE position criteria
+            return "";
+        }
+
+        String[] criterionParts = StringUtils.trimToEmpty(criteria[0]).split(" +");
+        final int decIndex = 2;
+        String distance =
+                String.format("DISTANCE(POINT('ICRS GEOCENTER',s_ra,s_dec),POINT('ICRS GEOCENTER',%s, %s))",
+                        criterionParts[1], criterionParts[decIndex]);
+        return distance;
+    }
 }

@@ -1,159 +1,144 @@
 package au.csiro.casda.votools.siap1;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Verify the FormatParamProcessor.
  * <p>
  * Copyright 2022, CSIRO Australia. All rights reserved.
  */
-@RunWith(Enclosed.class)
 public class FormatParamProcessorTest
 {
 
     /**
      * Check the validate method's handling of valid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateValidTest
     {
-
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        
+        public static Stream<Arguments> validQueryParams()
         {
-            // Param values (may be multiple)
-            return Arrays.asList(new Object[][] { { "METADATA" }, { "metadata" }, { "all" }, { "graphic" },
-                    { "graphic-ALL" }, { "image/fits" }, { "application/fits" }, { "metadata" }, { "text/html" },
-                    { "image/png" }, { "image/PNG" }, { "image/fits,image/png" } });
+            return Stream.of(Arguments.arguments((Object) new String[]{"METADATA"}),
+                    Arguments.arguments((Object) new String[]{"metadata"}),
+                    Arguments.arguments((Object) new String[]{"all"}),
+                    Arguments.arguments((Object) new String[]{"graphic"}),
+                    Arguments.arguments((Object) new String[]{"graphic-ALL"}),
+                    Arguments.arguments((Object) new String[]{"image/fits"}),
+                    Arguments.arguments((Object) new String[]{"application/fits"}),
+                    Arguments.arguments((Object) new String[]{"text/html"}),
+                    Arguments.arguments((Object) new String[]{"image/png"}),
+                    Arguments.arguments((Object) new String[]{"image/PNG"}),
+                    Arguments.arguments((Object) new String[]{"image/fits,image/png"}));
         }
 
-        private String[] validParamValues;
-
-        private FormatParamProcessor processor;
-
-        public ValidateValidTest(Object validValue) throws Exception
+        @BeforeEach
+        private void setup()
         {
             processor = new FormatParamProcessor();
-
-            if (validValue instanceof String[])
-            {
-                validParamValues = (String[]) validValue;
-            }
-            else if (validValue instanceof String)
-            {
-                validParamValues = new String[] { (String) validValue };
-            }
         }
+        
+        private FormatParamProcessor processor;
 
         /**
          * Test method for
          * {@link au.csiro.casda.votools.siap2.FormatParamProcessor#validate(java.lang.String, java.lang.String[])}.
          */
-        @Test
-        public void testValidate()
+        @ParameterizedTest
+        @MethodSource("validQueryParams")
+        public void testValidate(String [] validParams)
         {
-            assertThat("Expected '" + ArrayUtils.toString(validParamValues) + "' to be valid.",
-                    processor.validate("FORMAT", validParamValues), is(empty()));
+            assertThat("Expected '" + ArrayUtils.toString(validParams) + "' to be valid.",
+                    processor.validate("FORMAT", validParams), empty());
         }
     }
 
     /**
      * Check the validate method's handling of invalid values.
      */
-    @RunWith(Parameterized.class)
     public static class ValidateInvalidTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> invalidQueryParams()
         {
-            return Arrays.asList(new Object[][] { { "application/fits;convention=STScI-STIS" }, { "unknown" },
-                    { "text/csv" }, { "fits" }, { "fits/a" }, { "image\\png" }, { "image/jpeg" }, { "GRAPHIC-jpeg" },
-                    { "image/jpg,image/gif,image/fits" } });
+            return Stream.of(Arguments.arguments((Object) new String[]{"application/fits;convention=STScI-STIS"}),
+                    Arguments.arguments((Object) new String[]{"unknown"}),
+                    Arguments.arguments((Object) new String[]{"text/csv"}),
+                    Arguments.arguments((Object) new String[]{"fits"}),
+                    Arguments.arguments((Object) new String[]{"fits/a"}),
+                    Arguments.arguments((Object) new String[]{"image\\png"}),
+                    Arguments.arguments((Object) new String[]{"image/jpeg"}),
+                    Arguments.arguments((Object) new String[]{"GRAPHIC-jpeg"}),
+                    Arguments.arguments((Object) new String[]{"image/jpg,image/gif,image/fits"}));
         }
 
-        private String[] invalidParamValues;
-
-        private FormatParamProcessor processor;
-
-        public ValidateInvalidTest(Object invalidValue) throws Exception
+        @BeforeEach
+        private void setup()
         {
             processor = new FormatParamProcessor();
-
-            if (invalidValue instanceof String[])
-            {
-                invalidParamValues = (String[]) invalidValue;
-            }
-            else if (invalidValue instanceof String)
-            {
-                invalidParamValues = new String[] { (String) invalidValue };
-            }
         }
+        
+        private FormatParamProcessor processor;
 
-        @Test
-        public void testInValidate()
+        @ParameterizedTest
+        @MethodSource("invalidQueryParams")
+        public void testInValidate(String [] param)
         {
-            assertThat("Expected '" + ArrayUtils.toString(invalidParamValues) + "' to be ignored.",
-                    processor.validate("FORMAT", invalidParamValues), is(empty()));
+            assertThat("Expected '" + ArrayUtils.toString(param) + "' to be ignored.",
+                    processor.validate("FORMAT", param), is(empty()));
         }
     }
 
     /**
      * Check the BuildQuery method with valid values.
      */
-    @RunWith(Parameterized.class)
     public static class BuildQueryTest
     {
 
-        @Parameters(name = "{0}")
-        public static Collection<Object[]> data()
+        public static Stream<Arguments> queryParams()
         {
-            return Arrays.asList(new Object[][] { { "fits", "" }, { "FITS", "" }, { "image/png", "image/png" },
-                    { "application/fits,graphic", "image/fits', 'image/png" }, { "native", "" },
-                    { "graphic-ALL", "image/png" }, { "compliant", "" }, { "image/fits", "image/fits" },
-                    { "application/xml", "" }, { "application/XML", "" } });
+            return Stream.of(Arguments.arguments((Object) new String[]{"fits"}, ""),
+                    Arguments.arguments((Object) new String[]{"FITS"},  ""),
+                    Arguments.arguments((Object) new String[]{"image/png"}, "image/png"),
+                    Arguments.arguments((Object) new String[]{"application/fits,graphic"}, "image/fits', 'image/png"),
+                    Arguments.arguments((Object) new String[]{"native"}, ""),
+                    Arguments.arguments((Object) new String[]{"graphic-ALL"}, "image/png"),
+                    Arguments.arguments((Object) new String[]{"compliant"}, ""),
+                    Arguments.arguments((Object) new String[]{"image/fits"}, "image/fits"),
+                    Arguments.arguments((Object) new String[]{"application/xml"}, ""),
+                    Arguments.arguments((Object) new String[]{"application/XML"}, ""));
         }
 
-        private String[] paramValues;
-        private FormatParamProcessor processor;
-        private String result;
-
-        public BuildQueryTest(Object value, String resultFragment)
+        @BeforeEach
+        private void setup()
         {
-            this.result = String.format("sia1_format.content_type IN ('%s')", resultFragment);
-            if (value instanceof String[])
-            {
-                paramValues = (String[]) value;
-            }
-            else if (value instanceof String)
-            {
-                paramValues = new String[] { (String) value };
-            }
             processor = new FormatParamProcessor();
         }
+        
+        private FormatParamProcessor processor;
 
         /**
          * Test method for {@link au.csiro.casda.votools.siap2.FormatParamProcessor#buildQuery(java.lang.String)}.
          */
-        @Test
-        public void testWithValidParams()
+        @ParameterizedTest
+        @MethodSource("queryParams")
+        public void testWithValidParams(String[] param, String resultFragment)
         {
-            assertEquals("Incorrect value for " + ArrayUtils.toString(paramValues), result,
-                    processor.buildQuery(null, null, paramValues));
+            String result = String.format("sia1_format.content_type IN ('%s')", resultFragment);
+            assertEquals("Incorrect value for " + ArrayUtils.toString(param), result,
+                    processor.buildQuery(null, null, param));
         }
     }
 

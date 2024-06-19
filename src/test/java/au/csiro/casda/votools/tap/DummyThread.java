@@ -6,11 +6,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 
+import au.csiro.casda.votools.result.OutputFormat;
+import au.csiro.casda.votools.uws.BaseThread;
 import uws.UWSException;
 import uws.job.ErrorType;
 import uws.job.UWSJob;
-import au.csiro.casda.votools.result.OutputFormat;
-import au.csiro.casda.votools.uws.BaseThread;
 
 /*
  * #%L
