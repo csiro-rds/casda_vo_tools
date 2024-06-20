@@ -123,7 +123,6 @@ public class DataLinkServiceTest extends BaseTest
                 		"invalid-123456", "cube-1;drop table casda.tablename" },
                 "pul052", "OPAL", PROJECT_CODE_SAMPLE_LIST, true, false, ACCESS_DATE);
 
-        System.out.println(writer.getBuffer().toString());
         checkXmlAgainstTestCaseFile("service.invalid.ids", writer.getBuffer().toString());
     }
 
@@ -164,6 +163,27 @@ public class DataLinkServiceTest extends BaseTest
                 PROJECT_CODE_SAMPLE_LIST, true, false, ACCESS_DATE);
 
         checkXmlAgainstTestCaseFile("service.authenticated.released.catalogue", writer.getBuffer().toString());
+    }
+
+    /**
+     * Check the handling of measurement set requests using scan ids 
+     * @throws Exception err
+     */
+    @Test
+    public void processQueryScanTest() throws Exception
+    {
+        when(voTableRepositoryService.fetchProjectIdsFromCodes(eq(PROJECT_CODE_SAMPLE_LIST), anyString()))
+                .thenReturn(Arrays.asList(123l, 456l, 789l));
+        Map<String, Object> result = new HashMap<>();
+        result.put("filesize", 1L);
+        result.put("released_date", "13-01-2016:16:29:39:00");
+        when(jdbcTemplate.queryForMap(any(), eq(10152L))).thenReturn(result);
+
+        StringWriter writer = new StringWriter();
+        dataLinkService.processQuery(writer, new String[] { "scan-10152-99817" }, "dem040", "OPAL",
+                PROJECT_CODE_SAMPLE_LIST, true, false, ACCESS_DATE);
+
+        checkXmlAgainstTestCaseFile("service.authenticated.released.scan", writer.getBuffer().toString());
     }
     
     @Test
@@ -372,14 +392,27 @@ public class DataLinkServiceTest extends BaseTest
     private void checkXmlAgainstTestCaseFile(String testCase, String xml) throws SAXException, IOException
     {
         String testXml = FileUtils.readFileToString(new File("src/test/resources/datalink/" + testCase + ".xml"));
-        Diff diff = DiffBuilder.compare(xml).withTest(testXml)
-                .ignoreWhitespace()
-                .withNodeFilter(n -> n.getNodeName().equals("?xml-stylesheet"))
+        Diff diff = DiffBuilder.compare(removeProcessingInstruction(testXml)).withTest(removeProcessingInstruction(xml))
+                .ignoreWhitespace()//
                 .build();
         
         Iterator<Difference> allDifferences = diff.getDifferences().iterator();
+        int numDiff = Iterators.size(allDifferences);
+        
+        if (numDiff > 0)
+        {
+            System.out.println("--------");
+            System.out.println("Differences found, actual XML is");
+            System.out.println("--------");
+            System.out.println(xml);
+        }
 
-        assertEquals(0, Iterators.size(allDifferences), "Differences found: " + diff.toString());
+        assertEquals(0, numDiff, "Differences found: " + diff.toString());
+    }
+    
+    private String removeProcessingInstruction(String xml)
+    {
+        return xml.replaceAll("<\\?xml-stylesheet.*\\?>", "");
     }
     
     @Test

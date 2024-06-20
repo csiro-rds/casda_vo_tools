@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +79,8 @@ public class DataLinkService extends Configurable
     private static final String FITS_REGEX = "^(cube|spectrum|moment_map|cubelet)-[0-9]+$";
     
     private static final String VISIBILITY_REGEX = "^visibility-[0-9]+$";
+    
+    private static final String SCAN_REGEX = "^scan-[0-9]+-[0-9]+$";
     
     private static final int KB_IN_GB= 1024 * 1024;
 
@@ -315,6 +317,7 @@ public class DataLinkService extends Configurable
         String contentType;
         String table = "";
 
+        String parsedId = id;
         if(StringUtils.isBlank(id))
         {
             builder.withErrorResult(id,
@@ -332,6 +335,12 @@ public class DataLinkService extends Configurable
         else if(id.toLowerCase().matches(VISIBILITY_REGEX))
         {
         	table = "casda.measurement_set";
+        }
+        else if(id.toLowerCase().matches(SCAN_REGEX))
+        {
+            table = "casda.measurement_set";
+            // We ignore the second id (scan summary id) as it is only there to make the obscore record unique
+            parsedId = "visibility-" + id.split("-")[1];
         }
         else if(id.toLowerCase().matches(SPECTRUM_REGEX))
         {
@@ -355,7 +364,7 @@ public class DataLinkService extends Configurable
                     "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(id));
             return;
         }
-        Long dataProductId = Long.parseLong(id.split("-")[1]);
+        Long dataProductId = Long.parseLong(parsedId.split("-")[1]);
         
         long contentLengthKb = getContentLength(table, dataProductId);
         
@@ -368,11 +377,11 @@ public class DataLinkService extends Configurable
                 // show access data link to casdaAdmins or project members
                 if (isAccessAllowed(casdaAdmin, userId, projectIds, table, dataProductId))
                 {
-                    if (id.toLowerCase().matches(FITS_REGEX))
+                    if (parsedId.toLowerCase().matches(FITS_REGEX))
                     {
                         contentType = "application/fits";
                     }
-                    else if(id.toLowerCase().matches(CATALOGUE_REGEX))
+                    else if(parsedId.toLowerCase().matches(CATALOGUE_REGEX))
                     {
                         contentType = "application/xml";
                     }
@@ -381,8 +390,8 @@ public class DataLinkService extends Configurable
                         contentType = "application/tar";
                     }
 
-                    RequestToken requestToken =
-                            new RequestToken(id, userId, loginSystem, accessTime, dataLinkAccessEncriptionSecretKey);
+                    RequestToken requestToken = new RequestToken(parsedId, userId, loginSystem, accessTime,
+                            dataLinkAccessEncriptionSecretKey);
 
                     if (StringUtils.isNotBlank(syncServiceUrl))
                     {
@@ -433,7 +442,6 @@ public class DataLinkService extends Configurable
                                     + (casdaLargeWebDownload ? datalinkLargeWebDownloadLimitHttp
                                             : datalinkDownloadLimitHttp) / KB_IN_GB + " GB in size";
                             builder.withErrorResult(id, asyncServiceNameWeb, message);
-                            
                         }
 
                         //to internal account, this can be disabled by removing property.
@@ -444,11 +452,14 @@ public class DataLinkService extends Configurable
                                     (long) contentLengthKb * Utils.ONE_KB_IN_BYTES, requestToken.toEncryptedString());
                             
                             builder.withServiceDefinition("pawsey_async_service", "ivo://ivoa.net/std/SODA#async-1.0",
-                                    asyncServiceUrl);
+                                    asyncServiceUrl, "DownloadToPawseyService",
+                                    "Asynchronous download of the file(s) to servers within the "
+                                            + "Pawsey Supercomputing Centre.");
                         }
                         
                         builder.withServiceDefinition("async_service", "ivo://ivoa.net/std/SODA#async-1.0",
-                                asyncServiceUrl);
+                                asyncServiceUrl, "DownloadService",
+                                "Asynchronous download of the file(s) to any server.");
                     }
                     
                     /*
@@ -461,7 +472,8 @@ public class DataLinkService extends Configurable
                         builder.withServiceDefResult(id, "cutout_service", cutoutServiceName, "#cutout", contentType,
                                 null, requestToken.toEncryptedString());
                         builder.withServiceDefinition("cutout_service", "ivo://ivoa.net/std/SODA#async-1.0",
-                                cutoutServiceUrl, true);
+                                cutoutServiceUrl, true, "CASDA Image Generation Service",
+                                "Generate a cutout image or cube");
                     }
                     
                     if(id.toLowerCase().matches(IMAGE_CUBE_REGEX) && StringUtils.isNotBlank(generateSpectrumServiceUrl))
@@ -469,8 +481,9 @@ public class DataLinkService extends Configurable
                         requestToken.setDownloadMode(RequestToken.GENERATED_SPECTRUM);
                         builder.withServiceDefResult(id, "spectrum_generation_service", generateSpectrumServiceName,
                         		"#proc", contentType, null, requestToken.toEncryptedString());
-                        builder.withServiceDefinition("spectrum_generation_service", 
-                        		"ivo://ivoa.net/std/SODA#async-1.0", generateSpectrumServiceUrl, true);
+                        builder.withServiceDefinition("spectrum_generation_service",
+                                "ivo://ivoa.net/std/SODA#async-1.0", generateSpectrumServiceUrl, true,
+                                "CASDA Spectrum Generation Service", "Generate a 1D spectrum for a specific region");
                     }
                 }
                 else if(!VoKeys.ANONYMOUS_USER.equals(userId))

@@ -2,6 +2,7 @@ package au.csiro.casda.votools.datalink;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,16 +11,17 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.apache.commons.lang3.CharEncoding;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
+import net.ivoa.vo.AnyTEXT;
 import net.ivoa.vo.Data;
 import net.ivoa.vo.DataType;
 import net.ivoa.vo.Field;
 import net.ivoa.vo.Group;
+import net.ivoa.vo.Info;
 import net.ivoa.vo.ObjectFactory;
 import net.ivoa.vo.Param;
 import net.ivoa.vo.Resource;
@@ -106,6 +108,11 @@ public class DataLinkVoTableBuilder
         content.add(authenticatedIdTokenField);
         this.authenticatedIdTokenField = authenticatedIdTokenField.getValue();
 
+        Info stdIdInfo = new Info();
+        stdIdInfo.setName("standardID");
+        stdIdInfo.setValueAttribute("ivo://ivoa.net/std/DataLink#links-1.1");
+
+        resultsResource.getLINKAndTABLEOrRESOURCE().add(stdIdInfo);
         resultsResource.getLINKAndTABLEOrRESOURCE().add(resultsTable);
         votable.getRESOURCE().add(resultsResource);
         return this;
@@ -121,11 +128,16 @@ public class DataLinkVoTableBuilder
      *            the 'standardID' of the service (eg: ivo://ivoa.net/std/SODA#async-1.0)
      * @param accessUrl
      *            the URL to access the service
+     * @param name
+     *            the user readable name of the service
+     * @param description
+     *            the user oriented description of the service
      * @return this builder instance
      */
-    public DataLinkVoTableBuilder withServiceDefinition(String xmlId, String standardId, String accessUrl)
+    public DataLinkVoTableBuilder withServiceDefinition(String xmlId, String standardId, String accessUrl, String name,
+            String description)
     {
-        return withServiceDefinition(xmlId, standardId, accessUrl, false);
+        return withServiceDefinition(xmlId, standardId, accessUrl, false, name, description);
     }
 
     /**
@@ -140,16 +152,24 @@ public class DataLinkVoTableBuilder
      *            the URL to access the service
      * @param isGeneratedFile
      *            is a isGeneratedFile service (cutout or generated spectrum)
+     * @param name
+     *            the user readable name of the service
+     * @param description
+     *            the user oriented description of the service
      * @return this builder instance
      */
     public DataLinkVoTableBuilder withServiceDefinition(String xmlId, String standardId, String accessUrl,
-            boolean isGeneratedFile)
+            boolean isGeneratedFile, String name, String description)
     {
         Resource serviceResource = new Resource();
 
         serviceResource.setType("meta");
         serviceResource.setUtype("adhoc:service");
         serviceResource.setID(xmlId);
+        serviceResource.setName(name);
+        AnyTEXT desc = new AnyTEXT();
+        desc.getContent().add(description);
+        serviceResource.setDESCRIPTION(desc);
 
         Param standardIdParam = new Param();
         standardIdParam.setName("standardID");
@@ -173,7 +193,8 @@ public class DataLinkVoTableBuilder
 
         if (isGeneratedFile)
         {
-            inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.POS));
+            inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.CIRCLE));
+            inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.POLYGON));
             inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.BAND));
             inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.CHANNEL));
             inputParamsGroup.getFIELDrefOrPARAMrefOrPARAM().addAll(createParamsList(CutoutParam.POL));
@@ -192,7 +213,7 @@ public class DataLinkVoTableBuilder
         inputParam.setDatatype(type);
         inputParam.setArraysize(arraySize);
         inputParam.setXtype(xtype);
-        inputParam.setValue(value);
+        inputParam.setValue(value == null ? "" : value);
         inputParam.setUnit(unit);
         inputParam.setRef(ref);
 
@@ -212,18 +233,20 @@ public class DataLinkVoTableBuilder
                         this.authenticatedIdTokenField));
                 break;
 
-            case POS:
-                inputParams.add(createParam(cutoutParam.name(), DataType.CHAR, "*", "circle", null, null, null));
-                inputParams.add(createParam(cutoutParam.name(), DataType.CHAR, "*", "range", null, null, null));
-                inputParams.add(createParam(cutoutParam.name(), DataType.CHAR, "*", "polygon", null, null, null));
+            case CIRCLE:
+                inputParams.add(createParam(cutoutParam.name(), DataType.DOUBLE, "3", "circle", null, null, null));
+                break;
+
+            case POLYGON:
+                inputParams.add(createParam(cutoutParam.name(), DataType.DOUBLE, "*", "polygon", null, null, null));
                 break;
 
             case BAND:
-                inputParams.add(createParam(cutoutParam.name(), DataType.DOUBLE, "*", "interval", null, "m", null));
+                inputParams.add(createParam(cutoutParam.name(), DataType.DOUBLE, "2", "interval", null, "m", null));
                 break;
 
             case CHANNEL:
-                inputParams.add(createParam(cutoutParam.name(), DataType.INT, "*", "interval", null, "pixel", null));
+                inputParams.add(createParam(cutoutParam.name(), DataType.INT, "2", "interval", null, "pixel", null));
                 break;
 
             case POL:
@@ -257,7 +280,7 @@ public class DataLinkVoTableBuilder
         metaResource.setName("this");
 
         List<Object> list = metaResource.getCOOSYSOrGROUPOrPARAM();
-        list.add(buildStringParam("standardID", "ivo://ivoa.net/std/DataLink#links-1.0"));
+        list.add(buildStringParam("standardID", "ivo://ivoa.net/std/DataLink#links-1.1"));
         list.add(buildStringParam("accessUrl", url));
 
         Group inputParams = new Group();
@@ -483,7 +506,7 @@ public class DataLinkVoTableBuilder
 
         try
         {
-            return xmlStream.toString(CharEncoding.UTF_8);
+            return xmlStream.toString(StandardCharsets.UTF_8.name());
         }
         catch (UnsupportedEncodingException e)
         {

@@ -34,7 +34,7 @@ project.description = """CSIRO CASDA Project - CASDA VO Tools web application"""
 
 ext {
     majorVersion = 1
-    minorVersion = 23
+    minorVersion = 24
     springBootVer = '2.7.4'
     tomcatVer = '8.0.14'
     log4jVersion = '2.17.1'
@@ -125,6 +125,8 @@ dependencies {
     
     // More recent version of hamcrest than is included by JUnit
     testImplementation('org.unitils:unitils-core:3.4.2')
+
+    testImplementation('org.junit.platform:junit-platform-launcher:1.8.2')
 }
 
 apply from: 'gradle/versioning.gradle'
@@ -232,7 +234,6 @@ task jaxb(dependsOn: [
 //=====================================================================================================================
 
 eclipse {
-    project { natures 'org.springsource.ide.eclipse.gradle.core.nature' }
     classpath {
         containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
         containers 'org.eclipse.jdt.launching.JRE_CONTAINER'
@@ -240,6 +241,10 @@ eclipse {
             withXml { xmlProvider ->
                 def node = xmlProvider.asNode()
                 node.appendNode('classpathentry', [kind: 'src', path: 'src/main/generated'])
+            }
+            
+            beforeMerged { 
+            	classpath -> classpath.entries.add(new org.gradle.plugins.ide.eclipse.model.SourceFolder('src/main/generated', null)) 
             }
         }
     }

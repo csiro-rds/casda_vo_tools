@@ -16,48 +16,48 @@
             <DATA>
                 <TABLEDATA>
                     <TR>
-                        <TD>catalogue-123456</TD>
-                        <TD>http://localhost:8080/casda_data_access/data/sync?id=uVKfbiJhQarGHTtXMZXchmzDPgVL9temE9FdXZnZfbTmg77Yoc36IDpv94w0JOo3</TD>
+                        <TD>scan-10152-99817</TD>
+                        <TD>http://localhost:8080/casda_data_access/data/sync?id=R6w7Cy8gh9yub6YnNFuxBuOmRdC9xr3yNXnQ9wTaikzmg77Yoc36IDpv94w0JOo3</TD>
                         <TD/>
                         <TD/>
                         <TD>Download data product via web</TD>
                         <TD>#this</TD>
-                        <TD>application/xml</TD>
+                        <TD>application/tar</TD>
                         <TD>1024</TD>
                         <TD/>
                     </TR>
                     <TR>
-                        <TD>catalogue-123456</TD>
-                        <TD>http://localhost:8080/casda_data_access/data/sync/pawsey?id=uVKfbiJhQarGHTtXMZXchrf-6sFAYDlw9-TWmDjeSn-o7H-ElTygfmKNZVkLXvN-au7HXPIixovpMq2TjJ1JtQ</TD>
+                        <TD>scan-10152-99817</TD>
+                        <TD>http://localhost:8080/casda_data_access/data/sync/pawsey?id=R6w7Cy8gh9yub6YnNFuxBtA1QgW7WnLyr6awK-nQA2io7H-ElTygfmKNZVkLXvN-au7HXPIixovpMq2TjJ1JtQ</TD>
                         <TD/>
                         <TD/>
                         <TD>Download data at Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</TD>
                         <TD>#this</TD>
-                        <TD>application/xml</TD>
+                        <TD>application/tar</TD>
                         <TD>1024</TD>
                         <TD/>
                     </TR>
                     <TR>
-                        <TD>catalogue-123456</TD>
+                        <TD>scan-10152-99817</TD>
                         <TD/>
                         <TD>async_service</TD>
                         <TD/>
                         <TD>Scripted file access via Web</TD>
                         <TD>#this</TD>
-                        <TD>application/xml</TD>
+                        <TD>application/tar</TD>
                         <TD>1024</TD>
-                        <TD>uVKfbiJhQarGHTtXMZXchmzDPgVL9temE9FdXZnZfbTmg77Yoc36IDpv94w0JOo3</TD>
+                        <TD>R6w7Cy8gh9yub6YnNFuxBuOmRdC9xr3yNXnQ9wTaikzmg77Yoc36IDpv94w0JOo3</TD>
                     </TR>
                     <TR>
-                        <TD>catalogue-123456</TD>
+                        <TD>scan-10152-99817</TD>
                         <TD/>
                         <TD>pawsey_async_service</TD>
                         <TD/>
                         <TD>Scripted file access via Pawsey Centre. Note: Only users from within PSC network can access the data through this link. Only use if you currently have access to Pawsey facilities.</TD>
                         <TD>#this</TD>
-                        <TD>application/xml</TD>
+                        <TD>application/tar</TD>
                         <TD>1024</TD>
-                        <TD>uVKfbiJhQarGHTtXMZXchrf-6sFAYDlw9-TWmDjeSn-o7H-ElTygfmKNZVkLXvN-au7HXPIixovpMq2TjJ1JtQ</TD>
+                        <TD>R6w7Cy8gh9yub6YnNFuxBtA1QgW7WnLyr6awK-nQA2io7H-ElTygfmKNZVkLXvN-au7HXPIixovpMq2TjJ1JtQ</TD>
                     </TR>
                 </TABLEDATA>
             </DATA>

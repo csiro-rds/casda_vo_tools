@@ -71,7 +71,8 @@ public class DataLinkVoTableBuilderTest
     {
         DataLinkVoTableBuilder builder = new DataLinkVoTableBuilder(APP_BASE_URL);
         builder.withResultsTable().withServiceDefinition("async_service", "ivo://ivoa.net/std/SODA#async-1.0",
-                "http://localhost/data");
+                "http://localhost/data", "DownloadService",
+                "Asynchronous download of the file(s) to any server.");
         checkXmlAgainstTestCaseFile("builder.service_def", builder.getXml());
     }
 
@@ -114,11 +115,19 @@ public class DataLinkVoTableBuilderTest
 
     private void checkXmlAgainstTestCaseFile(String testCase, String xml) throws SAXException, IOException
     {
-        String testXml = FileUtils.readFileToString(new File("src/test/resources/datalink/" + testCase + ".xml"));
-        Diff diff = DiffBuilder.compare(xml.toString()).withTest(testXml.toString()).ignoreWhitespace().build();
+        String expectedXml = FileUtils.readFileToString(new File("src/test/resources/datalink/" + testCase + ".xml"));
+        Diff diff = DiffBuilder.compare(expectedXml.toString()).withTest(xml.toString()).ignoreWhitespace().build();
 
         Iterator<Difference> allDifferences = diff.getDifferences().iterator();
+        int numDiffs = Iterators.size(allDifferences);
+        if (numDiffs > 0)
+        {
+            System.out.println("--------");
+            System.out.println("Differences found, actual XML is");
+            System.out.println("--------");
+            System.out.println(xml);
+        }
 
-        assertEquals(0, Iterators.size(allDifferences), "Differences found: " + diff.toString());
+        assertEquals(0, numDiffs, "Differences found: " + diff.toString());
     }
 }
