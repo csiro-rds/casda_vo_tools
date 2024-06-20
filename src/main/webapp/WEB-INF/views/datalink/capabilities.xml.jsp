@@ -22,7 +22,7 @@
 			<resultType>application/xml</resultType>
 	   </interface>
 	</capability>
-	<capability standardID="ivo://ivoa.net/std/DataLink#links-1.0" > 
+	<capability standardID="ivo://ivoa.net/std/DataLink#links-1.1" > 
 		<interface version="1.0" xsi:type="vs:ParamHTTP" role="std">
 			<accessURL use="base">${datalinkURL}</accessURL>
 			<queryType>GET</queryType>

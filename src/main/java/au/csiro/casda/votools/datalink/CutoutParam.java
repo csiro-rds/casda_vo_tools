@@ -22,8 +22,11 @@ public enum CutoutParam
     /** The ID parameter is a string-valued parameter that specifies the identifier of dataset(s).  */
     ID,
     
-    /** The POS parameter defines the positional region(s) to be retrieved for data. */
-    POS, 
+    /** The CIRCLE parameter defines the cone positional region(s) to be retrieved for data. */
+    CIRCLE, 
+    
+    /** The POLYGON parameter defines the polygonal positional region(s) to be retrieved for data. */
+    POLYGON, 
     
     /** The BAND parameter defines the energy interval(s) to be retrieved for data. */
     BAND,

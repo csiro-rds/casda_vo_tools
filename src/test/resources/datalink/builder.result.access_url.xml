@@ -2,6 +2,7 @@
 
 <VOTABLE xmlns="http://www.ivoa.net/xml/VOTable/v1.3" version="1.3">
     <RESOURCE name="CASDA Datalink Result" type="results">
+	    <INFO name="standardID" value="ivo://ivoa.net/std/DataLink#links-1.1"></INFO>
         <TABLE>
         	<FIELD datatype="char" name="ID" ucd="meta.id;meta.main" arraysize="*"/>
             <FIELD datatype="char" name="access_url" ucd="meta.ref.url" arraysize="*"/>
