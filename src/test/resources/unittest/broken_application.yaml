@@ -1,0 +1,3 @@
+!Configuration
+options: !Map
+   datalink.resource.moment_map: ^moment_map-[0-9]+$, application/fits

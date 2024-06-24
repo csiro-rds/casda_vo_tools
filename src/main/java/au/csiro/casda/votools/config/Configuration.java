@@ -113,6 +113,8 @@ public class Configuration extends Options
     public static final String DEFAULT_DB_SCHEMA = "default.db.schema";
 
     private static ConfigurationRegistry registry;
+    
+    private static final int DATALINK_RESOURCE_CONFIG_LENGTH = 3;
 
     /**
      * Parameterless constructor
@@ -222,6 +224,10 @@ public class Configuration extends Options
             YamlParser parser = new YamlBeansParser();
             String content = FileUtils.readFileToString(file);
             Configuration config = new Configuration(parser, content);
+            
+            // validate the newly generated configuration
+            validateConfig(config);
+            
             // If configuration is empty add settings from properties files
             if (configurationRegistry != null
                     && (config.endPoints.size() == 0 || config.get(ConfigValueKeys.CONNECTION_URL) == null))
@@ -233,6 +239,60 @@ public class Configuration extends Options
         catch (IOException e)
         {
             throw new ConfigurationException(e);
+        }
+    }
+
+    /**
+     * Validation method for a configuration object
+     * @param config
+     *          The configuration being validated
+     * @throws ConfigurationException
+     *          If a validation error occurs an exception is thrown
+     */
+    private static void validateConfig(Configuration config) throws ConfigurationException
+    {
+        // Check that if the datalink resources are valued, that they have 3 corresponding values
+        String[] arrayConfigValues = {
+                ConfigValueKeys.DATALINK_RESOURCE_IMAGE_CUBE,
+                ConfigValueKeys.DATALINK_RESOURCE_CATALOGUE,
+                ConfigValueKeys.DATALINK_RESOURCE_SPECTRUM,
+                ConfigValueKeys.DATALINK_RESOURCE_MOMENT_MAP,
+                ConfigValueKeys.DATALINK_RESOURCE_CUBELET,
+                ConfigValueKeys.DATALINK_RESOURCE_EVALUATION,
+                ConfigValueKeys.DATALINK_RESOURCE_VISIBILITY,
+                ConfigValueKeys.DATALINK_RESOURCE_SCAN
+        };
+        
+        for (String configArrayValue: arrayConfigValues)
+        {
+            String resource = config.getOptions().get(configArrayValue);
+            validateArrayConfigLength(configArrayValue, resource, DATALINK_RESOURCE_CONFIG_LENGTH);
+        }
+    }
+
+    /**
+     * Validation method for config array values to ensure they meet the correct length
+     * 
+     * @param arrayConfigKey
+     *          The key of the property in the config map
+     * @param arrayConfigValue
+     *          The value of the array config, typically csv list
+     * @param expectedLength
+     *          The expected length of the array config value
+     * @throws ConfigurationException
+     *          Thrown is validation fails
+     */
+    private static void validateArrayConfigLength(String arrayConfigKey, String arrayConfigValue, int expectedLength) 
+            throws ConfigurationException
+    {
+        if (arrayConfigValue != null)
+        {
+            if (arrayConfigValue.split(",").length != expectedLength)
+            {
+                throw new ConfigurationException("Expected " + expectedLength + " values for config value: " 
+                        + arrayConfigKey + " but received: " 
+                        + arrayConfigValue.split(",").length);
+            }
         }
     }
 
@@ -271,6 +331,16 @@ public class Configuration extends Options
         putDefault(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP, registry.getDatalinkDownloadLimitHttp());
         putDefault(ConfigValueKeys.DATALINK_LARGE_WEB_DOWNLOAD_LIMIT_HTTP,
                 registry.getDatalinkLargeWebDownloadLimitHttp());
+        
+        putDefault(ConfigValueKeys.DATALINK_RESOURCE_IMAGE_CUBE, StringUtils.join(registry.getImageCubeResource(), ","));
+        putDefault(ConfigValueKeys.DATALINK_RESOURCE_CATALOGUE, StringUtils.join(registry.getCatalogueResource(), ","));
+        putDefault(ConfigValueKeys.DATALINK_RESOURCE_SPECTRUM, StringUtils.join(registry.getSpectrumResource(), ","));
+        putDefault(ConfigValueKeys.DATALINK_RESOURCE_MOMENT_MAP, StringUtils.join(registry.getMomentMapResource(), ","));
+        putDefault(ConfigValueKeys.DATALINK_RESOURCE_CUBELET, StringUtils.join(registry.getCubeletResource(), ","));
+        putDefault(ConfigValueKeys.DATALINK_RESOURCE_EVALUATION, StringUtils.join(registry.getEvaluationResource(), ","));
+        putDefault(ConfigValueKeys.DATALINK_RESOURCE_VISIBILITY, StringUtils.join(registry.getVisibilityResource(), ","));
+        putDefault(ConfigValueKeys.DATALINK_RESOURCE_SCAN, StringUtils.join(registry.getScanResource(), ","));
+        
         putDefault(ConfigValueKeys.ENVIRONMENT, registry.getEnvironment());
         putDefault(ConfigValueKeys.CSS, registry.getCss());
         putDefault(ConfigValueKeys.LOGO_URL, registry.getLogoUrl());

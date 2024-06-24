@@ -14,6 +14,7 @@ package au.csiro.casda.votools.config;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -255,6 +256,30 @@ public class ConfigurationRegistry
     
     @Value("${logo.url}")
     private String logoUrl;
+    
+    @Value("#{'${datalink.resource.image_cube}'.split(',')}")
+    private List<String> imageCubeResource;
+    
+    @Value("#{'${datalink.resource.catalogue}'.split(',')}")
+    private List<String> catalogueResource;
+    
+    @Value("#{'${datalink.resource.spectrum}'.split(',')}")
+    private List<String> spectrumResource;
+    
+    @Value("#{'${datalink.resource.moment_map}'.split(',')}")
+    private List<String> momentMapResource;
+    
+    @Value("#{'${datalink.resource.cubelet}'.split(',')}")
+    private List<String> cubeletResource;
+    
+    @Value("#{'${datalink.resource.evaluation}'.split(',')}")
+    private List<String> evaluationResource;
+    
+    @Value("#{'${datalink.resource.visibility}'.split(',')}")
+    private List<String> visibilityResource;
+    
+    @Value("#{'${datalink.resource.scan}'.split(',')}")
+    private List<String> scanResource;
     
     private Set<String> verifiedDbs;
 
@@ -1125,6 +1150,86 @@ public class ConfigurationRegistry
     public void setLogoUrl(String logoUrl)
     {
         this.logoUrl = logoUrl;
+    }
+
+    public List<String> getImageCubeResource()
+    {
+        return imageCubeResource;
+    }
+
+    public void setImageCubeResource(List<String> imageCubeResource)
+    {
+        this.imageCubeResource = imageCubeResource;
+    }
+
+    public List<String> getCatalogueResource()
+    {
+        return catalogueResource;
+    }
+
+    public void setCatalogueResource(List<String> catalogueResource)
+    {
+        this.catalogueResource = catalogueResource;
+    }
+
+    public List<String> getSpectrumResource()
+    {
+        return spectrumResource;
+    }
+
+    public void setSpectrumResource(List<String> spectrumResource)
+    {
+        this.spectrumResource = spectrumResource;
+    }
+
+    public List<String> getMomentMapResource()
+    {
+        return momentMapResource;
+    }
+
+    public void setMomentMapResource(List<String> momentMapResource)
+    {
+        this.momentMapResource = momentMapResource;
+    }
+
+    public List<String> getCubeletResource()
+    {
+        return cubeletResource;
+    }
+
+    public void setCubeletResource(List<String> cubeletResource)
+    {
+        this.cubeletResource = cubeletResource;
+    }
+
+    public List<String> getEvaluationResource()
+    {
+        return evaluationResource;
+    }
+
+    public void setEvaluationResource(List<String> evaluationResource)
+    {
+        this.evaluationResource = evaluationResource;
+    }
+
+    public List<String> getVisibilityResource()
+    {
+        return visibilityResource;
+    }
+
+    public void setVisibilityResource(List<String> visibilityResource)
+    {
+        this.visibilityResource = visibilityResource;
+    }
+
+    public List<String> getScanResource()
+    {
+        return scanResource;
+    }
+
+    public void setScanResource(List<String> scanResource)
+    {
+        this.scanResource = scanResource;
     }
 
     /**
