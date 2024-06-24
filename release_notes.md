@@ -1,5 +1,42 @@
 # CASDA VO Tools Release Notes
 
+
+## v1.25:  2023-02-21
+
+* New Features
+    * Allow configuration of some datalink details
+* Bug fixes
+    * Correct support for PostgreSQL v14 and later
+
+## v1.24:  2023-02-21
+
+* New Features
+    * Update datalink to v1.1
+    * Allow visibilities to be requested via their scans
+    * Remove POS from SODA datalink results and use CIRCLE and POLYGON
+
+## v1.23:  2023-10-13
+
+* New Features
+    * Add support for prometheus metrics
+* Bug fixes
+    * Correct date format in TAP (UWS) job responses
+
+## v1.22:  2023-06-22
+
+* New Features
+    * Allow results directory to be configured
+    * Improvements to robustness of configuration
+
+## v1.21:  2023-02-21
+
+* New Features
+    * SIA2 - cone search - Add distance from image cube centre
+* Bug fixes
+    * Cleanup UWS error logs
+    * Cleanup old VO Tools result files
+    * SIA1 - correct validation errors
+
 ## v1.20 - 2022-09-21
 
 * New Features
