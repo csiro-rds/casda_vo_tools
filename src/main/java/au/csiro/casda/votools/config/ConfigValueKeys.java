@@ -82,7 +82,31 @@ public abstract class ConfigValueKeys
      * 'casdaLargeWebDownload' role.
      */
     public static final String DATALINK_LARGE_WEB_DOWNLOAD_LIMIT_HTTP = "datalink.large.web.download.limit.http";
-
+    
+    /** Constant for the data link image cube resource */
+    public static final String DATALINK_RESOURCE_IMAGE_CUBE = "datalink.resource.image_cube";
+    
+    /** Constant for the data link catalogue resource */
+    public static final String DATALINK_RESOURCE_CATALOGUE = "datalink.resource.catalogue";
+    
+    /** Constant for the data link spectrum resource */
+    public static final String DATALINK_RESOURCE_SPECTRUM = "datalink.resource.spectrum";
+    
+    /** Constant for the data link moment_map resource */
+    public static final String DATALINK_RESOURCE_MOMENT_MAP = "datalink.resource.moment_map";
+    
+    /** Constant for the data link cubelet resource */
+    public static final String DATALINK_RESOURCE_CUBELET = "datalink.resource.cubelet";
+    
+    /** Constant for the data link evaluation resource */
+    public static final String DATALINK_RESOURCE_EVALUATION = "datalink.resource.evaluation";
+    
+    /** Constant for the data link visibility resource */
+    public static final String DATALINK_RESOURCE_VISIBILITY = "datalink.resource.visibility";
+    
+    /** Constant for the data link scan resource */
+    public static final String DATALINK_RESOURCE_SCAN = "datalink.resource.scan";
+    
     /** Constant for the build number */
     public static final String BUILD_NUMBER = "build.number";
     

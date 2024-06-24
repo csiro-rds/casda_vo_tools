@@ -6,8 +6,10 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +32,7 @@ import au.csiro.casda.votools.config.Configurable;
 import au.csiro.casda.votools.config.Configuration;
 import au.csiro.casda.votools.config.ConfigurationException;
 import au.csiro.casda.votools.config.ConfigurationRegistry;
+import au.csiro.casda.votools.config.DataLinkResourceType;
 import au.csiro.casda.votools.jpa.repository.VoTableRepositoryService;
 import au.csiro.casda.votools.logging.CasdaVoToolsEvents;
 import au.csiro.casda.votools.result.VotableError;
@@ -61,26 +64,8 @@ public class DataLinkService extends Configurable
 {
     /**
      * Name to use in generated VOTable results
-     */
+     */    
     private static final String CASDA_DATALINK_RESULT_NAME = "CASDA Data Link";
-    
-    private static final String IMAGE_CUBE_REGEX = "^cube-[0-9]+$";
-    
-    private static final String CATALOGUE_REGEX = "^catalogue-[0-9]+$";
-    
-    private static final String SPECTRUM_REGEX = "^spectrum-[0-9]+$";
-    
-    private static final String MOMENT_MAP_REGEX = "^moment_map-[0-9]+$";
-    
-    private static final String CUBELET_REGEX = "^cubelet-[0-9]+$";
-    
-    private static final String EVALUATION_REGEX = "^evaluation-[0-9]+$";
-    
-    private static final String FITS_REGEX = "^(cube|spectrum|moment_map|cubelet)-[0-9]+$";
-    
-    private static final String VISIBILITY_REGEX = "^visibility-[0-9]+$";
-    
-    private static final String SCAN_REGEX = "^scan-[0-9]+-[0-9]+$";
     
     private static final int KB_IN_GB= 1024 * 1024;
 
@@ -111,6 +96,15 @@ public class DataLinkService extends Configurable
     private String cutoutUiServiceUrl;
     private long datalinkDownloadLimitHttp;
     private long datalinkLargeWebDownloadLimitHttp;
+    private List<String> imageCubeResource;
+    private List<String> catalogueResource;
+    private List<String> spectrumResource;
+    private List<String> momentMapResource;
+    private List<String> cubeletResource;
+    private List<String> evaluationResource;
+    private List<String> visibilityResource;
+    private List<String> scanResource;
+    private Map<DataLinkResourceType, List<String>> resourceMap;
 
     /**
      * Constructor
@@ -145,7 +139,26 @@ public class DataLinkService extends Configurable
         
         datalinkDownloadLimitHttp = convertLimit(ConfigValueKeys.DATALINK_DOWNLOAD_LIMIT_HTTP);
         datalinkLargeWebDownloadLimitHttp = convertLimit(ConfigValueKeys.DATALINK_LARGE_WEB_DOWNLOAD_LIMIT_HTTP);
-
+        
+        imageCubeResource = config.getList(ConfigValueKeys.DATALINK_RESOURCE_IMAGE_CUBE);
+        catalogueResource = config.getList(ConfigValueKeys.DATALINK_RESOURCE_CATALOGUE);
+        spectrumResource = config.getList(ConfigValueKeys.DATALINK_RESOURCE_SPECTRUM);
+        momentMapResource = config.getList(ConfigValueKeys.DATALINK_RESOURCE_MOMENT_MAP);
+        cubeletResource = config.getList(ConfigValueKeys.DATALINK_RESOURCE_CUBELET);
+        evaluationResource = config.getList(ConfigValueKeys.DATALINK_RESOURCE_EVALUATION);
+        visibilityResource = config.getList(ConfigValueKeys.DATALINK_RESOURCE_VISIBILITY);
+        scanResource = config.getList(ConfigValueKeys.DATALINK_RESOURCE_SCAN);
+        
+        resourceMap = new HashMap<DataLinkResourceType, List<String>>();
+        resourceMap.put(DataLinkResourceType.IMAGE_CUBE, imageCubeResource);
+        resourceMap.put(DataLinkResourceType.CATALOGUE, catalogueResource);
+        resourceMap.put(DataLinkResourceType.SPECTRUM, spectrumResource);
+        resourceMap.put(DataLinkResourceType.MOMENT_MAP, momentMapResource);
+        resourceMap.put(DataLinkResourceType.CUBELET, cubeletResource);
+        resourceMap.put(DataLinkResourceType.EVALUATION, evaluationResource);
+        resourceMap.put(DataLinkResourceType.VISIBILITY, visibilityResource);
+        resourceMap.put(DataLinkResourceType.SCAN, scanResource);
+        
         this.voTableRepositoryService = voTableRepositoryService;
     }
 
@@ -314,56 +327,42 @@ public class DataLinkService extends Configurable
     private void buildDataAccessForId(DataLinkVoTableBuilder builder, String id, String userId, String loginSystem,
             List<Long> projectIds, boolean casdaAdmin, boolean casdaLargeWebDownload, Date accessTime) throws Exception
     {
-        String contentType;
+        String contentType = "";
         String table = "";
+        DataLinkResourceType resource = null;
 
         String parsedId = id;
+        
         if(StringUtils.isBlank(id))
         {
             builder.withErrorResult(id,
                     "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(id));
             return;
         }
-        else if(id.toLowerCase().matches(CATALOGUE_REGEX))
+
+        // Loop through configuration lists
+        for (Entry<DataLinkResourceType, List<String>> entry : resourceMap.entrySet())
         {
-            table = "casda.catalogue";
+            if (id.toLowerCase().matches(entry.getValue().get(1)))
+            {
+                resource = entry.getKey();
+                table = entry.getValue().get(0);
+                contentType = entry.getValue().get(2);
+                if (entry.getKey() == DataLinkResourceType.SCAN)
+                {
+                    parsedId = "visibility-" + id.split("-")[1];
+                }
+                break;
+            }            
         }
-        else if(id.toLowerCase().matches(IMAGE_CUBE_REGEX))
-        {
-        	table = "casda.image_cube";
-        }
-        else if(id.toLowerCase().matches(VISIBILITY_REGEX))
-        {
-        	table = "casda.measurement_set";
-        }
-        else if(id.toLowerCase().matches(SCAN_REGEX))
-        {
-            table = "casda.measurement_set";
-            // We ignore the second id (scan summary id) as it is only there to make the obscore record unique
-            parsedId = "visibility-" + id.split("-")[1];
-        }
-        else if(id.toLowerCase().matches(SPECTRUM_REGEX))
-        {
-        	table = "casda.spectrum";
-        }
-        else if(id.toLowerCase().matches(MOMENT_MAP_REGEX))
-        {
-        	table = "casda.moment_map";
-        }
-        else if(id.toLowerCase().matches(CUBELET_REGEX))
-        {
-        	table = "casda.cubelet";
-        }
-        else if (id.toLowerCase().matches(EVALUATION_REGEX))
-        {
-            table = "casda.evaluation_file";
-        }
-        else
+
+        if (table.isEmpty() || contentType.isEmpty() || resource == null)
         {
             builder.withErrorResult(id,
                     "UsageFault: Invalid id " + StringEscapeUtils.escapeXml10(id));
             return;
         }
+        
         Long dataProductId = Long.parseLong(parsedId.split("-")[1]);
         
         long contentLengthKb = getContentLength(table, dataProductId);
@@ -377,19 +376,6 @@ public class DataLinkService extends Configurable
                 // show access data link to casdaAdmins or project members
                 if (isAccessAllowed(casdaAdmin, userId, projectIds, table, dataProductId))
                 {
-                    if (parsedId.toLowerCase().matches(FITS_REGEX))
-                    {
-                        contentType = "application/fits";
-                    }
-                    else if(parsedId.toLowerCase().matches(CATALOGUE_REGEX))
-                    {
-                        contentType = "application/xml";
-                    }
-                    else
-                    {
-                        contentType = "application/tar";
-                    }
-
                     RequestToken requestToken = new RequestToken(parsedId, userId, loginSystem, accessTime,
                             dataLinkAccessEncriptionSecretKey);
 
@@ -466,7 +452,7 @@ public class DataLinkService extends Configurable
                      *  Cutout & spectrum generation services have 
                      *  no maximum limit as the size of the cutout is not known at this point.
                      */
-                    if(id.toLowerCase().matches(IMAGE_CUBE_REGEX) && StringUtils.isNotBlank(cutoutServiceUrl))
+                    if(resource == DataLinkResourceType.IMAGE_CUBE && StringUtils.isNotBlank(cutoutServiceUrl))
                     {
                         requestToken.setDownloadMode(RequestToken.CUTOUT);
                         builder.withServiceDefResult(id, "cutout_service", cutoutServiceName, "#cutout", contentType,
@@ -476,7 +462,7 @@ public class DataLinkService extends Configurable
                                 "Generate a cutout image or cube");
                     }
                     
-                    if(id.toLowerCase().matches(IMAGE_CUBE_REGEX) && StringUtils.isNotBlank(generateSpectrumServiceUrl))
+                    if(resource == DataLinkResourceType.IMAGE_CUBE && StringUtils.isNotBlank(generateSpectrumServiceUrl))
                     {
                         requestToken.setDownloadMode(RequestToken.GENERATED_SPECTRUM);
                         builder.withServiceDefResult(id, "spectrum_generation_service", generateSpectrumServiceName,

@@ -1,0 +1,4 @@
+!Configuration
+options: !Map
+   datalink.resource.image_cube: casda.image_cube, ^cube-[0-9]+$, application/fits
+   datalink.resource.catalogue: test.catalogue, ^catalogue-[a-zA-Z0-9_]+$, test-content-type

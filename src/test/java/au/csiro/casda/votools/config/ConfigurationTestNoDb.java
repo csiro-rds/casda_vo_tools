@@ -1,8 +1,14 @@
 package au.csiro.casda.votools.config;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.File;
+
+import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +45,33 @@ public class ConfigurationTestNoDb
         assertThat(yaml, stringContainsInOrder("endPoints:", "TAP:", "tap.votable.xsl:", "SCS:"));
         // Make sure that tap.votable.xsl is not in the general list
         assertThat(yaml, not(stringContainsInOrder("application.base.url:", "tap.votable.xsl:")));
+    }
+    
+    
+    @Test
+    public void testYamlFileConfigurationLoading() throws ConfigurationException
+    {
+        ConfigurationRegistry registry = new ConfigurationRegistry();
+        Configuration.setRegistry(registry);
+        File testYamlFile = new File("src/test/resources/unittest/application.yaml");
+        Configuration config = Configuration.newConfiguration(testYamlFile, registry);
+        assertEquals("casda.image_cube, ^cube-[0-9]+$, application/fits", config.get("datalink.resource.image_cube"));
+        assertEquals("test.catalogue, ^catalogue-[a-zA-Z0-9_]+$, test-content-type",
+                config.get("datalink.resource.catalogue"));
+    }
+    
+    @Test
+    public void testBrokenYamlFileConfigurationLoading() throws ConfigurationException
+    {
+        ConfigurationRegistry registry = new ConfigurationRegistry();
+        Configuration.setRegistry(registry);
+        File testYamlFile = new File("src/test/resources/unittest/broken_application.yaml");
+        ConfigurationException configException = assertThrows(ConfigurationException.class, () -> {
+            Configuration.newConfiguration(testYamlFile, registry);
+        });
+        
+        assertThat(configException.getMessage(), 
+                containsString("Expected 3 values for config value: datalink.resource.moment_map but received: 2"));
     }
     
 }

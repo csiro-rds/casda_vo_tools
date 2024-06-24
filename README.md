@@ -97,6 +97,18 @@ For an initial installation, you should follow these basic steps:
 9. Go to `http://localhost:8080/casda_vo_tools/tap`
 10. The UI you see at this address can be used to execute some ADQL queries.  eg:
 
+#### Datalink Resource Configuration
+It is possible to alter the database configuration for data products accessed via data link. These values are stored in the datalink.resource properties.
+The configuration takes an array of 3 values of the format,
+
+{ "database table", "id regex", "content-type" }
+
+and example is as follows
+
+> `datalink.resource.image_cube: casda.image_cube, ^cube-[0-9]+$, application/fits`
+
+If the property is not valued, the default casda properties will be used.
+
 > `SELECT * FROM tap_schema.tables`
 
 ### Logging
