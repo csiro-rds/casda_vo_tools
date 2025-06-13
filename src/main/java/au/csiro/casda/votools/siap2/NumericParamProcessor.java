@@ -92,7 +92,7 @@ public class NumericParamProcessor implements SiapParamProcessor
         {
             return Double.NaN;
         }
-        return Double.valueOf(value);
+        return Double.parseDouble(value);
     }
 
     /**

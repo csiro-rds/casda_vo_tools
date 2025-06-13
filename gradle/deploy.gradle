@@ -52,10 +52,10 @@ task deployToServer() {
 			// Note: Each sudo command here must be specifically allowed in the remote host suduers config. 
 			session(remotes.targetServer) {
 				execute("sudo  ${tomcatRemoteDir}/stop")
-				println "Cleaning out old app at ${tomcatRemoteDir}/webapps/${war.baseName} "
+				println "Cleaning out old app at ${tomcatRemoteDir}/webapps/${war.archiveBaseName.get()} "
 				execute("sudo -u ${appUser} ${tomcatRemoteDir}/cleanupwarfile ${war.baseName}")
-				println "Uploading ${downloadedArtifact} to ${tomcatRemoteDir}/webapps/${war.baseName}.war"
-				put from: downloadedArtifact, into: "${tomcatRemoteDir}/webapps/${war.baseName}.war"
+				println "Uploading ${downloadedArtifact} to ${tomcatRemoteDir}/webapps/${war.archiveBaseName.get()}.war"
+				put from: downloadedArtifact, into: "${tomcatRemoteDir}/webapps/${war.archiveBaseName.get()}.war"
 				execute("sudo  ${tomcatRemoteDir}/start")
 			}
 		}
@@ -73,8 +73,9 @@ task downloadBinaryArchive(dependsOn: makeDownloadFolder) {
 
 	doLast {
 	    ext {
-	        binaryUrl = "https://nexus-isa.csiro.au/repository/cd/au/csiro/${war.baseName}/${project.version}/${war.baseName}-${project.version}.war"
+	        binaryUrl = "https://nexus-isa.csiro.au/repository/cd/au/csiro/${war.archiveBaseName.get()}/${project.version}/${war.archiveBaseName.get()}-${project.version}.war"
 	    }
+	    println "Downloading ${binaryUrl} to ${downloadedArtifact}"
 	
 		ant.get(src: binaryUrl, dest: downloadedArtifact)
 	}

@@ -75,8 +75,8 @@ public class PosParamProcessor extends NumericParamProcessor
             else
             {
                 // Check bounds of values
-                double longitude = Double.valueOf(list[0]);
-                double latitude = Double.valueOf(list[1]);
+                double longitude = Double.parseDouble(list[0]);
+                double latitude = Double.parseDouble(list[1]);
                 if (refFrame.startsWith("GALACTIC"))
                 {
                     if (longitude < MIN_GAL_LONGITUDE || longitude > MAX_LONGITUDE)

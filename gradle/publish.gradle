@@ -38,7 +38,7 @@ publishing {
     publications {
         mavenWar(MavenPublication) {
             artifact tasks.war
-            artifactId "${war.baseName}"
+            artifactId "${war.archiveBaseName.get()}"
             version project.version
         }
     }

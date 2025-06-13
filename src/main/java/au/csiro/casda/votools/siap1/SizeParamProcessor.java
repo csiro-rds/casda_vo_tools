@@ -65,7 +65,7 @@ public class SizeParamProcessor extends NumericParamProcessor
                 String[] parts = param.split(",");
                 for (String part : parts)
                 {
-                    double sizeVal = Double.valueOf(part);
+                    double sizeVal = Double.parseDouble(part);
                     numValues++;
 
                     if (sizeVal < 0 || sizeVal > maxSizeDegrees)
@@ -107,7 +107,7 @@ public class SizeParamProcessor extends NumericParamProcessor
         int idx = 0;
         for (String part : parts)
         {
-            double sizeVal = Double.valueOf(part);
+            double sizeVal = Double.parseDouble(part);
             if (sizeVal == 0.0d)
             {
                 sizeVal = defaultSize;

@@ -1,5 +1,9 @@
 # CASDA VO Tools Release Notes
 
+## v1.26:  2024-10-28
+
+* New Features
+    * Update to run on Java 21+
 
 ## v1.25:  2023-02-21
 

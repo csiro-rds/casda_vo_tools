@@ -138,7 +138,7 @@ public class NumericParamProcessor implements SsapParamProcessor
         {
             return Double.NaN;
         }
-        return Double.valueOf(value);
+        return Double.parseDouble(value);
     }
 
     /**
