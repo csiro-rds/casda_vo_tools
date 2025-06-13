@@ -22,12 +22,6 @@ checkstyle {
     configProperties.putAt("projectDir", projectDir)
 }
 
-spotbugs {
-    ignoreFailures = true
-    reportLevel = "high"
-    //exclude file("config/spotbugsFilter.xml")
-}
-
 pmd {
     toolVersion = "6.30.0"
     ignoreFailures = true
@@ -42,4 +36,13 @@ pmd {
         // only use shared rules and rules for test
         ruleSetFiles = files("config/pmd/pmdRules.xml", "config/pmd/pmdRulesTest.xml")
     }
+}
+
+cpdCheck {
+	ignoreFailures = true
+	ignoreAnnotations = true
+	// eventuall we want to get this down to the default of 50
+	//minimumTokenCount = 75
+    source = sourceSets.main.allJava
+    exclude excludePatternAntStyle
 }

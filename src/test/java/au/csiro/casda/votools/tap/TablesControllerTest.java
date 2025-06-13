@@ -79,7 +79,7 @@ public class TablesControllerTest extends BaseTest
         
         TapTable table2 = new TapTable();
         table2.setTableName("aaaa");
-        TapColumn column2_A = createTapColumn("aaaa", "bbbb", 1, 4, 1, "gus");
+        TapColumn column2_A= createTapColumn("aaaa", "bbbb", 1, 4, 1, "gus");
         TapColumn column2_fk = createTapColumn("aaaa", "xxxx_ref", 1, 4, 1, "fred");
         
         TapSchema schema = new TapSchema();
@@ -107,7 +107,7 @@ public class TablesControllerTest extends BaseTest
     {
         TapColumn column = new TapColumn();
         column.setId(new TapColumnPK(tableName, columnName));
-        column.setStd(new Integer(size));
+        column.setStd(Integer.valueOf(size));
         column.setSize(size);
         column.setIndexed(indexed);
         column.setUtype(utype);

@@ -4,7 +4,7 @@ import java.io.File;
 
 /*
  * Gradle build script for CSIRO CASDA VO Tools web application (casda_vo_tools).
- * Built for Gradle v6.9.1
+ * Built for Gradle v8.7
  * 
  * Primary tasks are:
  *  clean - Remove the contents of the build folder ready for a full rebuild.
@@ -18,14 +18,27 @@ buildscript {
 }
 
 plugins {
-  id "com.github.spotbugs" version "4.6.0"
+  id "com.github.spotbugs" version "6.0.15"
   id "org.hidetake.ssh" version "2.10.1"
+  id 'de.aaschmid.cpd' version '3.4'
 }
 
 apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'maven-publish'
+apply plugin: 'com.github.spotbugs'
+
+/*
+ * Spotbugs must be in this file in order to import the Confidence emum to configure the reportLevel
+ * this was not possible in the report.gradle file
+ */
+import com.github.spotbugs.snom.Confidence
+
+spotbugs {
+    ignoreFailures = true
+    reportLevel = Confidence.valueOf('HIGH')
+}
 
 group = 'au.csiro'
 
@@ -34,20 +47,22 @@ project.description = """CSIRO CASDA Project - CASDA VO Tools web application"""
 
 ext {
     majorVersion = 1
-    minorVersion = 25
-    springBootVer = '2.7.4'
+    minorVersion = 26
+    springBootVer = '2.7.18'
     tomcatVer = '8.0.14'
-    log4jVersion = '2.17.1'
+    log4jVersion = '2.22.1'
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 repositories {
     mavenLocal()
     mavenCentral()
     ivy {
-        url 'https://github.com/csiro-rds/casda_vo_tools/raw/master/'
+        url 'https://github.com/csiro-rds/casda_vo_tools/raw/main/'
         patternLayout {
             artifact 'external-libs/[module]-[revision](-[classifier])(.[ext])'
         }
@@ -121,7 +136,7 @@ dependencies {
     
     implementation("org.freemarker:freemarker:2.3.31")
     
-    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVer}")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVer}")
     
     // More recent version of hamcrest than is included by JUnit
     testImplementation('org.unitils:unitils-core:3.4.2')
@@ -133,9 +148,8 @@ apply from: 'gradle/versioning.gradle'
 
 war {
     duplicatesStrategy = "EXCLUDE"
-    baseName = 'casda_vo_tools'
+    archiveBaseName = 'casda_vo_tools'
 }
-war.dependsOn makeVersionProps
 
 test {
     testLogging { exceptionFormat "full" }
@@ -151,15 +165,13 @@ test {
 configurations { jaxb }
 
 dependencies {
-    jaxb 'com.sun.xml.bind:jaxb-xjc:2.2.7-b41'
-    jaxb 'com.sun.xml.bind:jaxb-impl:2.2.7-b41'
-    jaxb 'javax.xml.bind:jaxb-api:2.2.7'
-    jaxb 'org.jvnet.jaxb2_commons:jaxb2-basics:0.8.1'
-}
+    jaxb 'org.glassfish.jaxb:jaxb-xjc:2.3.2'
+    jaxb 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
+    jaxb 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
+    jaxb 'org.jvnet.jaxb:jaxb2-basics:2.0.9'}
 
 task javadoc(type: Javadoc, overwrite: true) {
   source = sourceSets.main.allJava
-  classpath = configurations.compile
   
   exclude '**/jaxb/**'
   exclude '/net/ivoa/vo/**'
@@ -168,7 +180,7 @@ task javadoc(type: Javadoc, overwrite: true) {
 
 class JaxbTask extends DefaultTask {
 
-    @Input
+    @OutputDirectory
     File outputDir
     
     @Input
@@ -210,7 +222,7 @@ class JaxbTask extends DefaultTask {
             classpath: jaxbToolingClasspath) {
             schema(file: schemaFile)
             binding(file: bindingFile)
-            arg(line: "-Xinheritance")
+            //arg(line: "-Xinheritance")
         }
     }
 }
@@ -235,17 +247,8 @@ task jaxb(dependsOn: [
 
 eclipse {
     classpath {
-        containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
-        containers 'org.eclipse.jdt.launching.JRE_CONTAINER'
-        file {
-            withXml { xmlProvider ->
-                def node = xmlProvider.asNode()
-                node.appendNode('classpathentry', [kind: 'src', path: 'src/main/generated'])
-            }
-            
-            beforeMerged { 
-            	classpath -> classpath.entries.add(new org.gradle.plugins.ide.eclipse.model.SourceFolder('src/main/generated', null)) 
-            }
+        file.whenMerged { cp ->
+            cp.entries.add( new org.gradle.plugins.ide.eclipse.model.SourceFolder('src/main/generated', null) )
         }
     }
 }

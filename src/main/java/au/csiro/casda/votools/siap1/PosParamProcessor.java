@@ -63,8 +63,8 @@ public class PosParamProcessor extends NumericParamProcessor
             else
             {
                 // Check bounds of values
-                double longitude = Double.valueOf(list[0]);
-                double latitude = Double.valueOf(list[1]);
+                double longitude = Double.parseDouble(list[0]);
+                double latitude = Double.parseDouble(list[1]);
                 if (longitude < 0 || longitude > MAX_LONGITUDE)
                 {
                     errorList.add(String.format(USAGE_FAULT_MSG,

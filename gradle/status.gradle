@@ -4,7 +4,7 @@ buildscript {
         maven { url "https://nexus-isa.csiro.au/repository/releases/"}
     }
     dependencies {
-        classpath 'au.csiro:serverStatus:1.0.3'
+        classpath 'au.csiro:serverStatus:1.0.5'
     }
 }
 
@@ -35,10 +35,10 @@ task status(type: au.csiro.serverStatus.ServerStatus) {
     group 'Continuous Delivery'
 
     uri=endpoint
-    timeout=5000
+    callTimeoutMillis=5000
     attempts=18
-    contentType = groovyx.net.http.ContentType.JSON
-    requestContentType = groovyx.net.http.ContentType.JSON
+    contentType = org.apache.http.entity.ContentType.APPLICATION_JSON.getMimeType() 
+    requestContentType = org.apache.http.entity.ContentType.APPLICATION_JSON.getMimeType() 
 
     doLast {
         if (response != null) {

@@ -1,11 +1,11 @@
 apply plugin: 'jacoco'
 
 jacoco {
-     toolVersion = "0.8.3"
+     toolVersion = "0.8.11"
 }
 
 jacocoTestReport {
     reports {
-    	html.destination new File("${buildDir}/reports/jacocoHtml")
+    	html.outputLocation = layout.buildDirectory.dir('reports/jacocoHtml')
     }
 }

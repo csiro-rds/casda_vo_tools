@@ -53,14 +53,8 @@ task echoVer() {
 	}
 }
 
-task makeVersionProps (type: Copy) {
-    description 'Create a version.properties file with the version info and overwrite the default one'
-
-    from("${projectDir}/gradle/version.properties.template")
-    rename('.+',"version.properties")
-    expand(version: version, date: new Date().format('dd MMM yyyy'), timestamp: buildTimestamp)
-    into "${buildDir}/resources/main/resources/"
+processResources {
+    filesMatching("**/version.properties") {
+        expand(version: project.version, date: new Date().format('dd MMM yyyy'), timestamp: buildTimestamp)
+    }
 }
-
-war.dependsOn makeVersionProps
-makeVersionProps.mustRunAfter processResources

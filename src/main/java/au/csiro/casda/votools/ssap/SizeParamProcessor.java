@@ -54,7 +54,7 @@ public class SizeParamProcessor extends NumericParamProcessor
             }
             String[] sizeQual = param.trim().split(";");
 
-            double size_val = Double.valueOf(sizeQual[0]);
+            double size_val = Double.parseDouble(sizeQual[0]);
 
             if (size_val <= 0 || size_val > MAX_SIZE_DEGREES)
             {
